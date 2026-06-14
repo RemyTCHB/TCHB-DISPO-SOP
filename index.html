@@ -196,7 +196,6 @@
                 </h2>
                 <p class="text-sm text-gray-400 mt-1">Monitor real-time velocity and active agent assignments.</p>
             </div>
-            <!-- Original Emerald Styling Reverted -->
             <button onclick="window.openAssetModal()" class="bg-brand-emerald/10 border border-brand-emerald hover:bg-brand-emerald text-brand-emerald hover:text-gray-900 font-bold py-2 px-4 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
                 <i class="fa-solid fa-plus"></i> Deploy New Asset Tracker
             </button>
@@ -204,15 +203,15 @@
 
         <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-center border-collapse">
                     <thead>
                         <tr class="bg-gray-900/80 border-b border-gray-800 text-xs uppercase tracking-wider text-gray-400">
-                            <th class="p-4 font-bold">Address</th>
-                            <th class="p-4 font-bold">Date Started</th>
-                            <th class="p-4 font-bold">Last Edited</th>
-                            <th class="p-4 font-bold">Time Since Edit</th>
-                            <th class="p-4 font-bold">Next Agent</th>
-                            <th class="p-4 font-bold">Next Step</th>
+                            <th class="p-4 font-bold text-center">Address</th>
+                            <th class="p-4 font-bold text-center">Date Started</th>
+                            <th class="p-4 font-bold text-center">Last Edited</th>
+                            <th class="p-4 font-bold text-center">Time Since Edit</th>
+                            <th class="p-4 font-bold text-center">Next Agent</th>
+                            <th class="p-4 font-bold text-center">Next Step</th>
                             <th class="p-4 font-bold text-center">% Completion</th>
                         </tr>
                     </thead>
@@ -238,13 +237,13 @@
         <div class="glass-card p-4 rounded-2xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i> Targeted Asset:</span>
-                <!-- Dropdown keeps the hue -->
-                <select id="globalAssetSelector" onchange="window.handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-gradient-to-r from-brand-crimson to-brand-purple border-transparent text-sm font-bold text-white rounded-lg px-3 py-2 focus:outline-none cursor-pointer appearance-none">
-                    <option value="" class="bg-gray-900">-- Select an Active Deal --</option>
+                <!-- Dropdown cleanly styled like the unselected nav -->
+                <select id="globalAssetSelector" onchange="window.handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-transparent border border-gray-700 text-sm font-bold text-gray-300 hover:text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-purple cursor-pointer appearance-none transition-colors">
+                    <option value="" class="bg-gray-900 text-gray-300">-- Select an Active Deal --</option>
                     <!-- Options populated dynamically -->
                 </select>
             </div>
-            <!-- Add New Asset keeps the hue -->
+            <!-- Add New Asset keeps the hue as a primary action button here -->
             <button onclick="window.openAssetModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-bold bg-gradient-to-r from-brand-crimson to-brand-purple text-white rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-plus text-brand-emerald"></i> Add New Asset
             </button>
@@ -306,27 +305,27 @@
             
             <!-- Quick Navigation Shortcuts -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                <a href="#phase-1" class="flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-crimson/30 transition-all hover:-translate-y-1">
+                <div onclick="document.getElementById('phase-1').scrollIntoView({behavior: 'smooth'})" class="cursor-pointer flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-crimson/30 transition-all hover:-translate-y-1">
                     <span class="w-8 h-8 rounded-lg bg-brand-crimson/20 border border-brand-crimson flex items-center justify-center text-brand-crimson font-extrabold text-sm shadow">I</span>
                     <div>
                         <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Phase One</span>
                         <span class="text-xs font-bold text-white block">Deal Intake (10%)</span>
                     </div>
-                </a>
-                <a href="#phase-2" class="flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-purple/30 transition-all hover:-translate-y-1">
+                </div>
+                <div onclick="document.getElementById('phase-2').scrollIntoView({behavior: 'smooth'})" class="cursor-pointer flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-purple/30 transition-all hover:-translate-y-1">
                     <span class="w-8 h-8 rounded-lg bg-brand-purple/20 border border-brand-purple flex items-center justify-center text-brand-purple font-extrabold text-sm shadow">II</span>
                     <div>
                         <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Phase Two</span>
                         <span class="text-xs font-bold text-white block">Marketing Prep (40%)</span>
                     </div>
-                </a>
-                <a href="#phase-3" class="flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-emerald/30 transition-all hover:-translate-y-1">
+                </div>
+                <div onclick="document.getElementById('phase-3').scrollIntoView({behavior: 'smooth'})" class="cursor-pointer flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-emerald/30 transition-all hover:-translate-y-1">
                     <span class="w-8 h-8 rounded-lg bg-brand-emerald/20 border border-brand-emerald flex items-center justify-center text-brand-emerald font-extrabold text-sm shadow">III</span>
                     <div>
                         <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Phase Three</span>
                         <span class="text-xs font-bold text-white block">Marketing Execution (50%)</span>
                     </div>
-                </a>
+                </div>
             </div>
 
             <!-- Vertical Process Line Map -->
@@ -543,7 +542,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="mt-auto pt-8 pb-8 relative z-10 flex justify-center border-t border-gray-800/60 mt-12 bg-[#080b14]">
+    <footer class="mt-auto pt-8 pb-8 relative z-10 flex justify-center border-t border-gray-800/60 mt-12">
         <img src="logo.svg" alt="TCHB Logo" class="h-24 opacity-60 hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/240x80/0b0f19/ffffff?text=TCHB'">
     </footer>
 
@@ -859,7 +858,7 @@
     function updateGlobalAssetSelector() {
         const selector = document.getElementById('globalAssetSelector');
         if(!selector) return;
-        selector.innerHTML = '<option value="" class="bg-gray-900">-- Select an Active Deal --</option>';
+        selector.innerHTML = '<option value="" class="bg-gray-900 text-gray-300">-- Select an Active Deal --</option>';
         propertiesData.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
@@ -902,15 +901,19 @@
                 tr.onclick = () => window.openTracker(prop.id);
                 
                 tr.innerHTML = `
-                    <td class="p-4 font-bold text-white group-hover:text-brand-purple transition-colors">${prop.address}</td>
-                    <td class="p-4">${formatEST(prop.dateStarted)}</td>
-                    <td class="p-4">${formatEST(prop.dateLastEdited)}</td>
-                    <td class="p-4 text-brand-emerald text-xs font-mono">${timeSince(prop.dateLastEdited)}</td>
-                    <td class="p-4">
+                    <td class="p-4 font-bold text-white group-hover:text-brand-purple transition-colors text-center">${prop.address}</td>
+                    <td class="p-4 text-center">${formatEST(prop.dateStarted)}</td>
+                    <td class="p-4 text-center">${formatEST(prop.dateLastEdited)}</td>
+                    <td class="p-4 text-brand-emerald text-xs font-mono text-center">${timeSince(prop.dateLastEdited)}</td>
+                    <td class="p-4 text-center">
                         <span class="${agentBgColor} ${agentTxtColor} px-2.5 py-1 rounded text-xs font-extrabold border ${agentBorderColor}">${stats.nextAgent}</span>
                     </td>
-                    <td class="p-4 text-xs font-semibold truncate max-w-[200px] text-gray-200" title="${stats.nextTaskDetail}">
-                        ${stats.nextStep}
+                    <td class="p-4 text-center text-xs font-semibold text-gray-200 relative group/tooltip">
+                        <div class="truncate max-w-[200px] mx-auto cursor-help">${stats.nextStep}</div>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block w-max max-w-[250px] bg-gray-800 text-white text-xs p-3 rounded shadow-xl z-50 border border-gray-700 whitespace-normal text-center leading-relaxed">
+                            <span class="text-brand-purple font-bold block mb-1">Upcoming Task:</span>
+                            ${stats.nextTaskDetail}
+                        </div>
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-2">
@@ -1120,7 +1123,7 @@
     }
 
     function initLocalApp() {
-        const stored = localStorage.getItem('tchb_dispo_app_data_v6');
+        const stored = localStorage.getItem('tchb_dispo_app_data_v7');
         if (stored) propertiesData = JSON.parse(stored);
         if (isGatewayUnlocked) {
             renderDashboard();
@@ -1133,7 +1136,7 @@
             await firebaseSavePropertyData(prop);
         } else {
             prop.dateLastEdited = Date.now();
-            localStorage.setItem('tchb_dispo_app_data_v6', JSON.stringify(propertiesData));
+            localStorage.setItem('tchb_dispo_app_data_v7', JSON.stringify(propertiesData));
             renderDashboard();
         }
     }
@@ -1143,7 +1146,7 @@
             await firebaseRemovePropertyData(id);
         } else {
             propertiesData = propertiesData.filter(p => p.id !== id);
-            localStorage.setItem('tchb_dispo_app_data_v6', JSON.stringify(propertiesData));
+            localStorage.setItem('tchb_dispo_app_data_v7', JSON.stringify(propertiesData));
             renderDashboard();
         }
     }
