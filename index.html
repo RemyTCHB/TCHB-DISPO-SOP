@@ -169,7 +169,7 @@
             <img src="icon.svg" alt="TCHB Icon" class="h-10 w-10 object-contain" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
             <div class="h-8 w-px bg-gray-700 hidden md:block"></div>
             <div class="flex items-center gap-3">
-                <h1 class="text-lg font-bold text-white tracking-tight">DISPO Operations Dashboard</h1>
+                <h1 class="text-lg font-bold text-white tracking-tight">Dispositions Team Dashboard</h1>
                 <!-- Logged In User Display Badge -->
                 <div id="userBadge" class="hidden items-center gap-2 bg-gray-800/60 border border-gray-700/60 rounded-lg px-2.5 py-1">
                     <div class="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse"></div>
@@ -182,14 +182,14 @@
                 <!-- ACTIVE USERS TOGGLE -->
                 <div class="relative ml-1 border-l border-gray-700 pl-3">
                     <button onclick="window.toggleActiveUsers(event)" class="flex items-center gap-2 bg-gray-800/60 border border-gray-700/60 hover:bg-gray-700/60 rounded-lg px-2.5 py-1.5 cursor-pointer transition-colors shadow-sm">
-                        <i class="fa-solid fa-users text-brand-cyan text-[10px]"></i>
+                        <i class="fa-solid fa-users text-brand-emerald text-[10px]"></i>
                         <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider hidden sm:inline">Active Users</span>
                     </button>
                     <!-- DROPDOWN -->
-                    <div id="activeUsersDropdown" class="absolute left-0 top-full mt-2 w-52 bg-[#0f1423] border border-gray-700 rounded-xl shadow-[0_0_30px_rgba(6,182,212,0.15)] hidden flex-col z-[100] overflow-hidden">
+                    <div id="activeUsersDropdown" class="absolute left-0 top-full mt-2 w-52 bg-[#0f1423] border border-gray-700 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.15)] hidden flex-col z-[100] overflow-hidden">
                         <div class="bg-gray-800/80 px-3 py-2 border-b border-gray-700 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex justify-between items-center">
                             <span>Personnel Online</span>
-                            <span id="activeUserCount" class="text-brand-cyan">0</span>
+                            <span id="activeUserCount" class="text-brand-emerald">0</span>
                         </div>
                         <div id="activeUsersList" class="flex flex-col max-h-48 overflow-y-auto p-1.5 gap-1">
                             <!-- Populated by JS -->
@@ -219,7 +219,6 @@
                 <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-satellite-dish text-brand-emerald"></i> Live Pipeline
                 </h2>
-                <p class="text-sm text-gray-400 mt-1">Monitor real-time velocity and active agent assignments.</p>
             </div>
             <button onclick="window.openAssetModal()" class="bg-brand-emerald/10 border border-brand-emerald hover:bg-brand-emerald text-brand-emerald hover:text-gray-900 font-bold py-2 px-4 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
                 <i class="fa-solid fa-plus"></i> Deploy New Asset Tracker
@@ -814,7 +813,7 @@
 
         list.innerHTML = users.map(u => `
             <div class="flex items-center gap-2 px-2.5 py-1.5 rounded bg-gray-800/40 border border-gray-700/30">
-                <div class="w-1.5 h-1.5 rounded-full bg-brand-cyan ${Date.now() - u.lastActive < 60000 ? 'animate-pulse' : ''}"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-brand-emerald ${Date.now() - u.lastActive < 60000 ? 'animate-pulse' : ''}"></div>
                 <span class="text-[10px] font-bold text-gray-300 lowercase tracking-wide truncate">${u.email}</span>
             </div>
         `).join('');
