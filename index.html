@@ -773,7 +773,8 @@
             title: task.title,
             weight: task.weight,
             assignee: task.defaultAssignee,
-            completed: false
+            completed: false,
+            subtasks: []
         }));
     }
 
@@ -1041,7 +1042,7 @@
 
                 tasks.forEach(t => {
                     const row = document.createElement('div');
-                    row.className = `p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-gray-800/30 ${t.completed ? 'opacity-60' : ''}`;
+                    row.className = `p-4 flex flex-col gap-3 transition-colors hover:bg-gray-800/30 ${(t.completed && (!t.subtasks || t.subtasks.every(s=>s.completed))) ? 'opacity-60' : ''}`;
                     
                     const agentOpts = agentsList.map(a => `<option value="${a}" ${t.assignee === a ? 'selected' : ''} class="bg-gray-900 text-white">${a}</option>`).join('');
                     const agentColor = getAgentColorClass(t.assignee, 'text');
@@ -1051,21 +1052,55 @@
                     const weightColor = t.completed ? 'text-brand-emerald bg-brand-emerald/10 border-brand-emerald/30' : 'text-brand-crimson bg-gray-900 border-gray-700';
                     const paddingAdjust = (tasks.length === 1 && tasks[0].title === mainTaskName) ? "" : "pl-6 sm:pl-8";
 
-                    row.innerHTML = `
-                        <div class="flex items-start gap-4 flex-1 ${paddingAdjust}">
-                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="window.toggleTask(${t.originalIndex}, this.checked)" class="w-5 h-5 mt-0.5 rounded accent-brand-purple bg-gray-900 border-gray-600 focus:ring-brand-purple focus:ring-offset-0 focus:ring-1 cursor-pointer">
-                            <div>
-                                <p class="text-sm font-bold ${t.completed ? 'text-gray-500 line-through' : 'text-gray-100'} leading-tight inline-flex items-center">
-                                    ${t.title}
-                                </p>
+                    let subtasksHtml = '';
+                    if (t.subtasks && t.subtasks.length > 0) {
+                        subtasksHtml = t.subtasks.map((st, sIdx) => `
+                            <div class="flex items-center justify-between gap-3 pl-8 sm:pl-14 py-1 group/sub">
+                                <div class="flex items-center gap-3 flex-1">
+                                    <input type="checkbox" ${st.completed ? 'checked' : ''} onchange="window.toggleSubtask(${t.originalIndex}, ${sIdx}, this.checked)" class="w-4 h-4 rounded accent-brand-purple bg-gray-900 border-gray-600 focus:ring-brand-purple focus:ring-offset-0 focus:ring-1 cursor-pointer">
+                                    <span class="text-xs font-medium ${st.completed ? 'text-gray-500 line-through' : 'text-gray-300'}">${st.title}</span>
+                                </div>
+                                <button onclick="window.deleteSubtask(${t.originalIndex}, ${sIdx})" class="text-gray-600 hover:text-brand-crimson opacity-0 group-hover/sub:opacity-100 transition-opacity cursor-pointer px-2" title="Delete Subtask">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        `).join('');
+                    }
+
+                    const addSubtaskInputHtml = `
+                        <div id="addSubtaskUI_${t.originalIndex}" class="hidden pl-8 sm:pl-14 mt-1">
+                            <div class="flex items-center gap-2 max-w-md">
+                                <input type="text" id="newSubtaskInput_${t.originalIndex}" placeholder="Describe subtask..." class="flex-1 bg-gray-900/50 border border-gray-700 rounded p-1.5 text-xs text-white focus:outline-none focus:border-brand-purple transition-colors" onkeydown="if(event.key === 'Enter') window.confirmAddSubtask(${t.originalIndex})">
+                                <button onclick="window.confirmAddSubtask(${t.originalIndex})" class="bg-brand-purple hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-xs font-bold transition-colors cursor-pointer">Save</button>
+                                <button onclick="window.toggleAddSubtaskUI(${t.originalIndex})" class="text-gray-500 hover:text-gray-300 px-2 py-1.5 cursor-pointer"><i class="fa-solid fa-times"></i></button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 shrink-0">
-                            <select onchange="window.changeAssignee(${t.originalIndex}, this.value)" class="${agentBg} border ${agentBorder} ${agentColor} text-xs font-bold rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-purple cursor-pointer appearance-none text-center min-w-[80px]">
-                                ${agentOpts}
-                            </select>
-                            <span class="${weightColor} text-xs font-black px-2 py-1 rounded w-12 text-center transition-colors">+${t.weight}%</span>
+                    `;
+
+                    row.innerHTML = `
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-start gap-4 flex-1 ${paddingAdjust}">
+                                <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="window.toggleTask(${t.originalIndex}, this.checked)" class="w-5 h-5 mt-0.5 rounded accent-brand-purple bg-gray-900 border-gray-600 focus:ring-brand-purple focus:ring-offset-0 focus:ring-1 cursor-pointer">
+                                <div>
+                                    <p class="text-sm font-bold ${t.completed ? 'text-gray-500 line-through' : 'text-gray-100'} leading-tight inline-flex items-center">
+                                        ${t.title}
+                                    </p>
+                                    <div class="mt-1.5">
+                                        <button onclick="window.toggleAddSubtaskUI(${t.originalIndex})" class="text-[10px] uppercase tracking-wider font-bold text-brand-purple/70 hover:text-brand-purple flex items-center gap-1 transition-colors cursor-pointer">
+                                            <i class="fa-solid fa-plus"></i> Add Subtask
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <select onchange="window.changeAssignee(${t.originalIndex}, this.value)" class="${agentBg} border ${agentBorder} ${agentColor} text-xs font-bold rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-purple cursor-pointer appearance-none text-center min-w-[80px]">
+                                    ${agentOpts}
+                                </select>
+                                <span class="${weightColor} text-xs font-black px-2 py-1 rounded w-12 text-center transition-colors">+${t.weight}%</span>
+                            </div>
                         </div>
+                        ${subtasksHtml}
+                        ${addSubtaskInputHtml}
                     `;
                     listDiv.appendChild(row);
                 });
@@ -1092,6 +1127,51 @@
         renderTrackerView();
     }
 
+    window.toggleAddSubtaskUI = function(taskIndex) {
+        const ui = document.getElementById(`addSubtaskUI_${taskIndex}`);
+        const input = document.getElementById(`newSubtaskInput_${taskIndex}`);
+        if (ui.classList.contains('hidden')) {
+            ui.classList.remove('hidden');
+            input.focus();
+        } else {
+            ui.classList.add('hidden');
+        }
+    }
+
+    window.confirmAddSubtask = async function(taskIndex) {
+        const input = document.getElementById(`newSubtaskInput_${taskIndex}`);
+        const title = input.value.trim();
+        if (!title) return;
+
+        const prop = propertiesData.find(p => p.id === activePropertyId);
+        if (!prop) return;
+
+        if (!prop.tasks[taskIndex].subtasks) {
+            prop.tasks[taskIndex].subtasks = [];
+        }
+
+        prop.tasks[taskIndex].subtasks.push({
+            id: 'sub_' + Date.now() + Math.random().toString(36).substr(2, 5),
+            title: title,
+            completed: false
+        });
+
+        await window.savePropertyData(prop);
+    }
+
+    window.toggleSubtask = async function(taskIndex, subtaskIndex, isCompleted) {
+        const prop = propertiesData.find(p => p.id === activePropertyId);
+        if (!prop) return;
+        prop.tasks[taskIndex].subtasks[subtaskIndex].completed = isCompleted;
+        await window.savePropertyData(prop);
+    }
+
+    window.deleteSubtask = async function(taskIndex, subtaskIndex) {
+        const prop = propertiesData.find(p => p.id === activePropertyId);
+        if (!prop) return;
+        prop.tasks[taskIndex].subtasks.splice(subtaskIndex, 1);
+        await window.savePropertyData(prop);
+    }
 
     // --- 4. CLOUD FIREBASE SYNC ENGINE (DYNAMIC IMPORT) ---
     async function initFirebase() {
@@ -1200,6 +1280,7 @@
             prop.dateLastEdited = Date.now();
             localStorage.setItem('tchb_dispo_app_data_v7', JSON.stringify(propertiesData));
             renderDashboard();
+            if (activePropertyId) renderTrackerView();
         }
     }
 
