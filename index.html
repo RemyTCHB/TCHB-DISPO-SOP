@@ -151,17 +151,16 @@
             <div class="h-8 w-px bg-gray-700 hidden md:block"></div>
             <div>
                 <h1 class="text-lg font-bold text-white tracking-tight">DISPO Operations Dashboard</h1>
-                <p class="text-xs text-gray-400 font-mono">INTERNAL // SYNDICATION PROTOCOL</p>
             </div>
         </div>
-        <div class="flex bg-[#0b0f19] p-1 rounded-xl border border-gray-800 overflow-x-auto max-w-full">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all bg-brand-purple text-white shadow-md flex items-center gap-2 whitespace-nowrap">
+        <div class="flex bg-gradient-to-r from-brand-crimson/10 to-brand-purple/10 p-1 rounded-xl border border-brand-purple/30 overflow-x-auto max-w-full">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all bg-gradient-to-r from-brand-crimson to-brand-purple text-white shadow-md flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-layer-group"></i> Master Dashboard
             </button>
-            <button onclick="switchTab('tracker')" id="nav-tracker" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
+            <button onclick="switchTab('tracker')" id="nav-tracker" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-list-check"></i> Active Deal Tracker
             </button>
-            <button onclick="switchTab('sop')" id="nav-sop" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
+            <button onclick="switchTab('sop')" id="nav-sop" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-book-open"></i> SOP Reference
             </button>
         </div>
@@ -187,8 +186,8 @@
                     <thead>
                         <tr class="bg-gray-900/80 border-b border-gray-800 text-xs uppercase tracking-wider text-gray-400">
                             <th class="p-4 font-bold">Address</th>
-                            <th class="p-4 font-bold">Date Started (EST)</th>
-                            <th class="p-4 font-bold">Last Edited (EST)</th>
+                            <th class="p-4 font-bold">Date Started</th>
+                            <th class="p-4 font-bold">Last Edited</th>
                             <th class="p-4 font-bold">Time Since Edit</th>
                             <th class="p-4 font-bold">Next Agent</th>
                             <th class="p-4 font-bold">Next Step</th>
@@ -217,8 +216,8 @@
         <div class="glass-card p-4 rounded-2xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i> Targeted Asset:</span>
-                <select id="globalAssetSelector" onchange="handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-gray-950 border border-gray-700 text-sm font-bold text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-purple cursor-pointer appearance-none">
-                    <option value="">-- Select an Active Deal --</option>
+                <select id="globalAssetSelector" onchange="handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-gradient-to-r from-brand-crimson/20 to-brand-purple/20 border border-brand-purple/50 text-sm font-bold text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-crimson cursor-pointer appearance-none">
+                    <option value="" class="bg-gray-900">-- Select an Active Deal --</option>
                     <!-- Options populated dynamically -->
                 </select>
             </div>
@@ -277,113 +276,255 @@
         </div>
     </div>
 
-    <!-- TAB: SOP REFERENCE -->
-    <div id="tab-sop" class="flex-1 hidden space-y-6 pb-12">
-        <div class="glass-card p-8 rounded-2xl border border-gray-800">
-            <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3"><i class="fa-solid fa-book-open text-brand-purple"></i> DISPO Standard Operating Procedure</h2>
-            <p class="text-sm text-gray-400 mb-8 pb-4 border-b border-gray-800">Internal rules of engagement and phase breakdowns for Disposition operations.</p>
+    <!-- TAB: SOP REFERENCE (VISUAL TIMELINE) -->
+    <div id="tab-sop" class="flex-1 hidden space-y-8 pb-12">
+        <div class="max-w-4xl mx-auto mt-4">
             
-            <div class="space-y-8 text-gray-300 text-sm leading-relaxed">
-                <!-- Phase I -->
-                <div>
-                    <h3 class="text-lg font-bold text-brand-crimson mb-3 uppercase tracking-wider">Deal Intake Section (10%)</h3>
-                    <div class="pl-4 border-l-2 border-brand-crimson/30 space-y-4">
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Underwriting</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>Manually UW The Deal 6% (Carlos)</li>
-                                <li>AI UW Tool To Confirm Manual UW 2% (Carlos)</li>
-                                <li>Search Entire CRM For Seller Number(s) - (Ensure Sellers Phone Number Is Either Disqualified or DND’d) 2% (Sarah)</li>
-                            </ul>
-                        </div>
+            <!-- Quick Navigation Shortcuts -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                <a href="#phase-1" class="flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-crimson/30 transition-all hover:-translate-y-1">
+                    <span class="w-8 h-8 rounded-lg bg-brand-crimson/20 border border-brand-crimson flex items-center justify-center text-brand-crimson font-extrabold text-sm shadow">I</span>
+                    <div>
+                        <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Phase One</span>
+                        <span class="text-xs font-bold text-white block">Deal Intake (10%)</span>
+                    </div>
+                </a>
+                <a href="#phase-2" class="flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-purple/30 transition-all hover:-translate-y-1">
+                    <span class="w-8 h-8 rounded-lg bg-brand-purple/20 border border-brand-purple flex items-center justify-center text-brand-purple font-extrabold text-sm shadow">II</span>
+                    <div>
+                        <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Phase Two</span>
+                        <span class="text-xs font-bold text-white block">Marketing Prep (40%)</span>
+                    </div>
+                </a>
+                <a href="#phase-3" class="flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-brand-emerald/30 transition-all hover:-translate-y-1">
+                    <span class="w-8 h-8 rounded-lg bg-brand-emerald/20 border border-brand-emerald flex items-center justify-center text-brand-emerald font-extrabold text-sm shadow">III</span>
+                    <div>
+                        <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Phase Three</span>
+                        <span class="text-xs font-bold text-white block">Marketing Execution (50%)</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Vertical Process Line Map -->
+            <div class="relative pl-6 sm:pl-10 border-l border-gray-800 space-y-12 py-4">
+
+                <!-- Line gradient -->
+                <div class="absolute left-0 top-0 w-1 bg-gradient-to-b from-brand-crimson via-brand-purple to-brand-emerald h-full pointer-events-none -ml-px rounded-full opacity-60"></div>
+
+                <!-- PHASE 1 TITLE -->
+                <div id="phase-1" class="absolute -top-10"></div>
+                <div class="relative -ml-[31px] sm:-ml-[47px] mb-8">
+                    <div class="inline-flex items-center gap-3">
+                        <span class="bg-brand-crimson text-white font-extrabold text-xs px-4 py-2 rounded-full flex items-center gap-1.5 border-4 border-[#05070f] shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+                            <i class="fa-solid fa-clipboard-check"></i> PHASE I: DEAL INTAKE SECTION (10%)
+                        </span>
                     </div>
                 </div>
 
-                <!-- Phase II -->
-                <div>
-                    <h3 class="text-lg font-bold text-brand-purple mb-3 uppercase tracking-wider">Marketing Prep Section (40%)</h3>
-                    <div class="pl-4 border-l-2 border-brand-purple/30 space-y-4">
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Pull Local Hyper Qualified buyers (Carlos)</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>At least 3 Local Investors that bought $10K - $15K from our purchase price 3%</li>
-                                <li>At Least 3 Local Investors - for ARV Comps 3%</li>
-                                <li>At Least 3-5 Local investor w/ Active Leases in the area (esp for Rentals) 2%</li>
-                            </ul>
+                <!-- Step 1 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-crimson border-4 border-[#05070f] flex items-center justify-center text-white font-black text-xs shadow-lg group-hover:scale-110 transition-transform">1</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-crimson/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(220,38,38,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-crimson bg-brand-crimson/10 border border-brand-crimson/30 px-2.5 py-1 rounded uppercase">Step 1</span>
+                                <h3 class="text-lg font-bold text-white">Underwriting & Verification</h3>
+                            </div>
+                            <span class="text-xs text-gray-300 bg-gray-900 border border-gray-700 px-3 py-1 rounded-full font-medium flex items-center gap-1.5">
+                                <i class="fa-solid fa-calculator text-brand-crimson"></i> Yield Integrity
+                            </span>
                         </div>
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Investor Data Scraping</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>Pull The Data From (Investorbase - etc) 2% (Moe)</li>
-                                <li>Format The Data 1% (Sarah)</li>
-                                <li>Upload The Data To CRM 1% (Sarah)</li>
-                                <li>Create Text Blast Draft 2% (Sarah)</li>
-                                <li>Get The Text Blast Draft Approved 2% (Sarah)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Realtor Data Scraping</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>Pull The Data From (Zillow - realtor.com - etc.) 2% (Moe)</li>
-                                <li>Format The Data 1% (Sarah)</li>
-                                <li>Upload The Data to CRM 1% (Sarah)</li>
-                                <li>Create Text Blast Draft 2% (Sarah)</li>
-                                <li>Get The Text Blast Draft Approved 2% (Sarah)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Facebook Groups Hunt</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>Join All Relevant FB Groups 6% (Moe)</li>
-                                <li>Create FB Post Draft 1% (Moe)</li>
-                                <li>Get The FB Post Draft Approved 1% (Moe)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Create InvestorLift Draft</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>Description 3% (Yanna)</li>
-                                <li>Photos & Videos (if applicable) 2% (Yanna)</li>
-                                <li>Comps 3% (Yanna)</li>
-                            </ul>
-                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Manually UW The Deal</span> <span class="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded font-bold">6% (Carlos)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> AI UW Tool To Confirm Manual UW</span> <span class="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded font-bold">2% (Carlos)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Search Entire CRM For Seller Number(s) (DND Check)</span> <span class="text-xs text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded font-bold">2% (Sarah)</span></li>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Phase III -->
-                <div>
-                    <h3 class="text-lg font-bold text-brand-emerald mb-3 uppercase tracking-wider">Marketing Section (50%)</h3>
-                    <div class="pl-4 border-l-2 border-brand-emerald/30 space-y-4">
-                        <div>
-                            <ul class="list-none space-y-2 text-gray-400">
-                                <li><i class="fa-solid fa-check text-brand-emerald mr-2 text-xs"></i>Call & Market To The Hyper Local Buyers / Realtors 10% (Carlos)</li>
-                                <li><i class="fa-solid fa-check text-brand-emerald mr-2 text-xs"></i>Investor Bulk Text Blast / Individual Text Blast (Depending on Market) 10% (Sarah)</li>
-                                <li><i class="fa-solid fa-check text-brand-emerald mr-2 text-xs"></i>Realtor Bulk Text Blast / Individual Text Blast (Depending on Market) 10% (Sarah)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Post On InvestorLift</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>Calling Inquiries / Interest On Subject Deal 5% (Yanna)</li>
-                                <li>Calling ALL Artemis Mode Buyers 5% (Yanna)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white mb-1">Post On Facebook on ALL Relevant Groups Joined (Moe)</h4>
-                            <ul class="list-disc list-inside space-y-1 text-gray-400">
-                                <li>Reach Out To Investors That Expressed Interest In Other Deals In Groups 10%</li>
-                                <li>Boost the Post (If Needed) 0%</li>
-                            </ul>
-                        </div>
+                <!-- PHASE 2 TITLE -->
+                <div id="phase-2" class="absolute pt-12"></div>
+                <div class="relative -ml-[31px] sm:-ml-[47px] mb-8 pt-8">
+                    <div class="inline-flex items-center gap-3">
+                        <span class="bg-brand-purple text-white font-extrabold text-xs px-4 py-2 rounded-full flex items-center gap-1.5 border-4 border-[#05070f] shadow-[0_0_15px_rgba(79,70,229,0.4)]">
+                            <i class="fa-solid fa-bullseye"></i> PHASE II: MARKETING PREP SECTION (40%)
+                        </span>
                     </div>
                 </div>
+
+                <!-- Step 2 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-purple border-4 border-[#05070f] flex items-center justify-center text-white font-black text-xs shadow-lg group-hover:scale-110 transition-transform">2</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-purple/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-purple bg-brand-purple/10 border border-brand-purple/30 px-2.5 py-1 rounded uppercase">Step 2</span>
+                                <h3 class="text-lg font-bold text-white">Pull Local Hyper Qualified Buyers</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> 3 Investors that bought $10K - $15K from purchase price</span> <span class="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded font-bold">3% (Carlos)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> 3 Local Investors for ARV Comps</span> <span class="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded font-bold">3% (Carlos)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> 3-5 Local investors w/ Active Leases (Rentals)</span> <span class="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded font-bold">2% (Carlos)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 3 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-purple border-4 border-[#05070f] flex items-center justify-center text-white font-black text-xs shadow-lg group-hover:scale-110 transition-transform">3</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-purple/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-purple bg-brand-purple/10 border border-brand-purple/30 px-2.5 py-1 rounded uppercase">Step 3</span>
+                                <h3 class="text-lg font-bold text-white">Investor Data Scraping</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Pull Core Data (Investorbase, etc.)</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">2% (Moe)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Format & Upload Data To CRM</span> <span class="text-xs text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded font-bold">2% (Sarah)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Create & Approve Text Blast Draft</span> <span class="text-xs text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded font-bold">4% (Sarah)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 4 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-purple border-4 border-[#05070f] flex items-center justify-center text-white font-black text-xs shadow-lg group-hover:scale-110 transition-transform">4</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-purple/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-purple bg-brand-purple/10 border border-brand-purple/30 px-2.5 py-1 rounded uppercase">Step 4</span>
+                                <h3 class="text-lg font-bold text-white">Realtor Data Scraping</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Pull Data (Zillow, Realtor.com)</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">2% (Moe)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Format & Upload Data to CRM</span> <span class="text-xs text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded font-bold">2% (Sarah)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Create & Approve Text Blast Draft</span> <span class="text-xs text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded font-bold">4% (Sarah)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 5 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-purple border-4 border-[#05070f] flex items-center justify-center text-white font-black text-xs shadow-lg group-hover:scale-110 transition-transform">5</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-purple/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-purple bg-brand-purple/10 border border-brand-purple/30 px-2.5 py-1 rounded uppercase">Step 5</span>
+                                <h3 class="text-lg font-bold text-white">Facebook Groups Hunt</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Join All Relevant FB Groups</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">6% (Moe)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Create & Approve FB Post Draft</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">2% (Moe)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 6 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-purple border-4 border-[#05070f] flex items-center justify-center text-white font-black text-xs shadow-lg group-hover:scale-110 transition-transform">6</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-purple/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-purple bg-brand-purple/10 border border-brand-purple/30 px-2.5 py-1 rounded uppercase">Step 6</span>
+                                <h3 class="text-lg font-bold text-white">Create InvestorLift Draft</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Marketing Description</span> <span class="text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded font-bold">3% (Yanna)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Upload Photos & Videos</span> <span class="text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded font-bold">2% (Yanna)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Prepare Verified Comps</span> <span class="text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded font-bold">3% (Yanna)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PHASE 3 TITLE -->
+                <div id="phase-3" class="absolute pt-12"></div>
+                <div class="relative -ml-[31px] sm:-ml-[47px] mb-8 pt-8">
+                    <div class="inline-flex items-center gap-3">
+                        <span class="bg-brand-emerald text-gray-900 font-extrabold text-xs px-4 py-2 rounded-full flex items-center gap-1.5 border-4 border-[#05070f] shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+                            <i class="fa-solid fa-rocket"></i> PHASE III: MARKETING SECTION (50%)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Step 7 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-emerald border-4 border-[#05070f] flex items-center justify-center text-gray-900 font-black text-xs shadow-lg group-hover:scale-110 transition-transform">7</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-emerald/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-emerald bg-brand-emerald/10 border border-brand-emerald/30 px-2.5 py-1 rounded uppercase">Step 7</span>
+                                <h3 class="text-lg font-bold text-white">Call & Market Leads</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-phone text-brand-emerald"></i> Execute Outbound (Buyers / Realtors)</span> <span class="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded font-bold">10% (Carlos)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 8 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-emerald border-4 border-[#05070f] flex items-center justify-center text-gray-900 font-black text-xs shadow-lg group-hover:scale-110 transition-transform">8</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-emerald/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-emerald bg-brand-emerald/10 border border-brand-emerald/30 px-2.5 py-1 rounded uppercase">Step 8</span>
+                                <h3 class="text-lg font-bold text-white">SMS Broadcast Deployment</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-paper-plane text-brand-emerald"></i> Execute Investor Bulk/Individual Blasts</span> <span class="text-xs text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded font-bold">10% (Sarah)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-paper-plane text-brand-emerald"></i> Execute Realtor Bulk/Individual Blasts</span> <span class="text-xs text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded font-bold">10% (Sarah)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 9 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-emerald border-4 border-[#05070f] flex items-center justify-center text-gray-900 font-black text-xs shadow-lg group-hover:scale-110 transition-transform">9</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-emerald/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-emerald bg-brand-emerald/10 border border-brand-emerald/30 px-2.5 py-1 rounded uppercase">Step 9</span>
+                                <h3 class="text-lg font-bold text-white">InvestorLift Active Outreach</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-globe text-brand-emerald"></i> Calling Inquiries / Subject Deal Interest</span> <span class="text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded font-bold">5% (Yanna)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-globe text-brand-emerald"></i> Calling ALL Artemis Mode Buyers</span> <span class="text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded font-bold">5% (Yanna)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 10 Card -->
+                <div class="relative group">
+                    <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full bg-brand-emerald border-4 border-[#05070f] flex items-center justify-center text-gray-900 font-black text-xs shadow-lg group-hover:scale-110 transition-transform">10</div>
+                    <div class="glass-card rounded-xl p-6 border-brand-emerald/30 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold tracking-widest text-brand-emerald bg-brand-emerald/10 border border-brand-emerald/30 px-2.5 py-1 rounded uppercase">Step 10</span>
+                                <h3 class="text-lg font-bold text-white">Facebook Outreach & Syndication</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-brands fa-facebook text-brand-emerald"></i> Reach Out To Interested Group Investors</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">10% (Moe)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-brands fa-facebook text-brand-emerald"></i> Boost the Post (If Needed)</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">0% (Moe)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="mt-auto pt-6 pb-6 border-t border-gray-800/60 text-center relative z-10">
-        <p class="text-xs text-gray-500 font-mono">&copy; 2026 TOTAL CASH HOME BUYERS | Disposition Operations</p>
+    <footer class="mt-auto pt-6 pb-6 relative z-10 flex justify-center">
+        <img src="logo.svg" alt="TCHB Logo" class="h-8 opacity-50" onerror="this.src='https://placehold.co/120x40/0b0f19/ffffff?text=TCHB'">
     </footer>
 
   </div>
@@ -480,7 +621,7 @@
     let activePropertyId = null;
 
     function initApp() {
-        const stored = localStorage.getItem('tchb_dispo_app_data_v2'); // Increment key to ensure fresh schema
+        const stored = localStorage.getItem('tchb_dispo_app_data_v3'); // Increment key to ensure fresh schema
         if (stored) {
             propertiesData = JSON.parse(stored);
         }
@@ -489,7 +630,7 @@
     }
 
     function saveState() {
-        localStorage.setItem('tchb_dispo_app_data_v2', JSON.stringify(propertiesData));
+        localStorage.setItem('tchb_dispo_app_data_v3', JSON.stringify(propertiesData));
     }
 
     // Agent Color Logic
@@ -498,7 +639,8 @@
             "Carlos": { text: "text-yellow-500", border: "border-yellow-500/50", bg: "bg-yellow-500/10" },
             "Moe": { text: "text-blue-400", border: "border-blue-400/50", bg: "bg-blue-400/10" },
             "Yanna": { text: "text-purple-400", border: "border-purple-400/50", bg: "bg-purple-400/10" },
-            "Sarah": { text: "text-pink-400", border: "border-pink-400/50", bg: "bg-pink-400/10" }
+            "Sarah": { text: "text-pink-400", border: "border-pink-400/50", bg: "bg-pink-400/10" },
+            "Completed": { text: "text-brand-emerald", border: "border-brand-emerald/50", bg: "bg-brand-emerald/10" }
         };
         const defaultColor = { text: "text-gray-400", border: "border-gray-700", bg: "bg-gray-800" };
         const selected = colors[name] || defaultColor;
@@ -533,17 +675,17 @@
         document.getElementById('tab-sop').classList.add('hidden');
         
         // Reset Nav Buttons
-        const defaultNavClasses = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap";
+        const defaultNavClasses = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap";
         document.getElementById('nav-dashboard').className = defaultNavClasses;
         document.getElementById('nav-tracker').className = defaultNavClasses;
         document.getElementById('nav-sop').className = defaultNavClasses;
 
-        const activeNavClasses = "bg-brand-purple text-white shadow-md";
+        const activeNavClasses = "bg-gradient-to-r from-brand-crimson to-brand-purple text-white shadow-md border-transparent";
 
         if (tab === 'dashboard') {
             document.getElementById('tab-dashboard').classList.remove('hidden');
             document.getElementById('nav-dashboard').classList.add(...activeNavClasses.split(' '));
-            document.getElementById('nav-dashboard').classList.remove('text-gray-400');
+            document.getElementById('nav-dashboard').classList.remove('text-gray-300');
             activePropertyId = null;
             renderDashboard();
             updateGlobalAssetSelector();
@@ -551,13 +693,13 @@
             document.getElementById('tab-tracker').classList.remove('hidden');
             document.getElementById('tab-tracker').classList.add('flex');
             document.getElementById('nav-tracker').classList.add(...activeNavClasses.split(' '));
-            document.getElementById('nav-tracker').classList.remove('text-gray-400');
+            document.getElementById('nav-tracker').classList.remove('text-gray-300');
             renderTrackerView();
             updateGlobalAssetSelector();
         } else if (tab === 'sop') {
             document.getElementById('tab-sop').classList.remove('hidden');
             document.getElementById('nav-sop').classList.add(...activeNavClasses.split(' '));
-            document.getElementById('nav-sop').classList.remove('text-gray-400');
+            document.getElementById('nav-sop').classList.remove('text-gray-300');
         }
     }
 
@@ -629,7 +771,12 @@
             }
         });
         
-        if (percent > 100) percent = 100;
+        if (percent >= 100) {
+            percent = 100;
+            nextStep = "All Workflow Tasks Complete";
+            nextAgent = "Completed";
+        }
+
         return { percent, nextStep, nextAgent };
     }
 
@@ -658,10 +805,11 @@
 
     function updateGlobalAssetSelector() {
         const selector = document.getElementById('globalAssetSelector');
-        selector.innerHTML = '<option value="">-- Select an Active Deal --</option>';
+        selector.innerHTML = '<option value="" class="bg-gray-900">-- Select an Active Deal --</option>';
         propertiesData.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
+            opt.className = "bg-gray-900 text-white";
             opt.innerText = p.address;
             if (p.id === activePropertyId) opt.selected = true;
             selector.appendChild(opt);
@@ -699,8 +847,8 @@
                 
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-white group-hover:text-brand-purple transition-colors">${prop.address}</td>
-                    <td class="p-4">${formatEST(prop.dateStarted)}</td>
-                    <td class="p-4">${formatEST(prop.dateLastEdited)}</td>
+                    <td class="p-4">${formatEST(prop.dateStarted, false)}</td>
+                    <td class="p-4">${formatEST(prop.dateLastEdited, false)}</td>
                     <td class="p-4 text-brand-emerald text-xs font-mono">${timeSince(prop.dateLastEdited)}</td>
                     <td class="p-4">
                         <span class="${agentBgColor} ${agentTxtColor} px-2.5 py-1 rounded text-xs font-extrabold border ${agentBorderColor}">${stats.nextAgent}</span>
@@ -808,7 +956,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">
-                            <select onchange="changeAssignee(${t.originalIndex}, this.value)" class="bg-gray-950 border ${agentBorder} ${agentColor} text-xs font-bold rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-purple cursor-pointer appearance-none text-center min-w-[80px]">
+                            <select onchange="changeAssignee(${t.originalIndex}, this.value)" class="bg-gradient-to-r from-brand-crimson/20 to-brand-purple/20 border ${agentBorder} ${agentColor} text-white text-xs font-bold rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-purple cursor-pointer appearance-none text-center min-w-[80px]">
                                 ${agentOpts}
                             </select>
                             <span class="bg-gray-900 border border-gray-700 ${weightColor} text-xs font-black px-2 py-1 rounded w-12 text-center transition-colors">+${t.weight}%</span>
