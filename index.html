@@ -221,6 +221,13 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- External Floating Dashboard Tooltip -->
+            <div id="dashboard-tooltip" class="fixed hidden w-max max-w-[300px] bg-[#0f1423] border border-brand-emerald/40 text-white text-xs p-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.15)] z-[100] whitespace-normal text-left pointer-events-none transition-opacity duration-200 opacity-0">
+                <span class="text-brand-emerald font-bold block mb-1.5 uppercase tracking-wider text-[10px]"><i class="fa-solid fa-bolt mr-1"></i> Target Action</span>
+                <span id="dashboard-tooltip-text" class="leading-relaxed text-gray-200 font-medium"></span>
+            </div>
+
             <div id="empty-state" class="hidden p-12 text-center">
                 <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4 border border-gray-700">
                     <i class="fa-solid fa-house-circle-xmark text-2xl text-gray-500"></i>
@@ -868,15 +875,26 @@
         let nextStep = "Fully Complete";
         let nextTaskDetail = "All workflow tasks finished";
         let nextAgent = "-";
+        let nextTaskId = null;
+        let nextSectionKey = null;
         let foundNext = false;
 
         prop.tasks.forEach(t => {
-            if (t.completed) {
+            const isTaskFullyCompleted = t.completed && (!t.subtasks || t.subtasks.every(s => s.completed));
+            
+            if (isTaskFullyCompleted) {
                 percent += t.weight;
             } else if (!foundNext) {
                 nextStep = t.phase;
                 nextTaskDetail = t.title;
+                // Pinpoint pending subtask if main task is checked
+                if (t.completed && t.subtasks) {
+                    const pendingSub = t.subtasks.find(s => !s.completed);
+                    if (pendingSub) nextTaskDetail = `Subtask: ${pendingSub.title}`;
+                }
                 nextAgent = t.assignee;
+                nextTaskId = t.id;
+                nextSectionKey = btoa(encodeURIComponent(t.phase + "_" + t.mainTask)).replace(/=/g, '');
                 foundNext = true;
             }
         });
@@ -886,7 +904,7 @@
             nextAgent = "Completed";
         }
 
-        return { percent, nextStep, nextTaskDetail, nextAgent };
+        return { percent, nextStep, nextTaskDetail, nextAgent, nextTaskId, nextSectionKey };
     }
 
     // Safely format time strictly to EST
@@ -966,6 +984,7 @@
                 const agentBgColor = getAgentColorClass(stats.nextAgent, 'bg');
                 const agentBorderColor = getAgentColorClass(stats.nextAgent, 'border');
                 const progressColor = getProgressColorRGB(stats.percent);
+                const tooltipEscapedDetail = stats.nextTaskDetail.replace(/`/g, '\\`').replace(/'/g, "\\'");
                 
                 const tr = document.createElement('tr');
                 tr.className = "cursor-pointer group";
@@ -979,12 +998,11 @@
                     <td class="p-4 text-center">
                         <span class="${agentBgColor} ${agentTxtColor} px-2.5 py-1 rounded text-xs font-extrabold border ${agentBorderColor}">${stats.nextAgent}</span>
                     </td>
-                    <td class="p-4 text-center text-xs font-semibold text-gray-200 relative group/tooltip">
-                        <div class="truncate max-w-[200px] mx-auto cursor-help">${stats.nextStep}</div>
-                        <div class="absolute top-1/2 left-[calc(100%-10px)] -translate-y-1/2 hidden group-hover/tooltip:block w-max max-w-[250px] bg-gray-800 text-white text-xs p-3 rounded shadow-xl z-[100] border border-gray-700 whitespace-normal text-left leading-relaxed pointer-events-none">
-                            <span class="text-brand-purple font-bold block mb-1">Upcoming Task:</span>
-                            ${stats.nextTaskDetail}
-                        </div>
+                    <td class="p-4 text-center text-xs font-semibold text-gray-200 transition-colors hover:text-brand-emerald cursor-help"
+                        onmouseenter="window.showDashboardTooltip(event, \`${tooltipEscapedDetail}\`)"
+                        onmouseleave="window.hideDashboardTooltip()"
+                        onclick="event.stopPropagation(); window.openTracker('${prop.id}', '${stats.nextTaskId}', '${stats.nextSectionKey}')">
+                        <div class="truncate max-w-[200px] mx-auto border-b border-dashed border-gray-600 pb-0.5 inline-block">${stats.nextStep}</div>
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-2">
@@ -997,17 +1015,71 @@
         }
     }
 
-    window.openTracker = function(propId) {
+    window.showDashboardTooltip = function(event, text) {
+        if (!text || text === 'All workflow tasks finished' || text === 'null') return;
+        const tooltip = document.getElementById('dashboard-tooltip');
+        const textEl = document.getElementById('dashboard-tooltip-text');
+        const tr = event.target.closest('tr');
+        
+        textEl.innerText = text;
+        tooltip.classList.remove('hidden');
+        
+        const trRect = tr.getBoundingClientRect();
+        const tableWrapper = tr.closest('.glass-card');
+        const wrapperRect = tableWrapper.getBoundingClientRect();
+        
+        // Position specifically right outside the table wrapper
+        let leftPos = wrapperRect.right + 20; 
+        const topPos = trRect.top + (trRect.height / 2);
+
+        // Fallback: if it clips off the right side of screen, pop it near the mouse instead
+        if (leftPos + 300 > window.innerWidth) {
+            leftPos = event.clientX - 320; 
+        }
+        
+        tooltip.style.left = `${leftPos}px`;
+        tooltip.style.top = `${topPos}px`;
+        tooltip.style.transform = `translateY(-50%)`;
+        
+        setTimeout(() => tooltip.classList.remove('opacity-0'), 10);
+    }
+
+    window.hideDashboardTooltip = function() {
+        const tooltip = document.getElementById('dashboard-tooltip');
+        tooltip.classList.add('opacity-0');
+        setTimeout(() => tooltip.classList.add('hidden'), 200);
+    }
+
+    window.openTracker = function(propId, scrollToTaskId = null, forceOpenSectionKey = null) {
         if (activePropertyId !== propId) {
             window.sectionToggleState = {};
             window.sectionCompletionState = {};
         }
         activePropertyId = propId;
+
+        // Force open specific accordion section if navigating from a Next Step click
+        if (forceOpenSectionKey && forceOpenSectionKey !== 'null') {
+            if (!window.sectionToggleState) window.sectionToggleState = {};
+            window.sectionToggleState[forceOpenSectionKey] = 'open';
+        }
+
         if(document.getElementById('tab-tracker').classList.contains('hidden')) {
             window.switchTab('tracker');
         } else {
             renderTrackerView();
             updateGlobalAssetSelector();
+        }
+
+        // Handle scrolling and highlighting for deep-links
+        if (scrollToTaskId && scrollToTaskId !== 'null') {
+            setTimeout(() => {
+                const el = document.getElementById('task_' + scrollToTaskId);
+                if (el) {
+                    el.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    el.classList.add('bg-brand-emerald/20');
+                    setTimeout(() => el.classList.remove('bg-brand-emerald/20'), 1500);
+                }
+            }, 150);
         }
     }
 
@@ -1118,7 +1190,8 @@
 
                 tasks.forEach(t => {
                     const row = document.createElement('div');
-                    row.className = `p-4 flex flex-col gap-3 transition-colors hover:bg-gray-800/30 ${(t.completed && (!t.subtasks || t.subtasks.every(s=>s.completed))) ? 'opacity-60' : ''}`;
+                    row.id = `task_${t.id}`;
+                    row.className = `p-4 flex flex-col gap-3 transition-colors duration-500 hover:bg-gray-800/30 ${(t.completed && (!t.subtasks || t.subtasks.every(s=>s.completed))) ? 'opacity-60' : ''}`;
                     
                     const agentOpts = agentsList.map(a => `<option value="${a}" ${t.assignee === a ? 'selected' : ''} class="bg-gray-900 text-white">${a}</option>`).join('');
                     const agentColor = getAgentColorClass(t.assignee, 'text');
