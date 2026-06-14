@@ -86,6 +86,11 @@
 </head>
 <body class="font-sans antialiased relative selection:bg-brand-crimson selection:text-white capitalize">
 
+  <!-- SCROLL TO TOP BUTTON -->
+  <button id="scrollToTopBtn" onclick="window.scrollToTop()" class="fixed right-6 z-[104] w-12 h-12 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-all text-white cursor-pointer opacity-0 pointer-events-none translate-y-4 backdrop-blur-md" style="bottom: 1.5rem; transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;">
+      <i class="fa-solid fa-arrow-up text-lg"></i>
+  </button>
+
   <!-- CURSOR OVERLAYS -->
   <div id="mouseGlow"></div>
   <div id="cursor-dot"></div>
@@ -184,7 +189,7 @@
   <div class="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 hidden flex-col min-h-screen" id="mainContent">
     
     <!-- Header -->
-    <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-brand-cardBg/60 p-4 rounded-2xl border border-gray-800/80 backdrop-blur-md shrink-0">
+    <header class="sticky top-0 md:top-2 z-[100] flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-[#0b0f19]/95 p-4 rounded-2xl border border-gray-800/80 backdrop-blur-xl shrink-0 shadow-lg">
         <div class="flex items-center gap-5 flex-wrap lg:flex-nowrap">
             <img src="icon.svg" alt="TCHB Icon" class="h-10 w-10 object-contain shrink-0" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
             
@@ -245,7 +250,7 @@
     <div id="tab-dashboard" class="flex-1 space-y-6">
         
         <!-- Controls Bar -->
-        <div class="flex flex-col xl:flex-row justify-between xl:items-center gap-4 mb-6">
+        <div class="flex flex-col xl:flex-row justify-between xl:items-center gap-4 mb-6 sticky top-[250px] md:top-[100px] z-[90] bg-[#0b0f19]/95 backdrop-blur-xl p-4 -mx-4 rounded-xl border border-gray-800/60 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]">
             <h2 class="text-2xl font-bold text-white flex items-center gap-2 shrink-0">
                 <i class="fa-solid fa-satellite-dish text-brand-emerald animate-pulse"></i> Live Pipeline
             </h2>
@@ -284,10 +289,10 @@
         </div>
 
         <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto overflow-y-auto max-h-[70vh] custom-scrollbar relative">
                 <table class="w-full text-center border-collapse">
-                    <thead>
-                        <tr class="bg-gray-900/80 border-b border-gray-800 text-xs uppercase tracking-wider text-gray-400">
+                    <thead class="sticky top-0 z-[80] shadow-[0_1px_0_#374151]">
+                        <tr class="bg-gray-900/95 backdrop-blur-md text-xs uppercase tracking-wider text-gray-400">
                             <th class="p-4 font-bold text-center">Address</th>
                             <th class="p-4 font-bold text-center">Exit Strategy</th>
                             <th class="p-4 font-bold text-center">Date Started</th>
@@ -317,7 +322,7 @@
     <div id="tab-tracker" class="flex-1 hidden flex-col relative">
         
         <!-- Global Asset Navigation Bar -->
-        <div class="glass-card p-4 rounded-2xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-20">
+        <div class="glass-card p-4 rounded-2xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-[250px] md:top-[100px] z-[90] backdrop-blur-xl bg-[#0b0f19]/95 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] transition-all">
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i> Targeted Asset:</span>
                 <div class="w-full sm:w-80 bg-gradient-to-r from-brand-crimson/5 to-brand-purple/5 border border-brand-purple/20 hover:border-brand-purple/40 rounded-lg transition-all relative flex items-center">
@@ -426,7 +431,7 @@
         <div class="max-w-4xl mx-auto mt-4">
             
             <!-- Strategy Navigation Tabs (Styled identical to Header Main Tabs) -->
-            <div class="flex bg-gradient-to-r from-brand-crimson/10 to-brand-purple/10 p-1 rounded-xl border border-brand-purple/30 overflow-x-auto max-w-fit mx-auto mb-10">
+            <div class="flex bg-gradient-to-r from-brand-crimson/10 to-brand-purple/10 p-1 rounded-xl border border-brand-purple/30 overflow-x-auto max-w-fit mx-auto mb-10 sticky top-[250px] md:top-[100px] z-[90] backdrop-blur-xl bg-[#0b0f19]/95 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] transition-all">
                 <button onclick="window.renderSOPTimeline('Wholesale')" id="sopPill_Wholesale" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all sop-pill flex items-center gap-2 whitespace-nowrap bg-gradient-to-r from-brand-crimson to-brand-purple text-white shadow-md">Wholesale SOP</button>
                 <button onclick="window.renderSOPTimeline('Fix & Flip')" id="sopPill_Fix & Flip" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all sop-pill flex items-center gap-2 whitespace-nowrap text-gray-300 hover:text-white">Fix & Flip SOP</button>
                 <button onclick="window.renderSOPTimeline('Creative')" id="sopPill_Creative" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all sop-pill flex items-center gap-2 whitespace-nowrap text-gray-300 hover:text-white">Creative SOP</button>
@@ -843,6 +848,23 @@
         `).join('');
     };
 
+    // --- SCROLL TO TOP LISTENER ---
+    window.addEventListener('scroll', () => {
+        const btn = document.getElementById('scrollToTopBtn');
+        if (!btn) return;
+        if (window.scrollY > 300) {
+            btn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+            btn.classList.add('opacity-100', 'translate-y-0');
+        } else {
+            btn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+            btn.classList.remove('opacity-100', 'translate-y-0');
+        }
+    });
+
+    window.scrollToTop = function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // --- 3. UI RENDERING & INTERACTIVITY ---
     window.switchTab = function(tab) {
         document.getElementById('tab-dashboard').classList.add('hidden');
@@ -856,6 +878,8 @@
         document.getElementById('nav-sop').className = defaultNavClasses;
 
         const activeNavClasses = "bg-gradient-to-r from-brand-crimson to-brand-purple text-white shadow-md border-transparent";
+        
+        const scrollBtn = document.getElementById('scrollToTopBtn');
 
         if (tab === 'dashboard') {
             document.getElementById('tab-dashboard').classList.remove('hidden');
@@ -865,6 +889,7 @@
             window.sectionToggleState = {};
             window.sectionCompletionState = {};
             if(window.isChatOpen) window.toggleChat();
+            if(scrollBtn) scrollBtn.style.bottom = '1.5rem';
             renderDashboard();
             updateGlobalAssetSelector();
         } else if (tab === 'tracker') {
@@ -872,6 +897,7 @@
             document.getElementById('tab-tracker').classList.add('flex');
             document.getElementById('nav-tracker').classList.add(...activeNavClasses.split(' '));
             document.getElementById('nav-tracker').classList.remove('text-gray-300');
+            if(scrollBtn && activePropertyId) scrollBtn.style.bottom = '5.5rem';
             renderTrackerView();
             updateGlobalAssetSelector();
         } else if (tab === 'sop') {
@@ -879,6 +905,7 @@
             document.getElementById('nav-sop').classList.add(...activeNavClasses.split(' '));
             document.getElementById('nav-sop').classList.remove('text-gray-300');
             if(window.isChatOpen) window.toggleChat();
+            if(scrollBtn) scrollBtn.style.bottom = '1.5rem';
             window.renderSOPTimeline('Wholesale'); // Default load
         }
     }
@@ -1392,6 +1419,7 @@
         const emptyView = document.getElementById('tracker-empty');
         const contentView = document.getElementById('tracker-content');
         const chatContainer = document.getElementById('propertyChatContainer');
+        const scrollBtn = document.getElementById('scrollToTopBtn');
         
         if(!emptyView || !contentView) return;
         
@@ -1399,6 +1427,7 @@
             emptyView.classList.remove('hidden');
             contentView.classList.add('hidden');
             if(chatContainer) chatContainer.classList.add('hidden');
+            if(scrollBtn) scrollBtn.style.bottom = '1.5rem';
             return;
         }
 
@@ -1408,6 +1437,7 @@
         emptyView.classList.add('hidden');
         contentView.classList.remove('hidden');
         if(chatContainer) chatContainer.classList.remove('hidden');
+        if(scrollBtn) scrollBtn.style.bottom = '5.5rem';
 
         document.getElementById('tracker-address').innerText = prop.address;
         const strat = prop.exitStrategy || 'Wholesale';
@@ -1640,7 +1670,7 @@
 
         // 1. Build Quick Navigation Shortcuts
         const phaseNames = Object.keys(structure);
-        let navHtml = `<div class="grid grid-cols-1 md:grid-cols-${Math.min(phaseNames.length, 4)} gap-4 mb-10">`;
+        let navHtml = `<div class="grid grid-cols-1 md:grid-cols-${Math.min(phaseNames.length, 4)} gap-4 mb-10 sticky top-[330px] md:top-[160px] z-[80] bg-[#0b0f19]/95 backdrop-blur-xl p-4 -mx-4 rounded-2xl border border-gray-800/60 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] transition-all">`;
         
         let pIndex = 1;
         for (const phaseName of phaseNames) {
