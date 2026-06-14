@@ -792,6 +792,16 @@
         return `rgb(${r}, ${g}, ${b})`;
     }
 
+    // --- UTILITIES ---
+    function escapeHtml(unsafe) {
+        return (unsafe || "").toString()
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
+    }
+
     // --- ACTIVE USERS UI CONTROLS ---
     window.toggleActiveUsers = function(e) {
         if(e) e.stopPropagation();
@@ -1187,6 +1197,45 @@
         }
     }
 
+    window.saveTemplates = async function(propId) {
+        const prop = propertiesData.find(p => p.id === propId);
+        if (!prop) return;
+        
+        prop.draftTemplate = document.getElementById(`draftTemplateInput_${propId}`).value;
+        prop.approvedTemplate = document.getElementById(`approvedTemplateInput_${propId}`).value;
+        
+        await window.savePropertyData(prop);
+        
+        const status = document.getElementById(`templatesSaveStatus_${propId}`);
+        if(status) {
+            status.style.opacity = '1';
+            setTimeout(() => { if(status) status.style.opacity = '0'; }, 2000);
+        }
+    }
+
+    window.addComment = async function(propId) {
+        const input = document.getElementById(`newCommentInput_${propId}`);
+        const text = input.value.trim();
+        if (!text) return;
+
+        const prop = propertiesData.find(p => p.id === propId);
+        if (!prop) return;
+
+        const authorName = currentUser && currentUser.email ? currentUser.email.split('@')[0] : "Agent";
+
+        if (!prop.comments) prop.comments = [];
+        prop.comments.push({
+            id: 'cmt_' + Date.now() + Math.random().toString(36).substr(2, 5),
+            text: text,
+            author: authorName,
+            timestamp: Date.now()
+        });
+
+        await window.savePropertyData(prop);
+        input.value = '';
+        renderTrackerView(); 
+    }
+
     function renderTrackerView() {
         const emptyView = document.getElementById('tracker-empty');
         const contentView = document.getElementById('tracker-content');
@@ -1212,6 +1261,11 @@
         document.getElementById('tracker-percent-text').innerText = `${stats.percent}%`;
         document.getElementById('tracker-progress-bar').style.width = `${stats.percent}%`;
 
+        // Initialize new data structures backward-compatibly
+        if (!prop.comments) prop.comments = [];
+        if (!prop.draftTemplate) prop.draftTemplate = "";
+        if (!prop.approvedTemplate) prop.approvedTemplate = "";
+
         // Group tasks by Phase -> MainTask
         const structure = {};
         prop.tasks.forEach((t, i) => {
@@ -1223,6 +1277,83 @@
         const container = document.getElementById('tracker-task-container');
         container.innerHTML = '';
 
+        // --- 1. MARKETING TEMPLATES WORKSPACE ---
+        const templatesIsOpen = window.sectionToggleState['workspace_templates'] === 'open';
+        const templatesDiv = document.createElement('div');
+        templatesDiv.className = "glass-card rounded-xl border border-gray-800/80 overflow-hidden mb-6";
+        templatesDiv.innerHTML = `
+            <div class="group bg-gray-900/80 hover:bg-brand-cyan/10 px-4 py-3 border-b border-gray-800 flex items-center justify-between cursor-pointer transition-colors duration-300 select-none" onclick="window.toggleSection('workspace_templates')">
+                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2 group-hover:text-brand-cyan transition-colors">
+                    <i class="fa-solid fa-caret-${templatesIsOpen ? 'down' : 'right'} text-gray-600 group-hover:text-brand-cyan w-3 text-center transition-transform"></i>
+                    <i class="fa-solid fa-file-lines text-brand-cyan ml-1"></i> Marketing Copy & Templates
+                </h3>
+            </div>
+            <div class="${templatesIsOpen ? 'block' : 'hidden'} bg-gray-900/40 p-4 space-y-4">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Draft Generation Pad</label>
+                        <textarea id="draftTemplateInput_${prop.id}" onchange="window.saveTemplates('${prop.id}')" class="w-full h-40 bg-gray-950/50 border border-gray-700/80 rounded-lg p-3 text-sm text-gray-300 focus:border-brand-cyan focus:outline-none transition-colors resize-y placeholder-gray-600 custom-scrollbar" placeholder="Paste generated text blasts, FB drafts, InvestorLift descriptions here...">${escapeHtml(prop.draftTemplate)}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 text-brand-emerald"><i class="fa-solid fa-check-circle mr-1"></i> Approved Final Copy</label>
+                        <textarea id="approvedTemplateInput_${prop.id}" onchange="window.saveTemplates('${prop.id}')" class="w-full h-40 bg-gray-950/50 border border-brand-emerald/30 rounded-lg p-3 text-sm text-gray-300 focus:border-brand-emerald focus:outline-none transition-colors resize-y placeholder-gray-600 custom-scrollbar" placeholder="Paste the final approved copy here for quick access...">${escapeHtml(prop.approvedTemplate)}</textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <span id="templatesSaveStatus_${prop.id}" class="text-[10px] uppercase tracking-wider text-brand-cyan font-bold opacity-0 transition-opacity">Saved automatically <i class="fa-solid fa-check ml-1"></i></span>
+                </div>
+            </div>
+        `;
+        container.appendChild(templatesDiv);
+
+        // --- 2. INTERNAL COMMENTS WORKSPACE ---
+        const commentsIsOpen = window.sectionToggleState['workspace_comments'] === 'open';
+        const commentsCount = prop.comments.length;
+        let commentsListHtml = commentsCount === 0 
+            ? '<p class="text-xs text-gray-500 italic text-center py-6">No comments yet. Be the first to start the discussion.</p>'
+            : prop.comments.map(c => `
+                <div class="bg-gray-800/40 border border-gray-700/50 rounded-lg p-3 flex flex-col gap-1.5">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold text-brand-gold"><i class="fa-solid fa-user-circle mr-1 text-gray-500"></i> ${escapeHtml(c.author)}</span>
+                        <span class="text-[10px] text-gray-500 font-mono">${formatEST(c.timestamp)}</span>
+                    </div>
+                    <p class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed mt-1">${escapeHtml(c.text)}</p>
+                </div>
+            `).join('');
+
+        const commentsDiv = document.createElement('div');
+        commentsDiv.className = "glass-card rounded-xl border border-gray-800/80 overflow-hidden mb-8";
+        commentsDiv.innerHTML = `
+            <div class="group bg-gray-900/80 hover:bg-brand-gold/10 px-4 py-3 border-b border-gray-800 flex items-center justify-between cursor-pointer transition-colors duration-300 select-none" onclick="window.toggleSection('workspace_comments')">
+                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2 group-hover:text-brand-gold transition-colors">
+                    <i class="fa-solid fa-caret-${commentsIsOpen ? 'down' : 'right'} text-gray-600 group-hover:text-brand-gold w-3 text-center transition-transform"></i>
+                    <i class="fa-solid fa-comments text-brand-gold ml-1"></i> Internal Notes & Discussion
+                </h3>
+                <span class="${commentsCount > 0 ? 'bg-brand-gold/20 text-brand-gold border-brand-gold/30' : 'bg-gray-800 text-gray-400 border-gray-700'} text-[10px] font-black px-2 py-0.5 rounded border transition-colors">${commentsCount}</span>
+            </div>
+            <div class="${commentsIsOpen ? 'flex' : 'hidden'} flex-col bg-gray-900/40 p-4">
+                <div class="max-h-80 overflow-y-auto pr-2 space-y-3 mb-4 custom-scrollbar flex-col flex">
+                    ${commentsListHtml}
+                </div>
+                <div class="flex items-end gap-3 mt-2 pt-4 border-t border-gray-800/60">
+                    <textarea id="newCommentInput_${prop.id}" class="flex-1 bg-gray-950/50 border border-gray-700/80 rounded-lg p-3 text-sm text-white focus:border-brand-gold focus:outline-none transition-colors resize-none placeholder-gray-600 min-h-[46px] h-[46px] custom-scrollbar" placeholder="Type a new comment... (Press Enter to post)" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.addComment('${prop.id}'); }"></textarea>
+                    <button onclick="window.addComment('${prop.id}')" class="bg-brand-gold hover:bg-yellow-500 text-gray-900 px-5 py-2.5 rounded-lg text-sm font-bold transition-colors cursor-pointer shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                        Post <i class="fa-solid fa-paper-plane ml-1 text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(commentsDiv);
+
+        // Auto-scroll comments to bottom when opened
+        if (commentsIsOpen) {
+            setTimeout(() => {
+                const scrollBox = commentsDiv.querySelector('.overflow-y-auto');
+                if (scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight;
+            }, 10);
+        }
+
+        // --- 3. STANDARD TASKS WORKFLOW ---
         for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
             const sectionDiv = document.createElement('div');
             sectionDiv.className = "glass-card rounded-xl border border-gray-800/80 overflow-hidden mb-6";
