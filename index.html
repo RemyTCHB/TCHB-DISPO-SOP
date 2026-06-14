@@ -252,6 +252,105 @@
                     <div class="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse"></div>
                     <span id="userEmailDisplay" class="text-[10px] font-bold text-gray-300 lowercase tracking-wide"></span>
                 </div>
+
+                <!-- Notification Preferences Center -->
+                <div class="relative flex items-center shrink-0">
+                    <button onclick="window.toggleNotificationSettings(event)" class="text-sm font-bold text-gray-500 hover:text-brand-cyan transition-colors cursor-pointer relative" title="Alert Preferences">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
+                    
+                    <!-- Notification Settings Dropdown -->
+                    <div id="notifSettingsDropdown" class="absolute right-0 top-full mt-4 w-72 sm:w-80 bg-[#0f1423]/95 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] hidden flex-col z-[120] overflow-hidden origin-top-right transition-all text-left">
+                        <div class="bg-gray-800/80 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+                            <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-sliders text-brand-cyan"></i> Alert Preferences</span>
+                            <button onclick="window.toggleNotificationSettings(event)" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-times"></i></button>
+                        </div>
+                        
+                        <div class="p-4 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <!-- Toggle Item -->
+                            <div class="flex items-center justify-between">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-gray-200">Offline Comment Alerts</p>
+                                    <p class="text-[9px] text-gray-500">Receive alerts for new unread property discussions.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                  <input type="checkbox" id="pref_comments" class="sr-only peer" checked>
+                                  <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-cyan"></div>
+                                </label>
+                            </div>
+                            <!-- Toggle Item -->
+                            <div class="flex items-center justify-between">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-gray-200">New Asset Deployments</p>
+                                    <p class="text-[9px] text-gray-500">Alert when a new property tracker is initialized.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                  <input type="checkbox" id="pref_new_assets" class="sr-only peer" checked>
+                                  <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-cyan"></div>
+                                </label>
+                            </div>
+                            <!-- Toggle Item -->
+                            <div class="flex items-center justify-between">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-gray-200">Phase Completions</p>
+                                    <p class="text-[9px] text-gray-500">Notify the team when major pipeline phases reach 100%.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                  <input type="checkbox" id="pref_completions" class="sr-only peer" checked>
+                                  <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-cyan"></div>
+                                </label>
+                            </div>
+                            <!-- Toggle Item -->
+                            <div class="flex items-center justify-between">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-brand-emerald"><i class="fa-solid fa-arrow-turn-down rotate-90 mr-1"></i> Task Turn Alerts</p>
+                                    <p class="text-[9px] text-gray-500">Instant alert when the next workflow step is assigned to you.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                  <input type="checkbox" id="pref_task_turns" class="sr-only peer" checked>
+                                  <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-emerald"></div>
+                                </label>
+                            </div>
+                            <!-- Toggle Item -->
+                            <div class="flex items-center justify-between border-t border-gray-800 pt-4">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-brand-gold"><i class="fa-regular fa-sun mr-1"></i> 10 AM Daily Briefing</p>
+                                    <p class="text-[9px] text-gray-500">Morning summary of your pending tasks for the day.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                  <input type="checkbox" id="pref_daily_brief" class="sr-only peer" checked>
+                                  <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-gold"></div>
+                                </label>
+                            </div>
+                            <!-- Toggle Item w/ Sub Menu -->
+                            <div class="flex flex-col border-t border-gray-800 pt-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="pr-3">
+                                        <p class="text-xs font-bold text-brand-crimson"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Overdue Reminders</p>
+                                        <p class="text-[9px] text-gray-500">Recurring nudges for tasks sitting on your desk.</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                      <input type="checkbox" id="pref_reminders" class="sr-only peer" checked onchange="document.getElementById('pref_reminder_interval').disabled = !this.checked">
+                                      <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-crimson"></div>
+                                    </label>
+                                </div>
+                                <select id="pref_reminder_interval" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-[10px] font-bold text-gray-300 focus:outline-none focus:border-brand-crimson transition-colors cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <option value="2">Every 2 Hours</option>
+                                    <option value="4" selected>Every 4 Hours</option>
+                                    <option value="8">Every 8 Hours</option>
+                                    <option value="24">Once a Day (24 Hours)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 border-t border-gray-700 bg-gray-900/50 flex justify-end">
+                            <button id="savePrefsBtn" onclick="window.saveNotificationPreferences()" class="bg-brand-cyan hover:bg-cyan-400 text-gray-900 text-xs font-bold py-2 px-4 rounded-lg shadow-md transition-colors cursor-pointer w-full flex justify-center items-center gap-2">
+                                Save Preferences
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <button onclick="window.logOut()" class="text-sm font-bold text-gray-500 hover:text-brand-crimson transition-colors cursor-pointer" title="Sign Out">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 </button>
@@ -826,10 +925,21 @@
         if(window.renderActiveUsersList) window.renderActiveUsersList();
     }
 
+    // --- NOTIFICATION UI CONTROLS ---
+    window.toggleNotificationSettings = function(e) {
+        if(e) e.stopPropagation();
+        const drop = document.getElementById('notifSettingsDropdown');
+        if (drop) drop.classList.toggle('hidden');
+    }
+
     document.addEventListener('click', (e) => {
-        const dropdown = document.getElementById('activeUsersDropdown');
-        if (dropdown && !dropdown.classList.contains('hidden') && !e.target.closest('#activeUsersDropdown')) {
-            dropdown.classList.add('hidden');
+        const activeUsersDropdown = document.getElementById('activeUsersDropdown');
+        if (activeUsersDropdown && !activeUsersDropdown.classList.contains('hidden') && !e.target.closest('#activeUsersDropdown')) {
+            activeUsersDropdown.classList.add('hidden');
+        }
+        const notifDropdown = document.getElementById('notifSettingsDropdown');
+        if (notifDropdown && !notifDropdown.classList.contains('hidden') && !e.target.closest('#notifSettingsDropdown')) {
+            notifDropdown.classList.add('hidden');
         }
     });
 
@@ -2097,11 +2207,98 @@
                 }
             };
 
+            // Helper for role-based notification defaults
+            function getDefaultPrefs(email) {
+                const mail = (email || '').toLowerCase();
+                const agents = ['carlos@totalchb.com', 'yanna@totalchb.com', 'moe@totalchb.com', 'sara@totalchb.com'];
+                
+                // If they are an Agent, they get task alerts. Everyone else (Admins) defaults to false.
+                const isAgent = agents.includes(mail);
+                
+                return {
+                    comments: true,
+                    new_assets: true,
+                    completions: true,
+                    task_turns: isAgent,
+                    daily_brief: isAgent,
+                    reminders: isAgent,
+                    reminder_interval: '4'
+                };
+            }
+
+            // Cloud Data Integration for Notification Preferences
+            window.loadNotificationPreferences = async function() {
+                if (!currentUser || !db) return;
+                try {
+                    const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
+                    const snap = await firestoreModule.getDoc(docRef);
+                    
+                    const defaults = getDefaultPrefs(currentUser.email);
+                    let data = defaults;
+
+                    if(snap.exists()) {
+                        const dbData = snap.data();
+                        data = { ...defaults, ...dbData }; // Merge saved data over the defaults
+                    } else {
+                        // First time login! Seed the database with role defaults so the backend has them immediately
+                        await firestoreModule.setDoc(docRef, {
+                            email: currentUser.email,
+                            ...defaults,
+                            updatedAt: Date.now()
+                        });
+                    }
+
+                    // Apply to UI Dropdown
+                    document.getElementById('pref_comments').checked = data.comments;
+                    document.getElementById('pref_new_assets').checked = data.new_assets;
+                    document.getElementById('pref_completions').checked = data.completions;
+                    document.getElementById('pref_task_turns').checked = data.task_turns;
+                    document.getElementById('pref_daily_brief').checked = data.daily_brief;
+                    
+                    document.getElementById('pref_reminders').checked = data.reminders;
+                    document.getElementById('pref_reminder_interval').disabled = !data.reminders;
+                    if (data.reminder_interval) document.getElementById('pref_reminder_interval').value = data.reminder_interval;
+                    
+                } catch(e) { console.error("Pref load error", e); }
+            }
+
+            window.saveNotificationPreferences = async function() {
+                if (!currentUser || !db) return;
+                const btn = document.getElementById('savePrefsBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+                
+                try {
+                    const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
+                    await firestoreModule.setDoc(docRef, {
+                        email: currentUser.email,
+                        comments: document.getElementById('pref_comments').checked,
+                        new_assets: document.getElementById('pref_new_assets').checked,
+                        completions: document.getElementById('pref_completions').checked,
+                        task_turns: document.getElementById('pref_task_turns').checked,
+                        daily_brief: document.getElementById('pref_daily_brief').checked,
+                        reminders: document.getElementById('pref_reminders').checked,
+                        reminder_interval: document.getElementById('pref_reminder_interval').value,
+                        updatedAt: Date.now()
+                    }, { merge: true });
+                    
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Preferences Saved';
+                    setTimeout(() => { btn.innerHTML = originalText; window.toggleNotificationSettings(); }, 1500);
+                } catch(e) { 
+                    console.error("Pref save error", e); 
+                    btn.innerHTML = 'Error Saving!';
+                    setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+                }
+            }
+
             authModule.onAuthStateChanged(firebaseAuth, async (user) => {
                 if (user) {
                     if (user.email && user.email.endsWith('@totalchb.com')) {
                         currentUser = user;
                         grantAccess(); 
+                        
+                        // Load user's unique alert settings from the Cloud
+                        window.loadNotificationPreferences();
                         
                         if (!window.presenceInterval) {
                             const updatePresence = () => {
