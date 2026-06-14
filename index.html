@@ -125,7 +125,7 @@
           <div class="space-y-5">
               <div>
                   <label class="block text-xs font-bold uppercase text-gray-400 mb-1.5">Subject Property Address</label>
-                  <input type="text" id="newAssetAddressInput" placeholder="e.g. 123 Example Street" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-brand-emerald transition-colors cursor-pointer">
+                  <input type="text" id="newAssetAddressInput" placeholder="e.g. 123 Example Street" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-brand-emerald transition-colors cursor-pointer" onkeydown="if(event.key === 'Enter') window.confirmNewAsset()">
               </div>
               
               <div>
@@ -245,40 +245,42 @@
     <div id="tab-dashboard" class="flex-1 space-y-6">
         
         <!-- Controls Bar -->
-        <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-2">
-            <div class="w-full md:w-auto">
-                <h2 class="text-2xl font-bold text-white flex items-center gap-2 mb-3">
-                    <i class="fa-solid fa-satellite-dish text-brand-emerald"></i> Live Pipeline
-                </h2>
-                
-                <!-- Dynamic Filters -->
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="relative">
-                        <select id="filterStrategy" onchange="window.updateDashboardFilters()" class="bg-gray-900 border border-gray-700 hover:border-gray-500 text-gray-300 text-xs font-bold rounded-lg px-3 py-2 focus:outline-none appearance-none cursor-pointer pr-8 shadow-sm">
-                            <option value="All">All Strategies</option>
-                            <option value="Wholesale">Wholesale</option>
-                            <option value="Fix & Flip">Fix & Flip</option>
-                            <option value="Creative">Creative</option>
-                            <option value="Novation">Novation</option>
-                        </select>
-                        <i class="fa-solid fa-filter absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none"></i>
+        <div class="flex flex-col xl:flex-row justify-between xl:items-center gap-4 mb-6">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2 shrink-0">
+                <i class="fa-solid fa-satellite-dish text-brand-emerald"></i> Live Pipeline
+            </h2>
+            
+            <!-- Dynamic Filters & Action -->
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto ml-auto">
+                <div class="w-full sm:w-48 bg-gradient-to-r from-brand-crimson/5 to-brand-purple/5 border border-brand-purple/20 hover:border-brand-purple/40 rounded-lg transition-all relative flex items-center">
+                    <select id="filterStrategy" onchange="window.updateDashboardFilters()" class="w-full bg-transparent text-sm font-bold text-gray-400 hover:text-gray-200 px-3 py-2 focus:outline-none cursor-pointer appearance-none z-10 relative">
+                        <option value="All" class="bg-gray-900 text-gray-300">All Strategies</option>
+                        <option value="Wholesale" class="bg-gray-900 text-white">Wholesale</option>
+                        <option value="Fix & Flip" class="bg-gray-900 text-white">Fix & Flip</option>
+                        <option value="Creative" class="bg-gray-900 text-white">Creative</option>
+                        <option value="Novation" class="bg-gray-900 text-white">Novation</option>
+                    </select>
+                    <div class="pointer-events-none absolute right-3 text-brand-purple/60 z-0">
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </div>
-                    
-                    <div class="relative">
-                        <select id="filterSort" onchange="window.updateDashboardFilters()" class="bg-gray-900 border border-gray-700 hover:border-gray-500 text-gray-300 text-xs font-bold rounded-lg px-3 py-2 focus:outline-none appearance-none cursor-pointer pr-8 shadow-sm">
-                            <option value="started_desc">Sort: Newest Added</option>
-                            <option value="started_asc">Sort: Oldest Added</option>
-                            <option value="edited_desc">Sort: Recently Edited</option>
-                            <option value="edited_asc">Sort: Oldest Edited</option>
-                        </select>
-                        <i class="fa-solid fa-sort absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none"></i>
+                </div>
+                
+                <div class="w-full sm:w-48 bg-gradient-to-r from-brand-crimson/5 to-brand-purple/5 border border-brand-purple/20 hover:border-brand-purple/40 rounded-lg transition-all relative flex items-center">
+                    <select id="filterSort" onchange="window.updateDashboardFilters()" class="w-full bg-transparent text-sm font-bold text-gray-400 hover:text-gray-200 px-3 py-2 focus:outline-none cursor-pointer appearance-none z-10 relative">
+                        <option value="edited_desc" class="bg-gray-900 text-white">Recently Edited</option>
+                        <option value="edited_asc" class="bg-gray-900 text-white">Oldest Edited</option>
+                        <option value="started_desc" class="bg-gray-900 text-white">Newest Added</option>
+                        <option value="started_asc" class="bg-gray-900 text-white">Oldest Added</option>
+                    </select>
+                    <div class="pointer-events-none absolute right-3 text-brand-purple/60 z-0">
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </div>
                 </div>
 
+                <button onclick="window.openAssetModal()" class="w-full sm:w-auto shrink-0 bg-brand-emerald/10 border border-brand-emerald hover:bg-brand-emerald text-brand-emerald hover:text-gray-900 font-bold py-2 px-4 rounded-xl transition-all cursor-pointer flex justify-center items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                    <i class="fa-solid fa-plus"></i> Deploy New Asset Tracker
+                </button>
             </div>
-            <button onclick="window.openAssetModal()" class="w-full md:w-auto bg-brand-emerald/10 border border-brand-emerald hover:bg-brand-emerald text-brand-emerald hover:text-gray-900 font-bold py-2.5 px-5 rounded-xl transition-all cursor-pointer flex justify-center items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                <i class="fa-solid fa-plus"></i> Deploy New Asset Tracker
-            </button>
         </div>
 
         <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
@@ -423,17 +425,17 @@
     <div id="tab-sop" class="flex-1 hidden space-y-6 pb-12">
         <div class="max-w-4xl mx-auto mt-4">
             
-            <!-- Strategy Pills -->
-            <div class="flex flex-wrap justify-center gap-3 mb-10">
-                <button onclick="window.renderSOPTimeline('Wholesale')" id="sopPill_Wholesale" class="px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-brand-purple text-white border-brand-purple">Wholesale SOP</button>
-                <button onclick="window.renderSOPTimeline('Fix & Flip')" id="sopPill_Fix & Flip" class="px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-gray-900 border-gray-700 text-gray-400 hover:text-white">Fix & Flip SOP</button>
-                <button onclick="window.renderSOPTimeline('Creative')" id="sopPill_Creative" class="px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-gray-900 border-gray-700 text-gray-400 hover:text-white">Creative SOP</button>
-                <button onclick="window.renderSOPTimeline('Novation')" id="sopPill_Novation" class="px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-gray-900 border-gray-700 text-gray-400 hover:text-white">Novation SOP</button>
+            <!-- Strategy Navigation Tabs (Styled identical to Header Main Tabs) -->
+            <div class="flex bg-gradient-to-r from-brand-crimson/10 to-brand-purple/10 p-1 rounded-xl border border-brand-purple/30 overflow-x-auto max-w-fit mx-auto mb-10">
+                <button onclick="window.renderSOPTimeline('Wholesale')" id="sopPill_Wholesale" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all sop-pill flex items-center gap-2 whitespace-nowrap bg-gradient-to-r from-brand-crimson to-brand-purple text-white shadow-md">Wholesale SOP</button>
+                <button onclick="window.renderSOPTimeline('Fix & Flip')" id="sopPill_Fix & Flip" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all sop-pill flex items-center gap-2 whitespace-nowrap text-gray-300 hover:text-white">Fix & Flip SOP</button>
+                <button onclick="window.renderSOPTimeline('Creative')" id="sopPill_Creative" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all sop-pill flex items-center gap-2 whitespace-nowrap text-gray-300 hover:text-white">Creative SOP</button>
+                <button onclick="window.renderSOPTimeline('Novation')" id="sopPill_Novation" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all sop-pill flex items-center gap-2 whitespace-nowrap text-gray-300 hover:text-white">Novation SOP</button>
             </div>
 
             <!-- Dynamic Timeline Container -->
-            <div id="sopTimelineContainer" class="relative pl-6 sm:pl-10 border-l border-gray-800 space-y-12 py-4">
-               <!-- Rendered by JS -->
+            <div id="sopTimelineContainer">
+               <!-- Rendered dynamically via JS to include Nav Cards + Map -->
             </div>
         </div>
     </div>
@@ -652,10 +654,10 @@
 
     function getStrategyColorClass(strategy) {
         const colors = {
-            "Wholesale": "bg-brand-purple/20 text-brand-purple border-brand-purple/50",
+            "Wholesale": "bg-brand-emerald/20 text-brand-emerald border-brand-emerald/50",
             "Fix & Flip": "bg-brand-cyan/20 text-brand-cyan border-brand-cyan/50",
-            "Creative": "bg-brand-gold/20 text-brand-gold border-brand-gold/50",
-            "Novation": "bg-pink-500/20 text-pink-400 border-pink-500/50"
+            "Creative": "bg-brand-purple/20 text-brand-purple border-brand-purple/50",
+            "Novation": "bg-brand-gold/20 text-brand-gold border-brand-gold/50"
         };
         return colors[strategy] || "bg-gray-800 text-gray-300 border-gray-600";
     }
@@ -1350,6 +1352,7 @@
             if (phaseName.includes("Phase I")) { phaseIcon = "fa-clipboard-check"; phaseIconColor = "text-brand-crimson"; }
             else if (phaseName.includes("Phase II")) { phaseIcon = "fa-bullseye"; phaseIconColor = "text-brand-purple"; }
             else if (phaseName.includes("Phase III")) { phaseIcon = "fa-rocket"; phaseIconColor = "text-brand-emerald"; }
+            else if (phaseName.includes("Phase IV")) { phaseIcon = "fa-chart-pie"; phaseIconColor = "text-brand-cyan"; }
 
             const phaseHeader = document.createElement('div');
             phaseHeader.className = "bg-gray-900/60 p-4 border-b border-gray-800 flex items-center justify-between";
@@ -1524,31 +1527,65 @@
 
     // Dynamic SOP Reference Rendering
     window.renderSOPTimeline = function(strategyName) {
-        // Toggle Pills UI
+        // Toggle Pills UI (like Main Tabs)
         document.querySelectorAll('.sop-pill').forEach(btn => {
-            btn.className = "px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-gray-900 border-gray-700 text-gray-400 hover:text-white";
+            btn.className = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap sop-pill";
         });
         const activeBtn = document.getElementById(`sopPill_${strategyName}`);
         if(activeBtn) {
-            if(strategyName==='Wholesale') activeBtn.className = "px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-brand-purple/20 text-brand-purple border-brand-purple shadow-lg";
-            if(strategyName==='Fix & Flip') activeBtn.className = "px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-brand-cyan/20 text-brand-cyan border-brand-cyan shadow-lg";
-            if(strategyName==='Creative') activeBtn.className = "px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-brand-gold/20 text-brand-gold border-brand-gold shadow-lg";
-            if(strategyName==='Novation') activeBtn.className = "px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer sop-pill bg-pink-500/20 text-pink-400 border-pink-500 shadow-lg";
+            activeBtn.className = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all bg-gradient-to-r from-brand-crimson to-brand-purple text-white shadow-md sop-pill flex items-center gap-2 whitespace-nowrap";
         }
 
         const container = document.getElementById('sopTimelineContainer');
-        container.innerHTML = `<div class="absolute left-0 top-0 w-1 bg-gradient-to-b from-brand-crimson via-brand-purple to-brand-emerald h-full pointer-events-none -ml-px rounded-full opacity-60"></div>`;
-        
         const tasks = sopBlueprints[strategyName] || [];
         const structure = {};
+        
         tasks.forEach(t => {
             if (!structure[t.phase]) structure[t.phase] = {};
             if (!structure[t.phase][t.mainTask]) structure[t.phase][t.mainTask] = [];
             structure[t.phase][t.mainTask].push(t);
         });
 
+        // 1. Build Quick Navigation Shortcuts
+        const phaseNames = Object.keys(structure);
+        let navHtml = `<div class="grid grid-cols-1 md:grid-cols-${Math.min(phaseNames.length, 4)} gap-4 mb-10">`;
+        
+        let pIndex = 1;
+        for (const phaseName of phaseNames) {
+            const phaseId = `phase-${pIndex}`;
+            
+            let roman = "I", pColor = "brand-purple", pIcon = "fa-layer-group";
+            if (phaseName.includes("Phase I")) { roman = "I"; pColor = "brand-crimson"; pIcon = "fa-clipboard-check"; }
+            else if (phaseName.includes("Phase II")) { roman = "II"; pColor = "brand-purple"; pIcon = "fa-bullseye"; }
+            else if (phaseName.includes("Phase III")) { roman = "III"; pColor = "brand-emerald"; pIcon = "fa-rocket"; }
+            else if (phaseName.includes("Phase IV")) { roman = "IV"; pColor = "brand-cyan"; pIcon = "fa-chart-pie"; }
+            
+            let splitName = phaseName.split(':');
+            let shortPhase = splitName[0] ? splitName[0].trim() : `Phase ${roman}`;
+            let phaseDesc = splitName[1] ? splitName[1].trim() : phaseName;
+
+            navHtml += `
+                <div onclick="document.getElementById('${phaseId}').scrollIntoView({behavior: 'smooth'})" class="cursor-pointer flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border border-${pColor}/30 transition-all hover:-translate-y-1 shadow-sm">
+                    <span class="w-8 h-8 rounded-lg bg-${pColor}/20 border border-${pColor} flex items-center justify-center text-${pColor} font-extrabold text-sm shadow">${roman}</span>
+                    <div>
+                        <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">${shortPhase}</span>
+                        <span class="text-xs font-bold text-white block">${phaseDesc}</span>
+                    </div>
+                </div>
+            `;
+            pIndex++;
+        }
+        navHtml += `</div>`;
+
+        // 2. Build Timeline Map
+        let timelineHtml = `<div class="relative pl-6 sm:pl-10 border-l border-gray-800 space-y-12 py-4">
+            <div class="absolute left-0 top-0 w-1 bg-gradient-to-b from-brand-crimson via-brand-purple to-brand-emerald h-full pointer-events-none -ml-px rounded-full opacity-60"></div>`;
+
         let cardCounter = 1;
+        pIndex = 1;
         for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
+            const phaseId = `phase-${pIndex}`;
+            
             let phaseIcon = "fa-layer-group";
             let phaseColorClass = "bg-brand-purple border-[#05070f] shadow-[0_0_15px_rgba(79,70,229,0.4)]";
             let borderColorClass = "border-brand-purple/30 group-hover:shadow-[0_0_25px_rgba(79,70,229,0.2)]";
@@ -1572,11 +1609,18 @@
                 borderColorClass = "border-brand-emerald/30 group-hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]";
                 dotColor = "bg-brand-emerald text-gray-900";
             }
+            else if (phaseName.includes("Phase IV")) {
+                phaseIcon = "fa-chart-pie"; 
+                phaseColorClass = "bg-brand-cyan border-[#05070f] shadow-[0_0_15px_rgba(6,182,212,0.4)] text-gray-900"; 
+                borderColorClass = "border-brand-cyan/30 group-hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]";
+                dotColor = "bg-brand-cyan text-gray-900";
+            }
 
             const phaseTotalWeight = Object.values(mainTasksMap).flat().reduce((sum, t) => sum + t.weight, 0);
 
-            container.innerHTML += `
-                <div class="relative -ml-[31px] sm:-ml-[47px] mb-8 pt-8">
+            timelineHtml += `
+                <div id="${phaseId}" class="absolute -top-10"></div>
+                <div class="relative -ml-[31px] sm:-ml-[47px] mb-8 ${pIndex > 1 ? 'pt-8' : ''}">
                     <div class="inline-flex items-center gap-3">
                         <span class="${phaseColorClass} font-extrabold text-xs px-4 py-2 rounded-full flex items-center gap-1.5 border-4">
                             <i class="fa-solid ${phaseIcon}"></i> ${phaseName.toUpperCase()} (${phaseTotalWeight}%)
@@ -1609,7 +1653,7 @@
                     </li>`;
                 }).join('');
 
-                container.innerHTML += `
+                timelineHtml += `
                     <div class="relative group">
                         <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full ${dotColor} border-4 border-[#05070f] flex items-center justify-center font-black text-xs shadow-lg group-hover:scale-110 transition-transform">${cardCounter}</div>
                         <div class="glass-card rounded-xl p-6 ${borderColorClass} hover:-translate-y-1 transition-all">
@@ -1624,7 +1668,10 @@
                 `;
                 cardCounter++;
             }
+            pIndex++;
         }
+        timelineHtml += `</div>`;
+        container.innerHTML = navHtml + timelineHtml;
     }
 
     // Task Specific Template Logic
