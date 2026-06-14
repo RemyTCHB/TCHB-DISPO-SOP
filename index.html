@@ -105,11 +105,11 @@
         
         <div class="space-y-4">
             <button id="googleAuthButton" onclick="window.signInWithGoogle()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-3 mt-6 cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google"> Sign in with @totalchb.com
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google"> Sign in with Google
             </button>
         </div>
 
-        <p id="gateErrorMessage" class="text-xs text-brand-crimson font-medium text-center hidden mt-4">Invalid Access Protocol.</p>
+        <p id="gateErrorMessage" class="text-xs text-brand-crimson font-medium text-center hidden mt-4 leading-relaxed"></p>
     </div>
   </div>
 
@@ -585,7 +585,10 @@
             }
         } catch (error) {
             console.error("Google Sign-In Error:", error);
-            if (error.code !== 'auth/popup-closed-by-user') {
+            if (error.code === 'auth/unauthorized-domain') {
+                // Formatting for the dynamic canvas domain
+                showGateError(`<strong>Domain Not Authorized!</strong><br/>Please add this exact domain to your Firebase Authorized Domains:<br/><span class="select-all block mt-2 p-2 bg-gray-800 border border-gray-700 rounded text-[10px] break-all text-white font-mono">${window.location.hostname}</span>`, true);
+            } else if (error.code !== 'auth/popup-closed-by-user') {
                 showGateError(error.message);
             }
         }
@@ -598,10 +601,16 @@
         }
     }
 
-    function showGateError(msg) {
+    function showGateError(msg, isHTML = false) {
         const errorMsg = document.getElementById('gateErrorMessage');
         const modalBox = document.getElementById('gateModalBox');
-        errorMsg.innerText = msg;
+        
+        if (isHTML) {
+            errorMsg.innerHTML = msg;
+        } else {
+            errorMsg.innerText = msg;
+        }
+        
         errorMsg.classList.remove('hidden');
         modalBox.classList.add('shake-element');
         setTimeout(() => { modalBox.classList.remove('shake-element'); }, 400);
