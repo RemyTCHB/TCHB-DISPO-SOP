@@ -246,10 +246,15 @@
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i> Targeted Asset:</span>
                 <!-- Dropdown cleanly styled like the unselected nav -->
-                <select id="globalAssetSelector" onchange="window.handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-brand-purple/10 border border-brand-purple/30 text-sm font-bold text-gray-300 hover:text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple cursor-pointer transition-all appearance-none">
-                    <option value="" class="bg-gray-900 text-gray-300">-- Select an Active Deal --</option>
-                    <!-- Options populated dynamically -->
-                </select>
+                <div class="w-full sm:w-64 bg-gradient-to-r from-brand-crimson/5 to-brand-purple/5 border border-brand-purple/20 hover:border-brand-purple/40 rounded-lg transition-all relative flex items-center">
+                    <select id="globalAssetSelector" onchange="window.handleGlobalAssetSelection(this.value)" class="w-full bg-transparent text-sm font-bold text-gray-400 hover:text-gray-200 px-3 py-2 focus:outline-none cursor-pointer appearance-none z-10 relative">
+                        <option value="" class="bg-gray-900 text-gray-300">-- Select an Active Deal --</option>
+                        <!-- Options populated dynamically -->
+                    </select>
+                    <div class="pointer-events-none absolute right-3 text-brand-purple/60 z-0">
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </div>
+                </div>
             </div>
             <!-- Add New Asset keeps the hue as a primary action button here -->
             <button onclick="window.openAssetModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-bold bg-gradient-to-r from-brand-crimson to-brand-purple text-white rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer">
@@ -784,7 +789,8 @@
             const subtasks = task.defaultSubtasks ? task.defaultSubtasks.map((stTitle, i) => ({
                 id: 'sub_' + Date.now() + i + Math.random().toString(36).substr(2, 5),
                 title: stTitle,
-                completed: false
+                completed: false,
+                isDefault: true
             })) : [];
             
             return {
@@ -1025,19 +1031,11 @@
         tooltip.classList.remove('hidden');
         
         const trRect = tr.getBoundingClientRect();
-        const tableWrapper = tr.closest('.glass-card');
-        const wrapperRect = tableWrapper.getBoundingClientRect();
-        
-        // Position specifically right outside the table wrapper
-        let leftPos = wrapperRect.right + 20; 
         const topPos = trRect.top + (trRect.height / 2);
 
-        // Fallback: if it clips off the right side of screen, pop it near the mouse instead
-        if (leftPos + 300 > window.innerWidth) {
-            leftPos = event.clientX - 320; 
-        }
-        
-        tooltip.style.left = `${leftPos}px`;
+        // Position anchored explicitly to the right margin of the screen
+        tooltip.style.left = 'auto';
+        tooltip.style.right = '2rem'; 
         tooltip.style.top = `${topPos}px`;
         tooltip.style.transform = `translateY(-50%)`;
         
@@ -1203,17 +1201,19 @@
 
                     let subtasksHtml = '';
                     if (t.subtasks && t.subtasks.length > 0) {
-                        subtasksHtml = t.subtasks.map((st, sIdx) => `
+                        subtasksHtml = t.subtasks.map((st, sIdx) => {
+                            const isDefaultSub = st.isDefault || (t.id === 'p3_6' && st.title.includes('Boost the Post'));
+                            const deleteBtn = isDefaultSub ? '' : `<button onclick="window.deleteSubtask(${t.originalIndex}, ${sIdx})" class="text-gray-600 hover:text-brand-crimson opacity-0 group-hover/sub:opacity-100 transition-opacity cursor-pointer px-2" title="Delete Subtask"><i class="fa-solid fa-xmark"></i></button>`;
+                            return `
                             <div class="flex items-center justify-between gap-3 pl-8 sm:pl-14 py-1 group/sub">
                                 <div class="flex items-center gap-3 flex-1">
                                     <input type="checkbox" ${st.completed ? 'checked' : ''} onchange="window.toggleSubtask(${t.originalIndex}, ${sIdx}, this.checked)" class="w-4 h-4 rounded accent-brand-purple bg-gray-900 border-gray-600 focus:ring-brand-purple focus:ring-offset-0 focus:ring-1 cursor-pointer">
                                     <span class="text-xs font-medium ${st.completed ? 'text-gray-500 line-through' : 'text-gray-300'}">${st.title}</span>
                                 </div>
-                                <button onclick="window.deleteSubtask(${t.originalIndex}, ${sIdx})" class="text-gray-600 hover:text-brand-crimson opacity-0 group-hover/sub:opacity-100 transition-opacity cursor-pointer px-2" title="Delete Subtask">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
+                                ${deleteBtn}
                             </div>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
 
                     const addSubtaskInputHtml = `
