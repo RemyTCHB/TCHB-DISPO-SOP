@@ -66,6 +66,16 @@
     @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); } 20%, 40%, 60%, 80% { transform: translateX(6px); } }
     .shake-element { animation: shake 0.4s ease-in-out; }
 
+    @keyframes jelly-pop {
+      0% { transform: scale(1) rotate(0deg); }
+      40% { transform: scale(0.7) rotate(-15deg); }
+      70% { transform: scale(1.15) rotate(15deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .animate-jelly-pop {
+      animation: jelly-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
     .glass-card {
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(12px);
@@ -86,9 +96,12 @@
 </head>
 <body class="font-sans antialiased relative selection:bg-brand-crimson selection:text-white capitalize">
 
+  <!-- TAILWIND SAFELIST (Forces compilation of dynamic phase & strategy classes once and for all) -->
+  <div class="hidden bg-brand-crimson bg-brand-crimson/20 border-brand-crimson border-brand-crimson/30 text-brand-crimson shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:shadow-[0_0_25px_rgba(220,38,38,0.2)] bg-brand-purple bg-brand-purple/20 border-brand-purple border-brand-purple/30 text-brand-purple shadow-[0_0_15px_rgba(79,70,229,0.4)] group-hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] bg-brand-emerald bg-brand-emerald/20 border-brand-emerald border-brand-emerald/30 border-brand-emerald/50 text-brand-emerald text-gray-900 shadow-[0_0_15px_rgba(16,185,129,0.4)] group-hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] bg-brand-cyan bg-brand-cyan/20 border-brand-cyan border-brand-cyan/30 border-brand-cyan/50 text-brand-cyan shadow-[0_0_15px_rgba(6,182,212,0.4)] group-hover:shadow-[0_0_25px_rgba(6,182,212,0.2)] bg-brand-gold bg-brand-gold/20 border-brand-gold border-brand-gold/30 border-brand-gold/50 text-brand-gold bg-pink-500/20 text-pink-400 border-pink-500/50"></div>
+
   <!-- SCROLL TO TOP BUTTON -->
-  <button id="scrollToTopBtn" onclick="window.scrollToTop()" class="fixed right-6 z-[104] w-12 h-12 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-all text-white cursor-pointer opacity-0 pointer-events-none translate-y-4 backdrop-blur-md" style="bottom: 1.5rem; transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;">
-      <i class="fa-solid fa-arrow-up text-lg"></i>
+  <button id="scrollToTopBtn" onclick="window.scrollToTop()" class="fixed right-6 z-[104] w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-all text-white cursor-pointer opacity-0 pointer-events-none translate-y-4 backdrop-blur-md" style="bottom: 1.5rem; transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;">
+      <i class="fa-solid fa-arrow-up text-xl"></i>
   </button>
 
   <!-- CURSOR OVERLAYS -->
@@ -416,11 +429,13 @@
                 </div>
             </div>
             
-            <!-- FAB Button -->
-            <button onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50">
-                <img src="icon.svg" class="w-full h-full object-cover rounded-full p-2 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+            <!-- FAB Button (Rebuilt to match requested design flawlessly) -->
+            <button id="chatFabBtn" onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50 p-1.5">
+                <div class="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden border border-gray-300">
+                    <img src="icon.svg" class="w-full h-full object-contain p-0.5 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+                </div>
                 <!-- Unread Badge -->
-                <span id="chatUnreadBadge" class="absolute -top-1 -right-1 bg-brand-crimson text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0f1423] shadow-md hidden">0</span>
+                <span id="chatUnreadBadge" class="absolute -top-1 -right-1 bg-brand-crimson text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0f1423] shadow-md hidden z-10">0</span>
             </button>
         </div>
 
@@ -668,7 +683,6 @@
     }
 
     function getPhaseUI(phaseName) {
-        // Checking in reverse order prevents "Phase III" from triggering true on a "Phase I" substring search
         if (phaseName.includes("Phase IV")) {
             return {
                 roman: "IV", icon: "fa-chart-pie",
@@ -735,49 +749,6 @@
             b = Math.round(229 + pct * (129 - 229));
         }
         return `rgb(${r}, ${g}, ${b})`;
-    }
-
-    function getPhaseConfig(phaseName) {
-        if (phaseName.includes("Phase I")) {
-            return {
-                roman: "I", icon: "fa-clipboard-check",
-                navBorder: "border-brand-crimson/30", navIconBg: "bg-brand-crimson/20", navIconBorder: "border-brand-crimson", navIconText: "text-brand-crimson",
-                pillBg: "bg-brand-crimson", pillShadow: "shadow-[0_0_15px_rgba(220,38,38,0.4)]",
-                cardBorder: "border-brand-crimson/30", cardHoverShadow: "group-hover:shadow-[0_0_25px_rgba(220,38,38,0.2)]",
-                dotBg: "bg-brand-crimson", textColor: "text-white"
-            };
-        } else if (phaseName.includes("Phase II")) {
-            return {
-                roman: "II", icon: "fa-bullseye",
-                navBorder: "border-brand-purple/30", navIconBg: "bg-brand-purple/20", navIconBorder: "border-brand-purple", navIconText: "text-brand-purple",
-                pillBg: "bg-brand-purple", pillShadow: "shadow-[0_0_15px_rgba(79,70,229,0.4)]",
-                cardBorder: "border-brand-purple/30", cardHoverShadow: "group-hover:shadow-[0_0_25px_rgba(79,70,229,0.2)]",
-                dotBg: "bg-brand-purple", textColor: "text-white"
-            };
-        } else if (phaseName.includes("Phase III")) {
-            return {
-                roman: "III", icon: "fa-rocket",
-                navBorder: "border-brand-emerald/30", navIconBg: "bg-brand-emerald/20", navIconBorder: "border-brand-emerald", navIconText: "text-brand-emerald",
-                pillBg: "bg-brand-emerald", pillShadow: "shadow-[0_0_15px_rgba(16,185,129,0.4)]",
-                cardBorder: "border-brand-emerald/30", cardHoverShadow: "group-hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]",
-                dotBg: "bg-brand-emerald", textColor: "text-gray-900"
-            };
-        } else if (phaseName.includes("Phase IV")) {
-            return {
-                roman: "IV", icon: "fa-chart-pie",
-                navBorder: "border-brand-cyan/30", navIconBg: "bg-brand-cyan/20", navIconBorder: "border-brand-cyan", navIconText: "text-brand-cyan",
-                pillBg: "bg-brand-cyan", pillShadow: "shadow-[0_0_15px_rgba(6,182,212,0.4)]",
-                cardBorder: "border-brand-cyan/30", cardHoverShadow: "group-hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]",
-                dotBg: "bg-brand-cyan", textColor: "text-gray-900"
-            };
-        }
-        return {
-            roman: "?", icon: "fa-layer-group",
-            navBorder: "border-gray-600/30", navIconBg: "bg-gray-600/20", navIconBorder: "border-gray-600", navIconText: "text-gray-400",
-            pillBg: "bg-gray-700", pillShadow: "shadow-none",
-            cardBorder: "border-gray-700/30", cardHoverShadow: "group-hover:shadow-[0_0_25px_rgba(255,255,255,0.05)]",
-            dotBg: "bg-gray-700", textColor: "text-white"
-        };
     }
 
     // --- UTILITIES ---
@@ -897,7 +868,7 @@
             document.getElementById('tab-tracker').classList.add('flex');
             document.getElementById('nav-tracker').classList.add(...activeNavClasses.split(' '));
             document.getElementById('nav-tracker').classList.remove('text-gray-300');
-            if(scrollBtn && activePropertyId) scrollBtn.style.bottom = '5.5rem';
+            if(scrollBtn && activePropertyId) scrollBtn.style.bottom = '6rem';
             renderTrackerView();
             updateGlobalAssetSelector();
         } else if (tab === 'sop') {
@@ -1312,8 +1283,16 @@
 
     // --- SUPPORT STYLE CHAT LOGIC ---
     window.toggleChat = async function() {
+        const fab = document.getElementById('chatFabBtn');
+        if (fab) {
+            fab.classList.remove('animate-jelly-pop');
+            void fab.offsetWidth; // trigger reflow
+            fab.classList.add('animate-jelly-pop');
+        }
+
         window.isChatOpen = !window.isChatOpen;
         const chatWin = document.getElementById('chatWindow');
+        
         if (window.isChatOpen) {
             chatWin.classList.remove('hidden');
             chatWin.classList.add('flex');
@@ -1437,7 +1416,7 @@
         emptyView.classList.add('hidden');
         contentView.classList.remove('hidden');
         if(chatContainer) chatContainer.classList.remove('hidden');
-        if(scrollBtn) scrollBtn.style.bottom = '5.5rem';
+        if(scrollBtn) scrollBtn.style.bottom = '6rem';
 
         document.getElementById('tracker-address').innerText = prop.address;
         const strat = prop.exitStrategy || 'Wholesale';
