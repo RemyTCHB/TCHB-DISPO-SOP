@@ -86,9 +86,6 @@
 </head>
 <body class="font-sans antialiased relative selection:bg-brand-crimson selection:text-white capitalize">
 
-  <!-- TAILWIND SAFELIST (Forces compilation of dynamic phase & strategy classes once and for all) -->
-  <div class="hidden bg-brand-crimson bg-brand-crimson/20 border-brand-crimson border-brand-crimson/30 text-brand-crimson shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:shadow-[0_0_25px_rgba(220,38,38,0.2)] bg-brand-purple bg-brand-purple/20 border-brand-purple border-brand-purple/30 text-brand-purple shadow-[0_0_15px_rgba(79,70,229,0.4)] group-hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] bg-brand-emerald bg-brand-emerald/20 border-brand-emerald border-brand-emerald/30 border-brand-emerald/50 text-brand-emerald text-gray-900 shadow-[0_0_15px_rgba(16,185,129,0.4)] group-hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] bg-brand-cyan bg-brand-cyan/20 border-brand-cyan border-brand-cyan/30 border-brand-cyan/50 text-brand-cyan shadow-[0_0_15px_rgba(6,182,212,0.4)] group-hover:shadow-[0_0_25px_rgba(6,182,212,0.2)] bg-brand-gold bg-brand-gold/20 border-brand-gold border-brand-gold/30 border-brand-gold/50 text-brand-gold bg-pink-500/20 text-pink-400 border-pink-500/50"></div>
-
   <!-- CURSOR OVERLAYS -->
   <div id="mouseGlow"></div>
   <div id="cursor-dot"></div>
@@ -360,7 +357,7 @@
                     <div class="mt-3 flex flex-wrap items-center gap-4 text-xs font-mono text-gray-400">
                         <span class="flex items-center gap-1.5"><i class="fa-solid fa-play text-gray-500"></i> <span id="tracker-date-started">-</span></span>
                         <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-gray-500"></i> <span id="tracker-last-edited">-</span></span>
-                        <span id="tracker-strategy-badge" class="bg-gray-800 border border-gray-600 text-gray-300 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded font-sans ml-2 shadow-sm">Strategy</span>
+                        <span id="tracker-strategy-badge" class="bg-gray-800 border border-gray-600 text-gray-300 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded font-sans shadow-sm">Strategy</span>
                     </div>
                 </div>
 
@@ -661,6 +658,59 @@
             "Novation": "bg-brand-gold/20 text-brand-gold border-brand-gold/50"
         };
         return colors[strategy] || "bg-gray-800 text-gray-300 border-gray-600";
+    }
+
+    function getPhaseUI(phaseName) {
+        if (phaseName.includes("Phase I")) {
+            return {
+                roman: "I", icon: "fa-clipboard-check",
+                navWrapper: "border-brand-crimson/30",
+                navIcon: "bg-brand-crimson/20 border-brand-crimson text-brand-crimson",
+                timelineHeader: "bg-brand-crimson border-[#05070f] shadow-[0_0_15px_rgba(220,38,38,0.4)] text-white",
+                timelineDot: "bg-brand-crimson border-[#05070f] text-white",
+                timelineCard: "border-brand-crimson/30 group-hover:shadow-[0_0_25px_rgba(220,38,38,0.2)]",
+                trackerHeaderIcon: "text-brand-crimson"
+            };
+        } else if (phaseName.includes("Phase II")) {
+            return {
+                roman: "II", icon: "fa-bullseye",
+                navWrapper: "border-brand-purple/30",
+                navIcon: "bg-brand-purple/20 border-brand-purple text-brand-purple",
+                timelineHeader: "bg-brand-purple border-[#05070f] shadow-[0_0_15px_rgba(79,70,229,0.4)] text-white",
+                timelineDot: "bg-brand-purple border-[#05070f] text-white",
+                timelineCard: "border-brand-purple/30 group-hover:shadow-[0_0_25px_rgba(79,70,229,0.2)]",
+                trackerHeaderIcon: "text-brand-purple"
+            };
+        } else if (phaseName.includes("Phase III")) {
+            return {
+                roman: "III", icon: "fa-rocket",
+                navWrapper: "border-brand-emerald/30",
+                navIcon: "bg-brand-emerald/20 border-brand-emerald text-brand-emerald",
+                timelineHeader: "bg-brand-emerald border-[#05070f] shadow-[0_0_15px_rgba(16,185,129,0.4)] text-gray-900",
+                timelineDot: "bg-brand-emerald border-[#05070f] text-gray-900",
+                timelineCard: "border-brand-emerald/30 group-hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]",
+                trackerHeaderIcon: "text-brand-emerald"
+            };
+        } else if (phaseName.includes("Phase IV")) {
+            return {
+                roman: "IV", icon: "fa-chart-pie",
+                navWrapper: "border-brand-cyan/30",
+                navIcon: "bg-brand-cyan/20 border-brand-cyan text-brand-cyan",
+                timelineHeader: "bg-brand-cyan border-[#05070f] shadow-[0_0_15px_rgba(6,182,212,0.4)] text-gray-900",
+                timelineDot: "bg-brand-cyan border-[#05070f] text-gray-900",
+                timelineCard: "border-brand-cyan/30 group-hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]",
+                trackerHeaderIcon: "text-brand-cyan"
+            };
+        }
+        return {
+            roman: "V", icon: "fa-layer-group",
+            navWrapper: "border-gray-600/30",
+            navIcon: "bg-gray-600/20 border-gray-600 text-gray-400",
+            timelineHeader: "bg-gray-700 border-[#05070f] text-white",
+            timelineDot: "bg-gray-700 border-[#05070f] text-white",
+            timelineCard: "border-gray-700/30 group-hover:shadow-[0_0_25px_rgba(255,255,255,0.05)]",
+            trackerHeaderIcon: "text-gray-400"
+        };
     }
 
     function getProgressColorRGB(percent) {
@@ -1388,15 +1438,15 @@
 
         // --- 3. STANDARD TASKS WORKFLOW ---
         for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
-            const conf = getPhaseConfig(phaseName);
+            const ui = getPhaseUI(phaseName);
             
             const sectionDiv = document.createElement('div');
-            sectionDiv.className = `glass-card rounded-xl border ${conf.cardBorder} overflow-hidden mb-6 transition-all`;
+            sectionDiv.className = `glass-card rounded-xl border ${ui.timelineCard} overflow-hidden mb-6 transition-all`;
 
             const phaseHeader = document.createElement('div');
             phaseHeader.className = "bg-gray-900/60 p-4 border-b border-gray-800 flex items-center justify-between";
             phaseHeader.innerHTML = `
-                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2"><i class="fa-solid ${conf.icon} ${conf.navIconText}"></i> ${phaseName}</h3>
+                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2"><i class="fa-solid ${ui.icon} ${ui.trackerHeaderIcon}"></i> ${phaseName}</h3>
             `;
             sectionDiv.appendChild(phaseHeader);
 
@@ -1592,15 +1642,15 @@
         let pIndex = 1;
         for (const phaseName of phaseNames) {
             const phaseId = `phase-${pIndex}`;
-            const conf = getPhaseConfig(phaseName);
+            const ui = getPhaseUI(phaseName);
             
             let splitName = phaseName.split(':');
-            let shortPhase = splitName[0] ? splitName[0].trim() : `Phase ${conf.roman}`;
+            let shortPhase = splitName[0] ? splitName[0].trim() : `Phase ${ui.roman}`;
             let phaseDesc = splitName[1] ? splitName[1].trim() : phaseName;
 
             navHtml += `
-                <div onclick="document.getElementById('${phaseId}').scrollIntoView({behavior: 'smooth'})" class="cursor-pointer flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border ${conf.navBorder} transition-all hover:-translate-y-1 shadow-sm">
-                    <span class="w-8 h-8 rounded-lg ${conf.navIconBg} border ${conf.navIconBorder} flex items-center justify-center ${conf.navIconText} font-extrabold text-sm shadow">${conf.roman}</span>
+                <div onclick="document.getElementById('${phaseId}').scrollIntoView({behavior: 'smooth'})" class="cursor-pointer flex items-center gap-3 bg-gray-900/60 hover:bg-gray-800/90 p-4 rounded-xl border ${ui.navWrapper} transition-all hover:-translate-y-1 shadow-sm">
+                    <span class="w-8 h-8 rounded-lg ${ui.navIcon} flex items-center justify-center font-extrabold text-sm shadow">${ui.roman}</span>
                     <div>
                         <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">${shortPhase}</span>
                         <span class="text-xs font-bold text-white block">${phaseDesc}</span>
@@ -1619,15 +1669,15 @@
         pIndex = 1;
         for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
             const phaseId = `phase-${pIndex}`;
-            const conf = getPhaseConfig(phaseName);
+            const ui = getPhaseUI(phaseName);
             const phaseTotalWeight = Object.values(mainTasksMap).flat().reduce((sum, t) => sum + t.weight, 0);
 
             timelineHtml += `
                 <div id="${phaseId}" class="absolute -top-10"></div>
                 <div class="relative -ml-[31px] sm:-ml-[47px] mb-8 ${pIndex > 1 ? 'pt-8' : ''}">
                     <div class="inline-flex items-center gap-3">
-                        <span class="${conf.pillBg} ${conf.textColor} font-extrabold text-xs px-4 py-2 rounded-full flex items-center gap-1.5 border-4 border-[#05070f] ${conf.pillShadow}">
-                            <i class="fa-solid ${conf.icon}"></i> ${phaseName.toUpperCase()} (${phaseTotalWeight}%)
+                        <span class="${ui.timelineHeader} font-extrabold text-xs px-4 py-2 rounded-full flex items-center gap-1.5 border-4">
+                            <i class="fa-solid ${ui.icon}"></i> ${phaseName.toUpperCase()} (${phaseTotalWeight}%)
                         </span>
                     </div>
                 </div>
@@ -1659,8 +1709,8 @@
 
                 timelineHtml += `
                     <div class="relative group">
-                        <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full ${conf.dotBg} ${conf.textColor} border-4 border-[#05070f] flex items-center justify-center font-black text-xs shadow-lg group-hover:scale-110 transition-transform">${cardCounter}</div>
-                        <div class="glass-card rounded-xl p-6 ${conf.cardBorder} ${conf.cardHoverShadow} hover:-translate-y-1 transition-all">
+                        <div class="absolute -left-[38px] sm:-left-[54px] top-0 w-8 h-8 rounded-full ${ui.timelineDot} border-4 flex items-center justify-center font-black text-xs shadow-lg group-hover:scale-110 transition-transform">${cardCounter}</div>
+                        <div class="glass-card rounded-xl p-6 ${ui.timelineCard} hover:-translate-y-1 transition-all">
                             <div class="flex items-center gap-2.5 border-b border-gray-800 pb-4 mb-4">
                                 <h3 class="text-lg font-bold text-white">${mainTaskName}</h3>
                             </div>
