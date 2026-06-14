@@ -100,12 +100,12 @@
                 <svg id="gateLockIcon" class="w-6 h-6 text-indigo-400 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
             </div>
             <h3 class="text-xl font-bold text-white mb-1">Restricted Dispo Portal</h3>
-            <p class="text-xs text-gray-400">Authorized personnel login required</p>
+            <p class="text-xs text-gray-400">Authorized Personnel Login Required</p>
         </div>
         
         <div class="space-y-4">
-            <input type="email" id="gateEmailInput" placeholder="name@totalchb.com" class="w-full bg-[#18182d] border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-brand-purple transition-all cursor-pointer">
-            <input type="password" id="gateAccessKeyInput" placeholder="Master Key" class="w-full bg-[#18182d] border border-white/10 rounded-lg px-4 py-3 text-center text-white tracking-widest focus:outline-none focus:border-brand-purple transition-all cursor-pointer" onkeydown="if(event.key === 'Enter') handleLogin()">
+            <input type="email" id="gateEmailInput" placeholder="Email" class="w-full bg-[#18182d] border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-brand-purple transition-all cursor-pointer">
+            <input type="password" id="gateAccessKeyInput" placeholder="Password" class="w-full bg-[#18182d] border border-white/10 rounded-lg px-4 py-3 text-center text-white tracking-widest focus:outline-none focus:border-brand-purple transition-all cursor-pointer" onkeydown="if(event.key === 'Enter') handleLogin()">
         </div>
 
         <p id="gateErrorMessage" class="text-xs text-brand-crimson font-medium text-center hidden mt-4">Invalid Access Protocol.</p>
@@ -113,6 +113,29 @@
             Initialize Workspace <i class="fa-solid fa-arrow-right-to-bracket text-sm ml-1"></i>
         </button>
     </div>
+  </div>
+
+  <!-- DEPLOY ASSET MODAL -->
+  <div id="newAssetModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-gray-900 border border-indigo-500/50 shadow-[0_0_30px_rgba(79,70,229,0.2)] rounded-2xl w-full max-w-md p-6 transform transition-all relative overflow-hidden">
+          <div class="absolute -right-20 -top-20 w-48 h-48 bg-brand-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
+          <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-satellite-dish text-brand-emerald"></i> Deploy Asset Tracker
+          </h3>
+          <p class="text-xs text-gray-400 mb-5">Initialize a new SOP pipeline for an incoming property.</p>
+          
+          <div class="space-y-4">
+              <div>
+                  <label class="block text-xs font-bold uppercase text-gray-400 mb-1.5">Subject Property Address</label>
+                  <input type="text" id="newAssetAddressInput" placeholder="e.g. 123 Example Street" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-brand-emerald transition-colors cursor-pointer" onkeydown="if(event.key === 'Enter') confirmNewAsset()">
+              </div>
+          </div>
+          
+          <div class="flex justify-end gap-3 mt-6">
+              <button onclick="closeAssetModal()" class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors cursor-pointer">Cancel</button>
+              <button onclick="confirmNewAsset()" class="px-5 py-2 text-sm font-bold bg-brand-emerald hover:bg-emerald-400 text-gray-900 rounded-lg shadow-lg transition-all cursor-pointer">Deploy Protocol</button>
+          </div>
+      </div>
   </div>
 
   <!-- CANVAS BACKGROUND -->
@@ -131,26 +154,29 @@
                 <p class="text-xs text-gray-400 font-mono">INTERNAL // SYNDICATION PROTOCOL</p>
             </div>
         </div>
-        <div class="flex bg-[#0b0f19] p-1 rounded-xl border border-gray-800">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all bg-brand-purple text-white shadow-md flex items-center gap-2">
+        <div class="flex bg-[#0b0f19] p-1 rounded-xl border border-gray-800 overflow-x-auto max-w-full">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all bg-brand-purple text-white shadow-md flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-layer-group"></i> Master Dashboard
             </button>
-            <button onclick="switchTab('tracker')" id="nav-tracker" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2">
+            <button onclick="switchTab('tracker')" id="nav-tracker" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-list-check"></i> Active Deal Tracker
+            </button>
+            <button onclick="switchTab('sop')" id="nav-sop" class="px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-book-open"></i> SOP Reference
             </button>
         </div>
     </header>
 
     <!-- TAB: DASHBOARD -->
     <div id="tab-dashboard" class="flex-1 space-y-6">
-        <div class="flex justify-between items-end mb-4">
+        <div class="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-4">
             <div>
                 <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-satellite-dish text-brand-emerald"></i> Live Pipeline
                 </h2>
                 <p class="text-sm text-gray-400 mt-1">Monitor real-time velocity and active agent assignments.</p>
             </div>
-            <button onclick="promptNewProperty()" class="bg-brand-emerald/10 border border-brand-emerald hover:bg-brand-emerald text-brand-emerald hover:text-white font-bold py-2 px-4 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+            <button onclick="openAssetModal()" class="bg-brand-emerald/10 border border-brand-emerald hover:bg-brand-emerald text-brand-emerald hover:text-white font-bold py-2 px-4 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
                 <i class="fa-solid fa-plus"></i> Deploy New Asset Tracker
             </button>
         </div>
@@ -161,8 +187,8 @@
                     <thead>
                         <tr class="bg-gray-900/80 border-b border-gray-800 text-xs uppercase tracking-wider text-gray-400">
                             <th class="p-4 font-bold">Address</th>
-                            <th class="p-4 font-bold">Date Started</th>
-                            <th class="p-4 font-bold">Last Edited</th>
+                            <th class="p-4 font-bold">Date Started (EST)</th>
+                            <th class="p-4 font-bold">Last Edited (EST)</th>
                             <th class="p-4 font-bold">Time Since Edit</th>
                             <th class="p-4 font-bold">Next Agent</th>
                             <th class="p-4 font-bold">Next Step</th>
@@ -186,15 +212,32 @@
 
     <!-- TAB: ACTIVE DEAL TRACKER -->
     <div id="tab-tracker" class="flex-1 hidden flex-col">
-        <div id="tracker-empty" class="flex-1 flex flex-col items-center justify-center p-12 text-center glass-card rounded-2xl border border-gray-800">
-            <i class="fa-solid fa-magnifying-glass-location text-4xl text-gray-600 mb-4"></i>
-            <h3 class="text-xl font-bold text-white mb-2">No Asset Selected</h3>
-            <p class="text-sm text-gray-400 mb-6">Select a property from the Master Dashboard to view its checklist.</p>
-            <button onclick="switchTab('dashboard')" class="bg-brand-purple hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg transition-colors cursor-pointer">
-                Return to Dashboard
+        
+        <!-- Global Asset Navigation Bar -->
+        <div class="glass-card p-4 rounded-2xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i> Targeted Asset:</span>
+                <select id="globalAssetSelector" onchange="handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-gray-950 border border-gray-700 text-sm font-bold text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-purple cursor-pointer appearance-none">
+                    <option value="">-- Select an Active Deal --</option>
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+            <button onclick="openAssetModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-bold bg-gray-800 hover:bg-gray-700 text-white rounded-lg border border-gray-600 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-plus text-brand-emerald"></i> Add New Asset
             </button>
         </div>
 
+        <!-- Empty State For Tracker -->
+        <div id="tracker-empty" class="flex-1 flex flex-col items-center justify-center p-12 text-center glass-card rounded-2xl border border-gray-800">
+            <i class="fa-solid fa-magnifying-glass-location text-4xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-white mb-2">No Asset Selected</h3>
+            <p class="text-sm text-gray-400 mb-6">Select a property from the dropdown above to view and manage its checklist.</p>
+            <button onclick="switchTab('dashboard')" class="bg-brand-purple hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg transition-colors cursor-pointer">
+                Return to Master Dashboard
+            </button>
+        </div>
+
+        <!-- Active Content -->
         <div id="tracker-content" class="hidden space-y-6">
             <!-- Tracker Header -->
             <div class="glass-card p-6 rounded-2xl border border-gray-800 flex flex-col md:flex-row justify-between md:items-end gap-6 relative overflow-hidden">
@@ -203,7 +246,11 @@
                 <div class="relative z-10 flex-1">
                     <span class="text-xs font-bold uppercase tracking-wider text-brand-emerald border border-brand-emerald/30 bg-brand-emerald/10 px-2.5 py-1 rounded inline-block mb-3">Active Workflow Tracker</span>
                     <h2 id="tracker-address" class="text-2xl md:text-3xl font-extrabold text-white">123 Example Street</h2>
-                    <p class="text-sm text-gray-400 mt-2">Execute tasks to maximize yield within the standard 24-hour velocity window.</p>
+                    
+                    <div class="mt-3 flex flex-wrap items-center gap-4 text-xs font-mono text-gray-400">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-play text-gray-500"></i> <span id="tracker-date-started">-</span></span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-gray-500"></i> <span id="tracker-last-edited">-</span></span>
+                    </div>
                 </div>
 
                 <div class="relative z-10 w-full md:w-64 bg-gray-900/80 p-4 rounded-xl border border-gray-800">
@@ -226,6 +273,110 @@
                 <button onclick="deleteCurrentProperty()" class="text-xs text-red-500 hover:text-red-400 font-semibold cursor-pointer border border-red-500/20 bg-red-500/5 px-4 py-2 rounded transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-trash-can"></i> Remove Asset from Pipeline
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: SOP REFERENCE -->
+    <div id="tab-sop" class="flex-1 hidden space-y-6 pb-12">
+        <div class="glass-card p-8 rounded-2xl border border-gray-800">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3"><i class="fa-solid fa-book-open text-brand-purple"></i> DISPO Standard Operating Procedure</h2>
+            <p class="text-sm text-gray-400 mb-8 pb-4 border-b border-gray-800">Internal rules of engagement and phase breakdowns for Disposition operations.</p>
+            
+            <div class="space-y-8 text-gray-300 text-sm leading-relaxed">
+                <!-- Phase I -->
+                <div>
+                    <h3 class="text-lg font-bold text-brand-crimson mb-3 uppercase tracking-wider">Deal Intake Section (10%)</h3>
+                    <div class="pl-4 border-l-2 border-brand-crimson/30 space-y-4">
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Underwriting</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>Manually UW The Deal 6% (Carlos)</li>
+                                <li>AI UW Tool To Confirm Manual UW 2% (Carlos)</li>
+                                <li>Search Entire CRM For Seller Number(s) - (Ensure Sellers Phone Number Is Either Disqualified or DND’d) 2% (Sarah)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase II -->
+                <div>
+                    <h3 class="text-lg font-bold text-brand-purple mb-3 uppercase tracking-wider">Marketing Prep Section (40%)</h3>
+                    <div class="pl-4 border-l-2 border-brand-purple/30 space-y-4">
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Pull Local Hyper Qualified buyers (Carlos)</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>At least 3 Local Investors that bought $10K - $15K from our purchase price 3%</li>
+                                <li>At Least 3 Local Investors - for ARV Comps 3%</li>
+                                <li>At Least 3-5 Local investor w/ Active Leases in the area (esp for Rentals) 2%</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Investor Data Scraping</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>Pull The Data From (Investorbase - etc) 2% (Moe)</li>
+                                <li>Format The Data 1% (Sarah)</li>
+                                <li>Upload The Data To CRM 1% (Sarah)</li>
+                                <li>Create Text Blast Draft 2% (Sarah)</li>
+                                <li>Get The Text Blast Draft Approved 2% (Sarah)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Realtor Data Scraping</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>Pull The Data From (Zillow - realtor.com - etc.) 2% (Moe)</li>
+                                <li>Format The Data 1% (Sarah)</li>
+                                <li>Upload The Data to CRM 1% (Sarah)</li>
+                                <li>Create Text Blast Draft 2% (Sarah)</li>
+                                <li>Get The Text Blast Draft Approved 2% (Sarah)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Facebook Groups Hunt</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>Join All Relevant FB Groups 6% (Moe)</li>
+                                <li>Create FB Post Draft 1% (Moe)</li>
+                                <li>Get The FB Post Draft Approved 1% (Moe)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Create InvestorLift Draft</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>Description 3% (Yanna)</li>
+                                <li>Photos & Videos (if applicable) 2% (Yanna)</li>
+                                <li>Comps 3% (Yanna)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase III -->
+                <div>
+                    <h3 class="text-lg font-bold text-brand-emerald mb-3 uppercase tracking-wider">Marketing Section (50%)</h3>
+                    <div class="pl-4 border-l-2 border-brand-emerald/30 space-y-4">
+                        <div>
+                            <ul class="list-none space-y-2 text-gray-400">
+                                <li><i class="fa-solid fa-check text-brand-emerald mr-2 text-xs"></i>Call & Market To The Hyper Local Buyers / Realtors 10% (Carlos)</li>
+                                <li><i class="fa-solid fa-check text-brand-emerald mr-2 text-xs"></i>Investor Bulk Text Blast / Individual Text Blast (Depending on Market) 10% (Sarah)</li>
+                                <li><i class="fa-solid fa-check text-brand-emerald mr-2 text-xs"></i>Realtor Bulk Text Blast / Individual Text Blast (Depending on Market) 10% (Sarah)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Post On InvestorLift</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>Calling Inquiries / Interest On Subject Deal 5% (Yanna)</li>
+                                <li>Calling ALL Artemis Mode Buyers 5% (Yanna)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Post On Facebook on ALL Relevant Groups Joined (Moe)</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>Reach Out To Investors That Expressed Interest In Other Deals In Groups 10%</li>
+                                <li>Boost the Post (If Needed) 0%</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -267,7 +418,7 @@
         lockContainer.className = "mx-auto w-14 h-14 rounded-full bg-brand-emerald/10 flex items-center justify-center border border-brand-emerald/20 mb-4 animate-bounce";
 
         btn.innerHTML = 'Authentication Valid <i class="fa-solid fa-check ml-1"></i>';
-        btn.className = "w-full bg-brand-emerald text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 cursor-not-allowed opacity-90";
+        btn.className = "w-full bg-brand-emerald text-gray-900 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 cursor-not-allowed opacity-90";
 
         setTimeout(() => { 
             document.getElementById('secureGate').classList.add('hidden');
@@ -281,61 +432,96 @@
     // --- 2. DATA MODEL & STATE ---
     const agentsList = ["Carlos", "Yanna", "Moe", "Sarah"];
     
-    // Master SOP Task Blueprint (Totals 100%)
+    // Updated SOP Task Blueprint with Main Task grouping
     const sopBlueprint = [
         // PHASE I: INTAKE (10%)
-        { id: "p1_1", section: "Phase I: Deal Intake (10%)", title: "Manually Underwrite The Deal", weight: 6, defaultAssignee: "Carlos" },
-        { id: "p1_2", section: "Phase I: Deal Intake (10%)", title: "AI UW Tool To Confirm Manual UW", weight: 2, defaultAssignee: "Carlos" },
-        { id: "p1_3", section: "Phase I: Deal Intake (10%)", title: "Search Entire CRM For Seller Number(s) (DND/DQ Protocol)", weight: 2, defaultAssignee: "Sarah" },
+        { id: "p1_1", phase: "Deal Intake Section (10%)", mainTask: "Underwriting", title: "Manually UW The Deal", weight: 6, defaultAssignee: "Carlos" },
+        { id: "p1_2", phase: "Deal Intake Section (10%)", mainTask: "Underwriting", title: "AI UW Tool To Confirm Manual UW", weight: 2, defaultAssignee: "Carlos" },
+        { id: "p1_3", phase: "Deal Intake Section (10%)", mainTask: "Underwriting", title: "Search Entire CRM For Seller Number(s) (Disqualified or DND'd)", weight: 2, defaultAssignee: "Sarah" },
         
         // PHASE II: MARKETING PREP (40%)
-        { id: "p2_1", section: "Phase II: Marketing Prep (40%)", title: "Pull Local Hyper Qualified buyers: 3 Investors $10K-$15K Delta", weight: 3, defaultAssignee: "Carlos" },
-        { id: "p2_2", section: "Phase II: Marketing Prep (40%)", title: "Pull Local Hyper Qualified buyers: 3 Investors for ARV Comps", weight: 3, defaultAssignee: "Carlos" },
-        { id: "p2_3", section: "Phase II: Marketing Prep (40%)", title: "Pull Local Hyper Qualified buyers: 3-5 Investors w/ Active Leases", weight: 2, defaultAssignee: "Carlos" },
+        { id: "p2_1", phase: "Marketing Prep Section (40%)", mainTask: "Pull Local Hyper Qualified Buyers", title: "At least 3 Local Investors that bought $10K - $15K from purchase price", weight: 3, defaultAssignee: "Carlos" },
+        { id: "p2_2", phase: "Marketing Prep Section (40%)", mainTask: "Pull Local Hyper Qualified Buyers", title: "At Least 3 Local Investors - for ARV Comps", weight: 3, defaultAssignee: "Carlos" },
+        { id: "p2_3", phase: "Marketing Prep Section (40%)", mainTask: "Pull Local Hyper Qualified Buyers", title: "At Least 3-5 Local investors w/ Active Leases in the area", weight: 2, defaultAssignee: "Carlos" },
         
-        { id: "p2_4", section: "Phase II: Marketing Prep (40%)", title: "Investor Data Scraping: Pull Core Data (Investorbase, etc.)", weight: 2, defaultAssignee: "Moe" },
-        { id: "p2_5", section: "Phase II: Marketing Prep (40%)", title: "Investor Data Scraping: Format The Data", weight: 1, defaultAssignee: "Sarah" },
-        { id: "p2_6", section: "Phase II: Marketing Prep (40%)", title: "Investor Data Scraping: Upload The Data To CRM", weight: 1, defaultAssignee: "Sarah" },
-        { id: "p2_7", section: "Phase II: Marketing Prep (40%)", title: "Investor Data Scraping: Create Text Blast Draft", weight: 2, defaultAssignee: "Sarah" },
-        { id: "p2_8", section: "Phase II: Marketing Prep (40%)", title: "Investor Data Scraping: Get Text Blast Draft Approved", weight: 2, defaultAssignee: "Sarah" },
+        { id: "p2_4", phase: "Marketing Prep Section (40%)", mainTask: "Investor Data Scraping", title: "Pull The Data From (Investorbase - etc)", weight: 2, defaultAssignee: "Moe" },
+        { id: "p2_5", phase: "Marketing Prep Section (40%)", mainTask: "Investor Data Scraping", title: "Format The Data", weight: 1, defaultAssignee: "Sarah" },
+        { id: "p2_6", phase: "Marketing Prep Section (40%)", mainTask: "Investor Data Scraping", title: "Upload The Data To CRM", weight: 1, defaultAssignee: "Sarah" },
+        { id: "p2_7", phase: "Marketing Prep Section (40%)", mainTask: "Investor Data Scraping", title: "Create Text Blast Draft", weight: 2, defaultAssignee: "Sarah" },
+        { id: "p2_8", phase: "Marketing Prep Section (40%)", mainTask: "Investor Data Scraping", title: "Get The Text Blast Draft Approved", weight: 2, defaultAssignee: "Sarah" },
 
-        { id: "p2_9", section: "Phase II: Marketing Prep (40%)", title: "Realtor Data Scraping: Pull Core Data (Zillow, realtor.com)", weight: 2, defaultAssignee: "Moe" },
-        { id: "p2_10", section: "Phase II: Marketing Prep (40%)", title: "Realtor Data Scraping: Format The Data", weight: 1, defaultAssignee: "Sarah" },
-        { id: "p2_11", section: "Phase II: Marketing Prep (40%)", title: "Realtor Data Scraping: Upload The Data to CRM", weight: 1, defaultAssignee: "Sarah" },
-        { id: "p2_12", section: "Phase II: Marketing Prep (40%)", title: "Realtor Data Scraping: Create Text Blast Draft", weight: 2, defaultAssignee: "Sarah" },
-        { id: "p2_13", section: "Phase II: Marketing Prep (40%)", title: "Realtor Data Scraping: Get Text Blast Draft Approved", weight: 2, defaultAssignee: "Sarah" },
+        { id: "p2_9", phase: "Marketing Prep Section (40%)", mainTask: "Realtor Data Scraping", title: "Pull The Data From (Zillow - realtor.com - etc.)", weight: 2, defaultAssignee: "Moe" },
+        { id: "p2_10", phase: "Marketing Prep Section (40%)", mainTask: "Realtor Data Scraping", title: "Format The Data", weight: 1, defaultAssignee: "Sarah" },
+        { id: "p2_11", phase: "Marketing Prep Section (40%)", mainTask: "Realtor Data Scraping", title: "Upload The Data to CRM", weight: 1, defaultAssignee: "Sarah" },
+        { id: "p2_12", phase: "Marketing Prep Section (40%)", mainTask: "Realtor Data Scraping", title: "Create Text Blast Draft", weight: 2, defaultAssignee: "Sarah" },
+        { id: "p2_13", phase: "Marketing Prep Section (40%)", mainTask: "Realtor Data Scraping", title: "Get The Text Blast Draft Approved", weight: 2, defaultAssignee: "Sarah" },
 
-        { id: "p2_14", section: "Phase II: Marketing Prep (40%)", title: "Facebook Groups Hunt: Join All Relevant FB Groups", weight: 6, defaultAssignee: "Moe" },
-        { id: "p2_15", section: "Phase II: Marketing Prep (40%)", title: "Facebook Groups Hunt: Create FB Post Draft", weight: 1, defaultAssignee: "Moe" },
-        { id: "p2_16", section: "Phase II: Marketing Prep (40%)", title: "Facebook Groups Hunt: Get FB Post Draft Approved", weight: 1, defaultAssignee: "Moe" },
+        { id: "p2_14", phase: "Marketing Prep Section (40%)", mainTask: "Facebook Groups Hunt", title: "Join All Relevant FB Groups", weight: 6, defaultAssignee: "Moe" },
+        { id: "p2_15", phase: "Marketing Prep Section (40%)", mainTask: "Facebook Groups Hunt", title: "Create FB Post Draft", weight: 1, defaultAssignee: "Moe" },
+        { id: "p2_16", phase: "Marketing Prep Section (40%)", mainTask: "Facebook Groups Hunt", title: "Get The FB Post Draft Approved", weight: 1, defaultAssignee: "Moe" },
 
-        { id: "p2_17", section: "Phase II: Marketing Prep (40%)", title: "Create InvestorLift Draft: Description", weight: 3, defaultAssignee: "Yanna" },
-        { id: "p2_18", section: "Phase II: Marketing Prep (40%)", title: "Create InvestorLift Draft: Photos & Videos", weight: 2, defaultAssignee: "Yanna" },
-        { id: "p2_19", section: "Phase II: Marketing Prep (40%)", title: "Create InvestorLift Draft: Comps", weight: 3, defaultAssignee: "Yanna" },
+        { id: "p2_17", phase: "Marketing Prep Section (40%)", mainTask: "Create InvestorLift Draft", title: "Description", weight: 3, defaultAssignee: "Yanna" },
+        { id: "p2_18", phase: "Marketing Prep Section (40%)", mainTask: "Create InvestorLift Draft", title: "Photos & Videos (if applicable)", weight: 2, defaultAssignee: "Yanna" },
+        { id: "p2_19", phase: "Marketing Prep Section (40%)", mainTask: "Create InvestorLift Draft", title: "Comps", weight: 3, defaultAssignee: "Yanna" },
 
         // PHASE III: MARKETING (50%)
-        { id: "p3_1", section: "Phase III: Marketing Execution (50%)", title: "Call & Market To The Hyper Local Buyers / Realtors", weight: 10, defaultAssignee: "Carlos" },
-        { id: "p3_2", section: "Phase III: Marketing Execution (50%)", title: "Investor Bulk Text Blast / Individual Blast Deploy", weight: 10, defaultAssignee: "Sarah" },
-        { id: "p3_3", section: "Phase III: Marketing Execution (50%)", title: "Realtor Bulk Text Blast / Individual Blast Deploy", weight: 10, defaultAssignee: "Sarah" },
-        { id: "p3_4", section: "Phase III: Marketing Execution (50%)", title: "Post On InvestorLift: Calling Inquiries / Interest", weight: 5, defaultAssignee: "Yanna" },
-        { id: "p3_5", section: "Phase III: Marketing Execution (50%)", title: "Post On InvestorLift: Calling ALL Artemis Mode Buyers", weight: 5, defaultAssignee: "Yanna" },
-        { id: "p3_6", section: "Phase III: Marketing Execution (50%)", title: "Facebook: Reach Out To Investors Expressing Interest", weight: 10, defaultAssignee: "Moe" },
-        { id: "p3_7", section: "Phase III: Marketing Execution (50%)", title: "Facebook: Boost the Post (If Needed)", weight: 0, defaultAssignee: "Moe" }
+        { id: "p3_1", phase: "Marketing Section (50%)", mainTask: "Call & Market To The Hyper Local Buyers / Realtors", title: "Execute Calls & Marketing (Buyers / Realtors)", weight: 10, defaultAssignee: "Carlos" },
+        { id: "p3_2", phase: "Marketing Section (50%)", mainTask: "Investor Bulk Text Blast / Individual Text Blast", title: "Execute SMS Deployment (Investors)", weight: 10, defaultAssignee: "Sarah" },
+        { id: "p3_3", phase: "Marketing Section (50%)", mainTask: "Realtor Bulk Text Blast / Individual Text Blast", title: "Execute SMS Deployment (Realtors)", weight: 10, defaultAssignee: "Sarah" },
+        
+        { id: "p3_4", phase: "Marketing Section (50%)", mainTask: "Post On InvestorLift", title: "Calling Inquiries / Interest On Subject Deal", weight: 5, defaultAssignee: "Yanna" },
+        { id: "p3_5", phase: "Marketing Section (50%)", mainTask: "Post On InvestorLift", title: "Calling ALL Artemis Mode Buyers", weight: 5, defaultAssignee: "Yanna" },
+        
+        { id: "p3_6", phase: "Marketing Section (50%)", mainTask: "Post On Facebook", title: "Reach Out To Investors That Expressed Interest In Other Deals", weight: 10, defaultAssignee: "Moe" },
+        { id: "p3_7", phase: "Marketing Section (50%)", mainTask: "Post On Facebook", title: "Boost the Post (If Needed)", weight: 0, defaultAssignee: "Moe" }
     ];
 
     let propertiesData = [];
     let activePropertyId = null;
 
     function initApp() {
-        const stored = localStorage.getItem('tchb_dispo_app_data');
+        const stored = localStorage.getItem('tchb_dispo_app_data_v2'); // Increment key to ensure fresh schema
         if (stored) {
             propertiesData = JSON.parse(stored);
         }
         renderDashboard();
+        updateGlobalAssetSelector();
     }
 
     function saveState() {
-        localStorage.setItem('tchb_dispo_app_data', JSON.stringify(propertiesData));
+        localStorage.setItem('tchb_dispo_app_data_v2', JSON.stringify(propertiesData));
+    }
+
+    // Agent Color Logic
+    function getAgentColorClass(name, type = 'text') {
+        const colors = {
+            "Carlos": { text: "text-yellow-500", border: "border-yellow-500/50", bg: "bg-yellow-500/10" },
+            "Moe": { text: "text-blue-400", border: "border-blue-400/50", bg: "bg-blue-400/10" },
+            "Yanna": { text: "text-purple-400", border: "border-purple-400/50", bg: "bg-purple-400/10" },
+            "Sarah": { text: "text-pink-400", border: "border-pink-400/50", bg: "bg-pink-400/10" }
+        };
+        const defaultColor = { text: "text-gray-400", border: "border-gray-700", bg: "bg-gray-800" };
+        const selected = colors[name] || defaultColor;
+        return selected[type];
+    }
+
+    // Mathematical Color Interpolation: Crimson -> Indigo -> Emerald
+    function getProgressColorRGB(percent) {
+        let r, g, b;
+        if (percent < 50) {
+            const pct = percent / 50;
+            // Crimson: 220, 38, 38 to Indigo: 79, 70, 229
+            r = Math.round(220 + pct * (79 - 220));
+            g = Math.round(38 + pct * (70 - 38));
+            b = Math.round(38 + pct * (229 - 38));
+        } else {
+            const pct = (percent - 50) / 50;
+            // Indigo: 79, 70, 229 to Emerald: 16, 185, 129
+            r = Math.round(79 + pct * (16 - 79));
+            g = Math.round(70 + pct * (185 - 70));
+            b = Math.round(229 + pct * (129 - 229));
+        }
+        return `rgb(${r}, ${g}, ${b})`;
     }
 
     // --- 3. UI RENDERING & LOGIC ---
@@ -344,29 +530,42 @@
         document.getElementById('tab-dashboard').classList.add('hidden');
         document.getElementById('tab-tracker').classList.add('hidden');
         document.getElementById('tab-tracker').classList.remove('flex');
+        document.getElementById('tab-sop').classList.add('hidden');
         
-        document.getElementById('nav-dashboard').className = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2";
-        document.getElementById('nav-tracker').className = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2";
+        // Reset Nav Buttons
+        const defaultNavClasses = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap";
+        document.getElementById('nav-dashboard').className = defaultNavClasses;
+        document.getElementById('nav-tracker').className = defaultNavClasses;
+        document.getElementById('nav-sop').className = defaultNavClasses;
+
+        const activeNavClasses = "bg-brand-purple text-white shadow-md";
 
         if (tab === 'dashboard') {
             document.getElementById('tab-dashboard').classList.remove('hidden');
-            document.getElementById('nav-dashboard').classList.add('bg-brand-purple', 'text-white', 'shadow-md');
+            document.getElementById('nav-dashboard').classList.add(...activeNavClasses.split(' '));
             document.getElementById('nav-dashboard').classList.remove('text-gray-400');
             activePropertyId = null;
             renderDashboard();
+            updateGlobalAssetSelector();
         } else if (tab === 'tracker') {
             document.getElementById('tab-tracker').classList.remove('hidden');
             document.getElementById('tab-tracker').classList.add('flex');
-            document.getElementById('nav-tracker').classList.add('bg-brand-purple', 'text-white', 'shadow-md');
+            document.getElementById('nav-tracker').classList.add(...activeNavClasses.split(' '));
             document.getElementById('nav-tracker').classList.remove('text-gray-400');
             renderTrackerView();
+            updateGlobalAssetSelector();
+        } else if (tab === 'sop') {
+            document.getElementById('tab-sop').classList.remove('hidden');
+            document.getElementById('nav-sop').classList.add(...activeNavClasses.split(' '));
+            document.getElementById('nav-sop').classList.remove('text-gray-400');
         }
     }
 
     function generateTaskInstances() {
         return sopBlueprint.map(task => ({
             id: task.id,
-            section: task.section,
+            phase: task.phase,
+            mainTask: task.mainTask,
             title: task.title,
             weight: task.weight,
             assignee: task.defaultAssignee,
@@ -374,9 +573,25 @@
         }));
     }
 
-    function promptNewProperty() {
-        const address = prompt("Enter Subject Property Address:");
-        if (!address || address.trim() === '') return;
+    function openAssetModal() {
+        document.getElementById('newAssetAddressInput').value = '';
+        document.getElementById('newAssetModal').classList.remove('hidden');
+        document.getElementById('newAssetModal').classList.add('flex');
+        document.getElementById('newAssetAddressInput').focus();
+    }
+
+    function closeAssetModal() {
+        document.getElementById('newAssetModal').classList.add('hidden');
+        document.getElementById('newAssetModal').classList.remove('flex');
+    }
+
+    function confirmNewAsset() {
+        const input = document.getElementById('newAssetAddressInput');
+        const address = input.value;
+        if (!address || address.trim() === '') {
+            input.classList.add('border-red-500');
+            return;
+        }
         
         const newProp = {
             id: 'prop_' + Date.now(),
@@ -388,7 +603,14 @@
         
         propertiesData.unshift(newProp);
         saveState();
-        renderDashboard();
+        closeAssetModal();
+        
+        if(document.getElementById('tab-tracker').classList.contains('hidden')) {
+            renderDashboard();
+        } else {
+            openTracker(newProp.id);
+        }
+        updateGlobalAssetSelector();
     }
 
     function getPropStats(prop) {
@@ -407,10 +629,20 @@
             }
         });
         
-        // Safety clamp just in case floating point weirdness
         if (percent > 100) percent = 100;
-        
         return { percent, nextStep, nextAgent };
+    }
+
+    function formatEST(ms, includeTime = true) {
+        if (!ms) return '-';
+        const d = new Date(ms);
+        const options = { timeZone: 'America/New_York', month: 'numeric', day: 'numeric', year: '2-digit' };
+        if (includeTime) {
+            options.hour = 'numeric';
+            options.minute = '2-digit';
+            options.hour12 = true;
+        }
+        return d.toLocaleString('en-US', options);
     }
 
     function timeSince(ms) {
@@ -424,9 +656,25 @@
         return `${diffInDays}d ago`;
     }
 
-    function formatDate(ms) {
-        const d = new Date(ms);
-        return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear().toString().substr(-2)}`;
+    function updateGlobalAssetSelector() {
+        const selector = document.getElementById('globalAssetSelector');
+        selector.innerHTML = '<option value="">-- Select an Active Deal --</option>';
+        propertiesData.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.innerText = p.address;
+            if (p.id === activePropertyId) opt.selected = true;
+            selector.appendChild(opt);
+        });
+    }
+
+    function handleGlobalAssetSelection(propId) {
+        if (!propId || propId === '') {
+            activePropertyId = null;
+            renderTrackerView();
+        } else {
+            openTracker(propId);
+        }
     }
 
     function renderDashboard() {
@@ -440,6 +688,10 @@
             emptyState.classList.add('hidden');
             propertiesData.forEach(prop => {
                 const stats = getPropStats(prop);
+                const agentTxtColor = getAgentColorClass(stats.nextAgent, 'text');
+                const agentBgColor = getAgentColorClass(stats.nextAgent, 'bg');
+                const agentBorderColor = getAgentColorClass(stats.nextAgent, 'border');
+                const progressColor = getProgressColorRGB(stats.percent);
                 
                 const tr = document.createElement('tr');
                 tr.className = "cursor-pointer group";
@@ -447,16 +699,16 @@
                 
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-white group-hover:text-brand-purple transition-colors">${prop.address}</td>
-                    <td class="p-4">${formatDate(prop.dateStarted)}</td>
-                    <td class="p-4">${formatDate(prop.dateLastEdited)}</td>
+                    <td class="p-4">${formatEST(prop.dateStarted)}</td>
+                    <td class="p-4">${formatEST(prop.dateLastEdited)}</td>
                     <td class="p-4 text-brand-emerald text-xs font-mono">${timeSince(prop.dateLastEdited)}</td>
                     <td class="p-4">
-                        <span class="bg-gray-800 text-gray-300 px-2.5 py-1 rounded text-xs font-bold border border-gray-700">${stats.nextAgent}</span>
+                        <span class="${agentBgColor} ${agentTxtColor} px-2.5 py-1 rounded text-xs font-extrabold border ${agentBorderColor}">${stats.nextAgent}</span>
                     </td>
                     <td class="p-4 text-xs truncate max-w-[200px]" title="${stats.nextStep}">${stats.nextStep}</td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <span class="font-black ${stats.percent === 100 ? 'text-brand-emerald' : 'text-white'}">${stats.percent}%</span>
+                            <span class="font-black text-lg drop-shadow" style="color: ${progressColor}">${stats.percent}%</span>
                         </div>
                     </td>
                 `;
@@ -467,7 +719,12 @@
 
     function openTracker(propId) {
         activePropertyId = propId;
-        switchTab('tracker');
+        if(document.getElementById('tab-tracker').classList.contains('hidden')) {
+            switchTab('tracker');
+        } else {
+            renderTrackerView();
+            updateGlobalAssetSelector();
+        }
     }
 
     function renderTrackerView() {
@@ -487,64 +744,79 @@
         contentView.classList.remove('hidden');
 
         document.getElementById('tracker-address').innerText = prop.address;
+        document.getElementById('tracker-date-started').innerText = `Init: ${formatEST(prop.dateStarted)}`;
+        document.getElementById('tracker-last-edited').innerText = `Updated: ${formatEST(prop.dateLastEdited)}`;
         
         const stats = getPropStats(prop);
         document.getElementById('tracker-percent-text').innerText = `${stats.percent}%`;
         document.getElementById('tracker-progress-bar').style.width = `${stats.percent}%`;
 
-        // Group tasks by section
-        const groups = {};
+        // Group tasks by Phase -> MainTask
+        const structure = {};
         prop.tasks.forEach((t, i) => {
-            if (!groups[t.section]) groups[t.section] = [];
-            groups[t.section].push({ ...t, originalIndex: i });
+            if (!structure[t.phase]) structure[t.phase] = {};
+            if (!structure[t.phase][t.mainTask]) structure[t.phase][t.mainTask] = [];
+            structure[t.phase][t.mainTask].push({ ...t, originalIndex: i });
         });
 
         const container = document.getElementById('tracker-task-container');
         container.innerHTML = '';
 
-        for (const [sectionName, tasks] of Object.entries(groups)) {
+        for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
             const sectionDiv = document.createElement('div');
-            sectionDiv.className = "glass-card rounded-xl border border-gray-800/80 overflow-hidden";
+            sectionDiv.className = "glass-card rounded-xl border border-gray-800/80 overflow-hidden mb-6";
             
-            const header = document.createElement('div');
-            header.className = "bg-gray-900/60 p-4 border-b border-gray-800 flex items-center justify-between";
-            
-            // Calc section progress
-            const sectionTotalW = tasks.reduce((sum, t) => sum + t.weight, 0);
-            const sectionDoneW = tasks.reduce((sum, t) => sum + (t.completed ? t.weight : 0), 0);
-            
-            header.innerHTML = `
-                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2"><i class="fa-solid fa-layer-group text-brand-purple"></i> ${sectionName}</h3>
-                <span class="text-xs font-bold text-gray-400 bg-gray-950 px-2 py-1 border border-gray-800 rounded">Section Yield: ${sectionTotalW}%</span>
+            // Phase Header
+            const phaseHeader = document.createElement('div');
+            phaseHeader.className = "bg-gray-900/60 p-4 border-b border-gray-800 flex items-center justify-between";
+            phaseHeader.innerHTML = `
+                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2"><i class="fa-solid fa-layer-group text-brand-purple"></i> ${phaseName}</h3>
             `;
-            sectionDiv.appendChild(header);
+            sectionDiv.appendChild(phaseHeader);
 
             const listDiv = document.createElement('div');
             listDiv.className = "divide-y divide-gray-800/60";
 
-            tasks.forEach(t => {
-                const row = document.createElement('div');
-                row.className = `p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-gray-800/20 ${t.completed ? 'opacity-50' : ''}`;
+            for (const [mainTaskName, tasks] of Object.entries(mainTasksMap)) {
                 
-                // Agent options HTML
-                const agentOpts = agentsList.map(a => `<option value="${a}" ${t.assignee === a ? 'selected' : ''}>${a}</option>`).join('');
+                // Subheader for Main Task (if it holds multiple checklist items, OR if the title doesn't match exactly)
+                if (tasks.length > 1 || tasks[0].title !== mainTaskName) {
+                    const mainTaskHeader = document.createElement('div');
+                    mainTaskHeader.className = "bg-gray-800/40 px-4 py-3 border-b border-gray-800/60";
+                    mainTaskHeader.innerHTML = `<h4 class="text-xs font-black text-gray-300 uppercase tracking-widest"><i class="fa-solid fa-caret-right text-gray-600 mr-2"></i>${mainTaskName}</h4>`;
+                    listDiv.appendChild(mainTaskHeader);
+                }
 
-                row.innerHTML = `
-                    <div class="flex items-start gap-4 flex-1">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.originalIndex}, this.checked)" class="w-5 h-5 mt-0.5 rounded bg-gray-900 border-gray-700 text-brand-purple focus:ring-0 cursor-pointer">
-                        <div>
-                            <p class="text-sm font-bold ${t.completed ? 'text-gray-400 line-through' : 'text-white'} leading-tight">${t.title}</p>
+                tasks.forEach(t => {
+                    const row = document.createElement('div');
+                    row.className = `p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-gray-800/30 ${t.completed ? 'opacity-60' : ''}`;
+                    
+                    const agentOpts = agentsList.map(a => `<option value="${a}" ${t.assignee === a ? 'selected' : ''} class="bg-gray-900 text-white">${a}</option>`).join('');
+                    const agentColor = getAgentColorClass(t.assignee, 'text');
+                    const agentBorder = getAgentColorClass(t.assignee, 'border');
+
+                    const weightColor = t.completed ? 'text-brand-emerald' : 'text-brand-crimson';
+
+                    // If it's a standalone task and doesn't need a subheader, prefix it slightly for alignment
+                    const paddingAdjust = (tasks.length === 1 && tasks[0].title === mainTaskName) ? "" : "pl-6 sm:pl-8";
+
+                    row.innerHTML = `
+                        <div class="flex items-start gap-4 flex-1 ${paddingAdjust}">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.originalIndex}, this.checked)" class="w-5 h-5 mt-0.5 rounded bg-gray-900 border-gray-600 text-brand-emerald focus:ring-brand-emerald focus:ring-offset-0 focus:ring-1 cursor-pointer">
+                            <div>
+                                <p class="text-sm font-bold ${t.completed ? 'text-gray-500 line-through' : 'text-gray-100'} leading-tight">${t.title}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3 shrink-0">
-                        <select onchange="changeAssignee(${t.originalIndex}, this.value)" class="bg-gray-950 border border-gray-700 text-xs font-bold text-gray-300 rounded px-2 py-1.5 focus:outline-none focus:border-brand-purple cursor-pointer appearance-none text-center">
-                            ${agentOpts}
-                        </select>
-                        <span class="bg-brand-purple/10 border border-brand-purple/30 text-brand-purple text-xs font-black px-2 py-1 rounded w-12 text-center">+${t.weight}%</span>
-                    </div>
-                `;
-                listDiv.appendChild(row);
-            });
+                        <div class="flex items-center gap-3 shrink-0">
+                            <select onchange="changeAssignee(${t.originalIndex}, this.value)" class="bg-gray-950 border ${agentBorder} ${agentColor} text-xs font-bold rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-purple cursor-pointer appearance-none text-center min-w-[80px]">
+                                ${agentOpts}
+                            </select>
+                            <span class="bg-gray-900 border border-gray-700 ${weightColor} text-xs font-black px-2 py-1 rounded w-12 text-center transition-colors">+${t.weight}%</span>
+                        </div>
+                    `;
+                    listDiv.appendChild(row);
+                });
+            }
             
             sectionDiv.appendChild(listDiv);
             container.appendChild(sectionDiv);
@@ -558,7 +830,7 @@
         prop.tasks[taskIndex].completed = isCompleted;
         prop.dateLastEdited = Date.now();
         saveState();
-        renderTrackerView(); // Re-render to update percentages and strike-throughs
+        renderTrackerView();
     }
 
     function changeAssignee(taskIndex, newAssignee) {
