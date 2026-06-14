@@ -340,12 +340,15 @@
         <div id="propertyChatContainer" class="fixed bottom-6 right-6 z-[105] flex flex-col items-end hidden">
             <!-- Chat Window -->
             <div id="chatWindow" class="bg-[#0f1423]/95 backdrop-blur-xl border border-gray-700 rounded-2xl w-80 sm:w-96 shadow-2xl mb-4 hidden flex-col overflow-hidden transition-all origin-bottom-right">
-                <div class="bg-gray-800/90 p-3 border-b border-gray-700 flex justify-between items-center">
-                    <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                        <img src="icon.svg" class="w-4 h-4 opacity-80" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
-                        Property Discussion
-                    </span>
-                    <button onclick="window.toggleChat()" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-times"></i></button>
+                <div class="bg-gray-800/90 p-3 border-b border-gray-700 flex justify-between items-start">
+                    <div class="flex flex-col flex-1 overflow-hidden">
+                        <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <img src="icon.svg" class="w-4 h-4 opacity-80" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+                            Property Discussion
+                        </span>
+                        <span id="chatWindowAddress" class="text-[10px] text-brand-emerald font-medium mt-0.5 truncate w-full pr-2"></span>
+                    </div>
+                    <button onclick="window.toggleChat()" class="text-gray-400 hover:text-white cursor-pointer ml-2 mt-0.5"><i class="fa-solid fa-times"></i></button>
                 </div>
                 <div id="chatMessages" class="p-4 h-80 overflow-y-auto flex flex-col gap-3 custom-scrollbar">
                     <!-- Messages populated dynamically -->
@@ -360,7 +363,9 @@
             
             <!-- FAB Button -->
             <button onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50">
-                <img src="icon.svg" class="w-7 h-7 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+                <img src="icon.svg" class="w-full h-full object-cover rounded-full p-2 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+                <!-- Unread Badge -->
+                <span id="chatUnreadBadge" class="absolute -top-1 -right-1 bg-brand-crimson text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0f1423] shadow-md hidden">0</span>
             </button>
         </div>
 
@@ -643,6 +648,7 @@
     let firebaseSavePropertyData = null;
     let firebaseRemovePropertyData = null;
     window.isChatOpen = false;
+    if (!window.chatReadStates) window.chatReadStates = {};
 
     // --- 1. AUTHENTICATION LOGIC ---
     window.signInWithGoogle = async function() {
@@ -794,15 +800,17 @@
     ];
 
     function getAgentColorClass(name, type = 'text') {
+        const nameLower = (name || "").toLowerCase();
         const colors = {
-            "Carlos": { text: "text-yellow-500", border: "border-yellow-500/50", bg: "bg-yellow-500/10" },
-            "Moe": { text: "text-blue-400", border: "border-blue-400/50", bg: "bg-blue-400/10" },
-            "Yanna": { text: "text-purple-400", border: "border-purple-400/50", bg: "bg-purple-400/10" },
-            "Sarah": { text: "text-pink-400", border: "border-pink-400/50", bg: "bg-pink-400/10" },
-            "Completed": { text: "text-brand-emerald", border: "border-brand-emerald/50", bg: "bg-brand-emerald/10" }
+            "carlos": { text: "text-yellow-500", border: "border-yellow-500/50", bg: "bg-yellow-500/10" },
+            "moe": { text: "text-blue-400", border: "border-blue-400/50", bg: "bg-blue-400/10" },
+            "yanna": { text: "text-purple-400", border: "border-purple-400/50", bg: "bg-purple-400/10" },
+            "sarah": { text: "text-pink-400", border: "border-pink-400/50", bg: "bg-pink-400/10" },
+            "sara": { text: "text-pink-400", border: "border-pink-400/50", bg: "bg-pink-400/10" },
+            "completed": { text: "text-brand-emerald", border: "border-brand-emerald/50", bg: "bg-brand-emerald/10" }
         };
-        const defaultColor = { text: "text-gray-400", border: "border-gray-700", bg: "bg-gray-800" };
-        const selected = colors[name] || defaultColor;
+        const defaultColor = { text: "text-brand-emerald", border: "border-brand-emerald/50", bg: "bg-brand-emerald/10" };
+        const selected = colors[nameLower] || defaultColor;
         return selected[type];
     }
 
@@ -830,6 +838,25 @@
              .replace(/>/g, "&gt;")
              .replace(/"/g, "&quot;")
              .replace(/'/g, "&#039;");
+    }
+
+    function updateChatBadge(prop) {
+        const badge = document.getElementById('chatUnreadBadge');
+        if (!badge || !prop) return;
+        
+        const lastRead = window.chatReadStates[prop.id] || 0;
+        const unreadCount = (prop.comments || []).filter(c => c.timestamp > lastRead).length;
+        
+        if (unreadCount > 0 && !window.isChatOpen) {
+            badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+            badge.classList.add('animate-bounce');
+            setTimeout(() => badge.classList.remove('animate-bounce'), 1000);
+        } else {
+            badge.classList.add('hidden');
+            badge.classList.remove('flex');
+        }
     }
 
     // --- ACTIVE USERS UI CONTROLS ---
@@ -933,7 +960,9 @@
                 assignee: task.defaultAssignee,
                 completed: false,
                 subtasks: subtasks,
-                templateText: "" // Placeholder ready for drafts
+                templateText: "", // Placeholder ready for drafts
+                templateLastEditedBy: null,
+                templateLastEditedAt: null
             };
         });
     }
@@ -1251,6 +1280,14 @@
         if (window.isChatOpen) {
             chatWin.classList.remove('hidden');
             chatWin.classList.add('flex');
+            
+            // Mark chat as read
+            if (activePropertyId) {
+                window.chatReadStates[activePropertyId] = Date.now();
+                const prop = propertiesData.find(p => p.id === activePropertyId);
+                updateChatBadge(prop);
+            }
+
             // Auto scroll to bottom
             setTimeout(() => {
                 const scrollBox = document.getElementById('chatMessages');
@@ -1281,6 +1318,9 @@
             timestamp: Date.now()
         });
 
+        // Always mark as read for ourselves when we send a message
+        window.chatReadStates[activePropertyId] = Date.now();
+
         input.value = '';
         await window.savePropertyData(prop);
     }
@@ -1288,31 +1328,30 @@
     function renderChatMessages(prop) {
         const container = document.getElementById('chatMessages');
         if (!container) return;
+        
+        // Mark as read if window is open
+        if (window.isChatOpen) {
+            window.chatReadStates[prop.id] = Date.now();
+        }
+        updateChatBadge(prop);
+
         const comments = prop.comments || [];
         
         if (comments.length === 0) {
             container.innerHTML = '<div class="text-center text-xs text-gray-500 mt-10 italic">No messages yet. Be the first to start the discussion!</div>';
             return;
         }
-        
-        const colorMap = {
-            "carlos": "text-yellow-500",
-            "yanna": "text-purple-400",
-            "sarah": "text-pink-400",
-            "sara": "text-pink-400", 
-            "moe": "text-blue-400"
-        };
 
         container.innerHTML = comments.map(c => {
             const authorLower = c.author.toLowerCase();
-            const authorColor = colorMap[authorLower] || "text-brand-emerald";
+            const authorColorClass = getAgentColorClass(authorLower, 'text');
             
             // Detect if the message was sent by the current active user to align it to the right
             const isMe = currentUser && currentUser.email && currentUser.email.split('@')[0].toLowerCase() === authorLower;
             
             return `
             <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                <span class="text-[9px] font-bold ${authorColor} mb-0.5 px-1">${escapeHtml(c.author)} • ${formatEST(c.timestamp)}</span>
+                <span class="text-[9px] font-bold ${authorColorClass} mb-0.5 px-1">${escapeHtml(c.author)} • ${formatEST(c.timestamp)}</span>
                 <div class="${isMe ? 'bg-brand-emerald/10 border-brand-emerald/30' : 'bg-gray-800/60 border-gray-700/50'} border rounded-xl px-3 py-2 max-w-[90%]">
                     <p class="text-xs text-gray-200 whitespace-pre-wrap">${escapeHtml(c.text)}</p>
                 </div>
@@ -1347,6 +1386,7 @@
         document.getElementById('tracker-address').innerText = prop.address;
         document.getElementById('tracker-date-started').innerText = `Created: ${formatEST(prop.dateStarted)}`;
         document.getElementById('tracker-last-edited').innerText = `Updated: ${formatEST(prop.dateLastEdited)}`;
+        document.getElementById('chatWindowAddress').innerText = prop.address;
         
         const stats = getPropStats(prop);
         document.getElementById('tracker-percent-text').innerText = `${stats.percent}%`;
@@ -1481,21 +1521,30 @@
                     let templateBoxHtml = '';
                     
                     if (t.title.toLowerCase().includes('draft')) {
+                        const isApprovedTask = t.title.toLowerCase().includes('approved');
+                        const btnLabel = isApprovedTask ? "Template" : "Draft";
+                        const btnIcon = isApprovedTask ? "fa-file-circle-check" : "fa-file-pen";
+
                         templateActionHtml = `
                             <div class="w-px h-3 bg-gray-700 mx-3"></div>
                             <button onclick="window.toggleTaskTemplate(${t.originalIndex})" class="text-[10px] uppercase tracking-wider font-bold text-brand-cyan/70 hover:text-brand-cyan flex items-center gap-1.5 transition-colors cursor-pointer">
-                                <i class="fa-solid fa-file-code"></i> Copy / Template
+                                <i class="fa-solid ${btnIcon}"></i> ${btnLabel}
                             </button>
                         `;
                         
-                        // Default state handling for templates
                         const templateIsOpen = window.sectionToggleState[`template_${t.originalIndex}`] === 'open';
                         
+                        let saveMetaHtml = '<span class="text-[9px] uppercase tracking-wider text-brand-cyan opacity-50">Saves automatically on blur</span>';
+                        if (t.templateLastEditedBy) {
+                            const authorColorClass = getAgentColorClass(t.templateLastEditedBy, 'text');
+                            saveMetaHtml = `<span class="text-[9px] uppercase tracking-wider text-gray-500">Last saved by <span class="${authorColorClass} font-bold">${escapeHtml(t.templateLastEditedBy)}</span> • ${formatEST(t.templateLastEditedAt)}</span>`;
+                        }
+
                         templateBoxHtml = `
                             <div id="taskTemplateUI_${t.originalIndex}" class="${templateIsOpen ? 'block' : 'hidden'} pl-8 sm:pl-14 mt-3 mb-1 pr-4 w-full">
                                 <textarea id="taskTemplateInput_${t.originalIndex}" onchange="window.saveTaskTemplate(${t.originalIndex})" class="w-full max-w-3xl h-24 bg-gray-950/50 border border-brand-cyan/30 rounded-lg p-3 text-xs text-gray-300 focus:border-brand-cyan focus:outline-none transition-colors resize-y custom-scrollbar placeholder-gray-600" placeholder="Paste generated text blast, FB draft, or final approved copy here...">${escapeHtml(t.templateText || "")}</textarea>
                                 <div class="max-w-3xl flex justify-end mt-1">
-                                    <span class="text-[9px] uppercase tracking-wider text-brand-cyan opacity-50">Saves automatically on blur</span>
+                                    ${saveMetaHtml}
                                 </div>
                             </div>
                         `;
@@ -1562,7 +1611,11 @@
         const textVal = document.getElementById(`taskTemplateInput_${taskIndex}`).value;
         prop.tasks[taskIndex].templateText = textVal;
         
+        prop.tasks[taskIndex].templateLastEditedBy = currentUser && currentUser.email ? currentUser.email.split('@')[0] : "Agent";
+        prop.tasks[taskIndex].templateLastEditedAt = Date.now();
+        
         await window.savePropertyData(prop);
+        renderTrackerView(); // Re-render to show the updated save metadata
     }
 
     window.toggleSection = function(sectionKey) {
