@@ -84,7 +84,7 @@
     table tbody tr:hover { background-color: rgba(79, 70, 229, 0.1); }
   </style>
 </head>
-<body class="font-sans antialiased relative selection:bg-brand-crimson selection:text-white">
+<body class="font-sans antialiased relative selection:bg-brand-crimson selection:text-white capitalize">
 
   <!-- CURSOR OVERLAYS -->
   <div id="mouseGlow"></div>
@@ -104,14 +104,12 @@
         </div>
         
         <div class="space-y-4">
-            <input type="email" id="gateEmailInput" placeholder="Email" class="w-full bg-[#18182d] border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-brand-purple transition-all cursor-pointer">
-            <input type="password" id="gateAccessKeyInput" placeholder="Password" class="w-full bg-[#18182d] border border-white/10 rounded-lg px-4 py-3 text-center text-white tracking-widest focus:outline-none focus:border-brand-purple transition-all cursor-pointer" onkeydown="if(event.key === 'Enter') window.handleLogin()">
+            <button id="googleAuthButton" onclick="window.signInWithGoogle()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-3 mt-6 cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google"> Sign in with @totalchb.com
+            </button>
         </div>
 
         <p id="gateErrorMessage" class="text-xs text-brand-crimson font-medium text-center hidden mt-4">Invalid Access Protocol.</p>
-        <button id="gateAuthButton" onclick="window.handleLogin()" class="w-full bg-brand-purple hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 cursor-pointer shadow-[0_0_15px_rgba(79,70,229,0.3)]">
-            Initialize Workspace <i class="fa-solid fa-arrow-right-to-bracket text-sm ml-1"></i>
-        </button>
     </div>
   </div>
 
@@ -170,8 +168,11 @@
         <div class="flex items-center gap-4">
             <img src="icon.svg" alt="TCHB Icon" class="h-10 w-10 object-contain" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
             <div class="h-8 w-px bg-gray-700 hidden md:block"></div>
-            <div>
+            <div class="flex items-center gap-3">
                 <h1 class="text-lg font-bold text-white tracking-tight">DISPO Operations Dashboard</h1>
+                <button onclick="window.logOut()" class="text-xs font-bold text-gray-500 hover:text-brand-crimson transition-colors cursor-pointer" title="Sign Out">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
             </div>
         </div>
         <div class="flex bg-gradient-to-r from-brand-crimson/10 to-brand-purple/10 p-1 rounded-xl border border-brand-purple/30 overflow-x-auto max-w-full">
@@ -238,7 +239,7 @@
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i> Targeted Asset:</span>
                 <!-- Dropdown cleanly styled like the unselected nav -->
-                <select id="globalAssetSelector" onchange="window.handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-transparent border border-gray-700 text-sm font-bold text-gray-300 hover:text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-purple cursor-pointer appearance-none transition-colors">
+                <select id="globalAssetSelector" onchange="window.handleGlobalAssetSelection(this.value)" class="w-full sm:w-64 bg-brand-purple/10 border border-brand-purple/30 text-sm font-bold text-gray-300 hover:text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple cursor-pointer transition-all appearance-none">
                     <option value="" class="bg-gray-900 text-gray-300">-- Select an Active Deal --</option>
                     <!-- Options populated dynamically -->
                 </select>
@@ -531,7 +532,7 @@
                             <h3 class="text-lg font-bold text-white">Post On Facebook</h3>
                         </div>
                         <ul class="space-y-3 text-sm text-gray-300">
-                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Reach Out To Investors That Expressed Interest</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">10% (Moe)</span></li>
+                            <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Reach Out To Investors That Expressed Interest In Other Deals</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">10% (Moe)</span></li>
                             <li class="flex justify-between items-center bg-gray-900/50 p-2.5 rounded border border-gray-800/80"><span class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-gray-500"></i> Boost the Post (If Needed)</span> <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-bold">0% (Moe)</span></li>
                         </ul>
                     </div>
@@ -557,39 +558,71 @@
 
     let db = null;
     let currentUser = null;
+    let firebaseAuth = null;
+    let googleProvider = null;
     let appId = 'tchb-dispo-default';
     let firebaseSavePropertyData = null;
     let firebaseRemovePropertyData = null;
 
     // --- 1. AUTHENTICATION LOGIC ---
-    window.handleLogin = function() {
-        const emailInput = document.getElementById('gateEmailInput').value.trim().toLowerCase();
-        const keyInput = document.getElementById('gateAccessKeyInput').value.trim();
-        const errorMsg = document.getElementById('gateErrorMessage');
-        const modalBox = document.getElementById('gateModalBox');
+    window.signInWithGoogle = async function() {
+        if (!firebaseAuth || !googleProvider) {
+            showGateError("Authentication initializing, please wait...");
+            return;
+        }
         
-        if (emailInput.endsWith('@totalchb.com') && keyInput === 'Dispo@2026') {
-            errorMsg.classList.add('hidden');
-            grantAccess();
-        } else {
-            errorMsg.innerText = "Access Denied. Invalid Credentials.";
-            errorMsg.classList.remove('hidden');
-            modalBox.classList.add('shake-element');
-            setTimeout(() => { modalBox.classList.remove('shake-element'); }, 400);
+        try {
+            const result = await window.firebaseSignInWithPopup(firebaseAuth, googleProvider);
+            const user = result.user;
+            
+            // Check domain restriction
+            if (user.email && user.email.endsWith('@totalchb.com')) {
+                document.getElementById('gateErrorMessage').classList.add('hidden');
+                grantAccess();
+            } else {
+                showGateError("Access Denied. Only @totalchb.com emails are authorized.");
+                await window.firebaseSignOut(firebaseAuth);
+            }
+        } catch (error) {
+            console.error("Google Sign-In Error:", error);
+            if (error.code !== 'auth/popup-closed-by-user') {
+                showGateError(error.message);
+            }
+        }
+    }
+    
+    window.logOut = async function() {
+        if (firebaseAuth) {
+            await window.firebaseSignOut(firebaseAuth);
+            window.location.reload(); // Refresh to reset state
         }
     }
 
+    function showGateError(msg) {
+        const errorMsg = document.getElementById('gateErrorMessage');
+        const modalBox = document.getElementById('gateModalBox');
+        errorMsg.innerText = msg;
+        errorMsg.classList.remove('hidden');
+        modalBox.classList.add('shake-element');
+        setTimeout(() => { modalBox.classList.remove('shake-element'); }, 400);
+    }
+
     function grantAccess() {
-        const btn = document.getElementById('gateAuthButton');
+        if (isGatewayUnlocked) return; // Prevent double firing
+        
+        const btn = document.getElementById('googleAuthButton');
+        if (btn) {
+            btn.innerHTML = 'Authentication Valid <i class="fa-solid fa-check ml-1"></i>';
+            btn.className = "w-full bg-brand-emerald text-gray-900 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 cursor-not-allowed opacity-90";
+        }
+
         const lockIcon = document.getElementById('gateLockIcon');
         const lockContainer = document.getElementById('gateLockIconContainer');
-        
-        lockIcon.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>';
-        lockIcon.className = "w-6 h-6 text-brand-emerald transition-all duration-300 scale-110";
-        lockContainer.className = "mx-auto w-14 h-14 rounded-full bg-brand-emerald/10 flex items-center justify-center border border-brand-emerald/20 mb-4 animate-bounce";
-
-        btn.innerHTML = 'Authentication Valid <i class="fa-solid fa-check ml-1"></i>';
-        btn.className = "w-full bg-brand-emerald text-gray-900 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 cursor-not-allowed opacity-90";
+        if (lockIcon && lockContainer) {
+            lockIcon.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>';
+            lockIcon.className = "w-6 h-6 text-brand-emerald transition-all duration-300 scale-110";
+            lockContainer.className = "mx-auto w-14 h-14 rounded-full bg-brand-emerald/10 flex items-center justify-center border border-brand-emerald/20 mb-4 animate-bounce";
+        }
 
         setTimeout(() => { 
             try {
@@ -1004,19 +1037,22 @@
                     const agentOpts = agentsList.map(a => `<option value="${a}" ${t.assignee === a ? 'selected' : ''} class="bg-gray-900 text-white">${a}</option>`).join('');
                     const agentColor = getAgentColorClass(t.assignee, 'text');
                     const agentBorder = getAgentColorClass(t.assignee, 'border');
+                    const agentBg = getAgentColorClass(t.assignee, 'bg');
 
                     const weightColor = t.completed ? 'text-brand-emerald bg-brand-emerald/10 border-brand-emerald/30' : 'text-brand-crimson bg-gray-900 border-gray-700';
                     const paddingAdjust = (tasks.length === 1 && tasks[0].title === mainTaskName) ? "" : "pl-6 sm:pl-8";
 
                     row.innerHTML = `
                         <div class="flex items-start gap-4 flex-1 ${paddingAdjust}">
-                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="window.toggleTask(${t.originalIndex}, this.checked)" class="w-5 h-5 mt-0.5 rounded bg-gray-900 border-gray-600 text-brand-purple focus:ring-brand-purple focus:ring-offset-0 focus:ring-1 cursor-pointer">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="window.toggleTask(${t.originalIndex}, this.checked)" class="w-5 h-5 mt-0.5 rounded accent-brand-purple bg-gray-900 border-gray-600 focus:ring-brand-purple focus:ring-offset-0 focus:ring-1 cursor-pointer">
                             <div>
-                                <p class="text-sm font-bold ${t.completed ? 'text-gray-500 line-through' : 'text-gray-100'} leading-tight">${t.title}</p>
+                                <p class="text-sm font-bold ${t.completed ? 'text-gray-500 line-through' : 'text-gray-100'} leading-tight inline-flex items-center">
+                                    ${t.title}
+                                </p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">
-                            <select onchange="window.changeAssignee(${t.originalIndex}, this.value)" class="bg-gray-950 border ${agentBorder} ${agentColor} text-xs font-bold rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-purple cursor-pointer appearance-none text-center min-w-[80px]">
+                            <select onchange="window.changeAssignee(${t.originalIndex}, this.value)" class="${agentBg} border ${agentBorder} ${agentColor} text-xs font-bold rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-purple cursor-pointer appearance-none text-center min-w-[80px]">
                                 ${agentOpts}
                             </select>
                             <span class="${weightColor} text-xs font-black px-2 py-1 rounded w-12 text-center transition-colors">+${t.weight}%</span>
@@ -1051,12 +1087,16 @@
     // --- 4. CLOUD FIREBASE SYNC ENGINE (DYNAMIC IMPORT) ---
     async function initFirebase() {
         try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-            if (!firebaseConfig) {
-                console.warn("No Firebase config found. Falling back to local storage.");
-                initLocalApp();
-                return;
-            }
+            const firebaseConfig = {
+                apiKey: "AIzaSyANI40kfTq_ZP42EKNlrnpbIl9zlcjN-_s",
+                authDomain: "dispo-sop.firebaseapp.com",
+                projectId: "dispo-sop",
+                storageBucket: "dispo-sop.firebasestorage.app",
+                messagingSenderId: "435787659915",
+                appId: "1:435787659915:web:db3e37d8fc77f2d8af728e",
+                measurementId: "G-VNVGF0CCWJ"
+            };
+            
             appId = typeof __app_id !== 'undefined' ? __app_id : 'tchb-dispo-default';
 
             // Dynamically import to prevent local browser file:// blocking
@@ -1065,8 +1105,18 @@
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
 
             const app = appModule.initializeApp(firebaseConfig);
-            const auth = authModule.getAuth(app);
+            firebaseAuth = authModule.getAuth(app);
             db = firestoreModule.getFirestore(app);
+
+            // Setup Google Auth Provider
+            googleProvider = new authModule.GoogleAuthProvider();
+            googleProvider.setCustomParameters({
+                hd: 'totalchb.com' // Hints the Google Sign-In pop-up to prefer this domain
+            });
+            
+            // Export Auth functions to window for UI use
+            window.firebaseSignInWithPopup = authModule.signInWithPopup;
+            window.firebaseSignOut = authModule.signOut;
 
             window.listenToProperties = function() {
                 if (!currentUser) return;
@@ -1103,16 +1153,19 @@
                 }
             };
 
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await authModule.signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await authModule.signInAnonymously(auth);
-            }
-            
-            authModule.onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                if (user && isGatewayUnlocked) {
-                    window.listenToProperties();
+            // Listen to persistent Auth State
+            authModule.onAuthStateChanged(firebaseAuth, async (user) => {
+                if (user) {
+                    // Re-verify domain on automatic reconnects
+                    if (user.email && user.email.endsWith('@totalchb.com')) {
+                        currentUser = user;
+                        grantAccess(); // Automatically skip gate if already validly signed in
+                    } else {
+                        await authModule.signOut(firebaseAuth);
+                        currentUser = null;
+                    }
+                } else {
+                    currentUser = null;
                 }
             });
             
