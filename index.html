@@ -265,10 +265,10 @@
     </div>
 
     <!-- TAB: ACTIVE DEAL TRACKER -->
-    <div id="tab-tracker" class="flex-1 hidden flex-col">
+    <div id="tab-tracker" class="flex-1 hidden flex-col relative">
         
         <!-- Global Asset Navigation Bar -->
-        <div class="glass-card p-4 rounded-2xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="glass-card p-4 rounded-2xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-20">
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i> Targeted Asset:</span>
                 <!-- Dropdown cleanly styled like the unselected nav -->
@@ -301,7 +301,7 @@
         <!-- Active Content -->
         <div id="tracker-content" class="hidden space-y-6">
             <!-- Tracker Header -->
-            <div class="glass-card p-6 rounded-2xl border border-gray-800 flex flex-col md:flex-row justify-between md:items-end gap-6 relative overflow-hidden">
+            <div class="glass-card p-6 rounded-2xl border border-gray-800 flex flex-col md:flex-row justify-between md:items-end gap-6 relative overflow-hidden z-10">
                 <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-purple/10 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <div class="relative z-10 flex-1">
@@ -325,16 +325,45 @@
             </div>
 
             <!-- Task List Container -->
-            <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 pb-12" id="tracker-task-container">
+            <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 pb-12 z-10 relative" id="tracker-task-container">
                 <!-- Dynamically injected sections -->
             </div>
             
-            <div class="flex justify-center pt-4 pb-12">
+            <div class="flex justify-center pt-4 pb-12 z-10 relative">
                 <button onclick="window.openDeleteModal()" class="text-xs text-red-500 hover:text-red-400 font-semibold cursor-pointer border border-red-500/20 bg-red-500/5 px-4 py-2 rounded transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-trash-can"></i> Remove Asset from Pipeline
                 </button>
             </div>
         </div>
+
+        <!-- FLOATING CHAT BUBBLE (Tied to Tracker View) -->
+        <div id="propertyChatContainer" class="fixed bottom-6 right-6 z-[105] flex flex-col items-end hidden">
+            <!-- Chat Window -->
+            <div id="chatWindow" class="bg-[#0f1423]/95 backdrop-blur-xl border border-gray-700 rounded-2xl w-80 sm:w-96 shadow-2xl mb-4 hidden flex-col overflow-hidden transition-all origin-bottom-right">
+                <div class="bg-gray-800/90 p-3 border-b border-gray-700 flex justify-between items-center">
+                    <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        <img src="icon.svg" class="w-4 h-4 opacity-80" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+                        Property Discussion
+                    </span>
+                    <button onclick="window.toggleChat()" class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <div id="chatMessages" class="p-4 h-80 overflow-y-auto flex flex-col gap-3 custom-scrollbar">
+                    <!-- Messages populated dynamically -->
+                </div>
+                <div class="p-3 border-t border-gray-700 bg-gray-900/50">
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="chatInput" class="flex-1 bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-emerald transition-colors" placeholder="Type a message..." onkeydown="if(event.key === 'Enter') window.sendChatMessage()">
+                        <button onclick="window.sendChatMessage()" class="bg-brand-emerald hover:bg-emerald-400 text-gray-900 w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer shadow-md"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAB Button -->
+            <button onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50">
+                <img src="icon.svg" class="w-7 h-7 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+            </button>
+        </div>
+
     </div>
 
     <!-- TAB: SOP REFERENCE (VISUAL TIMELINE) -->
@@ -593,7 +622,7 @@
 
   </div>
 
-  <!-- External Floating Dashboard Tooltip (Moved strictly out of overflow containers) -->
+  <!-- External Floating Dashboard Tooltip -->
   <div id="dashboard-tooltip" class="fixed hidden w-max max-w-[300px] bg-[#0f1423] border border-brand-emerald/40 text-white text-xs p-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.15)] z-[999999] whitespace-normal text-left pointer-events-none transition-opacity duration-200 opacity-0">
       <span class="text-brand-emerald font-bold block mb-1.5 uppercase tracking-wider text-[10px]"><i class="fa-solid fa-bolt mr-1"></i> Target Action</span>
       <span id="dashboard-tooltip-text" class="leading-relaxed text-gray-200 font-medium"></span>
@@ -613,6 +642,7 @@
     let appId = 'tchb-dispo-default';
     let firebaseSavePropertyData = null;
     let firebaseRemovePropertyData = null;
+    window.isChatOpen = false;
 
     // --- 1. AUTHENTICATION LOGIC ---
     window.signInWithGoogle = async function() {
@@ -862,6 +892,10 @@
             activePropertyId = null;
             window.sectionToggleState = {};
             window.sectionCompletionState = {};
+            
+            // Auto close Chat bubble on leaving Tracker tab
+            if(window.isChatOpen) window.toggleChat();
+            
             renderDashboard();
             updateGlobalAssetSelector();
         } else if (tab === 'tracker') {
@@ -875,6 +909,9 @@
             document.getElementById('tab-sop').classList.remove('hidden');
             document.getElementById('nav-sop').classList.add(...activeNavClasses.split(' '));
             document.getElementById('nav-sop').classList.remove('text-gray-300');
+            
+            // Auto close Chat bubble on leaving Tracker tab
+            if(window.isChatOpen) window.toggleChat();
         }
     }
 
@@ -895,7 +932,8 @@
                 weight: task.weight,
                 assignee: task.defaultAssignee,
                 completed: false,
-                subtasks: subtasks
+                subtasks: subtasks,
+                templateText: "" // Placeholder ready for drafts
             };
         });
     }
@@ -925,6 +963,7 @@
             address: address.trim(),
             dateStarted: Date.now(),
             dateLastEdited: Date.now(),
+            comments: [],
             tasks: generateTaskInstances()
         };
         
@@ -960,6 +999,10 @@
             if (activePropertyId) {
                 await window.removePropertyData(activePropertyId);
                 window.closeDeleteModal();
+                
+                // Keep chat closed after deletion
+                if(window.isChatOpen) window.toggleChat();
+                
                 window.switchTab('dashboard');
             }
         } else {
@@ -1061,6 +1104,9 @@
             activePropertyId = null;
             window.sectionToggleState = {};
             window.sectionCompletionState = {};
+            
+            if(window.isChatOpen) window.toggleChat(); // Close chat if switching away
+            
             renderTrackerView();
         } else {
             window.openTracker(propId);
@@ -1168,6 +1214,7 @@
         if (activePropertyId !== propId) {
             window.sectionToggleState = {};
             window.sectionCompletionState = {};
+            if(window.isChatOpen) window.toggleChat(); // Reset chat state between assets
         }
         activePropertyId = propId;
 
@@ -1197,28 +1244,31 @@
         }
     }
 
-    window.saveTemplates = async function(propId) {
-        const prop = propertiesData.find(p => p.id === propId);
-        if (!prop) return;
-        
-        prop.draftTemplate = document.getElementById(`draftTemplateInput_${propId}`).value;
-        prop.approvedTemplate = document.getElementById(`approvedTemplateInput_${propId}`).value;
-        
-        await window.savePropertyData(prop);
-        
-        const status = document.getElementById(`templatesSaveStatus_${propId}`);
-        if(status) {
-            status.style.opacity = '1';
-            setTimeout(() => { if(status) status.style.opacity = '0'; }, 2000);
+    // --- SUPPORT STYLE CHAT LOGIC ---
+    window.toggleChat = function() {
+        window.isChatOpen = !window.isChatOpen;
+        const chatWin = document.getElementById('chatWindow');
+        if (window.isChatOpen) {
+            chatWin.classList.remove('hidden');
+            chatWin.classList.add('flex');
+            // Auto scroll to bottom
+            setTimeout(() => {
+                const scrollBox = document.getElementById('chatMessages');
+                if(scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight;
+            }, 10);
+        } else {
+            chatWin.classList.add('hidden');
+            chatWin.classList.remove('flex');
         }
     }
 
-    window.addComment = async function(propId) {
-        const input = document.getElementById(`newCommentInput_${propId}`);
+    window.sendChatMessage = async function() {
+        if (!activePropertyId) return;
+        const input = document.getElementById('chatInput');
         const text = input.value.trim();
         if (!text) return;
 
-        const prop = propertiesData.find(p => p.id === propId);
+        const prop = propertiesData.find(p => p.id === activePropertyId);
         if (!prop) return;
 
         const authorName = currentUser && currentUser.email ? currentUser.email.split('@')[0] : "Agent";
@@ -1231,19 +1281,59 @@
             timestamp: Date.now()
         });
 
-        await window.savePropertyData(prop);
         input.value = '';
-        renderTrackerView(); 
+        await window.savePropertyData(prop);
+    }
+
+    function renderChatMessages(prop) {
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        const comments = prop.comments || [];
+        
+        if (comments.length === 0) {
+            container.innerHTML = '<div class="text-center text-xs text-gray-500 mt-10 italic">No messages yet. Be the first to start the discussion!</div>';
+            return;
+        }
+        
+        const colorMap = {
+            "carlos": "text-yellow-500",
+            "yanna": "text-purple-400",
+            "sarah": "text-pink-400",
+            "sara": "text-pink-400", 
+            "moe": "text-blue-400"
+        };
+
+        container.innerHTML = comments.map(c => {
+            const authorLower = c.author.toLowerCase();
+            const authorColor = colorMap[authorLower] || "text-brand-emerald";
+            
+            // Detect if the message was sent by the current active user to align it to the right
+            const isMe = currentUser && currentUser.email && currentUser.email.split('@')[0].toLowerCase() === authorLower;
+            
+            return `
+            <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                <span class="text-[9px] font-bold ${authorColor} mb-0.5 px-1">${escapeHtml(c.author)} • ${formatEST(c.timestamp)}</span>
+                <div class="${isMe ? 'bg-brand-emerald/10 border-brand-emerald/30' : 'bg-gray-800/60 border-gray-700/50'} border rounded-xl px-3 py-2 max-w-[90%]">
+                    <p class="text-xs text-gray-200 whitespace-pre-wrap">${escapeHtml(c.text)}</p>
+                </div>
+            </div>`;
+        }).join('');
+        
+        // Force scroll to bottom to show newest messages
+        container.scrollTop = container.scrollHeight;
     }
 
     function renderTrackerView() {
         const emptyView = document.getElementById('tracker-empty');
         const contentView = document.getElementById('tracker-content');
+        const chatContainer = document.getElementById('propertyChatContainer');
+        
         if(!emptyView || !contentView) return;
         
         if (!activePropertyId) {
             emptyView.classList.remove('hidden');
             contentView.classList.add('hidden');
+            if(chatContainer) chatContainer.classList.add('hidden');
             return;
         }
 
@@ -1252,6 +1342,7 @@
 
         emptyView.classList.add('hidden');
         contentView.classList.remove('hidden');
+        if(chatContainer) chatContainer.classList.remove('hidden');
 
         document.getElementById('tracker-address').innerText = prop.address;
         document.getElementById('tracker-date-started').innerText = `Created: ${formatEST(prop.dateStarted)}`;
@@ -1261,10 +1352,8 @@
         document.getElementById('tracker-percent-text').innerText = `${stats.percent}%`;
         document.getElementById('tracker-progress-bar').style.width = `${stats.percent}%`;
 
-        // Initialize new data structures backward-compatibly
-        if (!prop.comments) prop.comments = [];
-        if (!prop.draftTemplate) prop.draftTemplate = "";
-        if (!prop.approvedTemplate) prop.approvedTemplate = "";
+        // Load chat UI natively in sync
+        renderChatMessages(prop);
 
         // Group tasks by Phase -> MainTask
         const structure = {};
@@ -1276,82 +1365,6 @@
 
         const container = document.getElementById('tracker-task-container');
         container.innerHTML = '';
-
-        // --- 1. MARKETING TEMPLATES WORKSPACE ---
-        const templatesIsOpen = window.sectionToggleState['workspace_templates'] === 'open';
-        const templatesDiv = document.createElement('div');
-        templatesDiv.className = "glass-card rounded-xl border border-gray-800/80 overflow-hidden mb-6";
-        templatesDiv.innerHTML = `
-            <div class="group bg-gray-900/80 hover:bg-brand-cyan/10 px-4 py-3 border-b border-gray-800 flex items-center justify-between cursor-pointer transition-colors duration-300 select-none" onclick="window.toggleSection('workspace_templates')">
-                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2 group-hover:text-brand-cyan transition-colors">
-                    <i class="fa-solid fa-caret-${templatesIsOpen ? 'down' : 'right'} text-gray-600 group-hover:text-brand-cyan w-3 text-center transition-transform"></i>
-                    <i class="fa-solid fa-file-lines text-brand-cyan ml-1"></i> Marketing Copy & Templates
-                </h3>
-            </div>
-            <div class="${templatesIsOpen ? 'block' : 'hidden'} bg-gray-900/40 p-4 space-y-4">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Draft Generation Pad</label>
-                        <textarea id="draftTemplateInput_${prop.id}" onchange="window.saveTemplates('${prop.id}')" class="w-full h-40 bg-gray-950/50 border border-gray-700/80 rounded-lg p-3 text-sm text-gray-300 focus:border-brand-cyan focus:outline-none transition-colors resize-y placeholder-gray-600 custom-scrollbar" placeholder="Paste generated text blasts, FB drafts, InvestorLift descriptions here...">${escapeHtml(prop.draftTemplate)}</textarea>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 text-brand-emerald"><i class="fa-solid fa-check-circle mr-1"></i> Approved Final Copy</label>
-                        <textarea id="approvedTemplateInput_${prop.id}" onchange="window.saveTemplates('${prop.id}')" class="w-full h-40 bg-gray-950/50 border border-brand-emerald/30 rounded-lg p-3 text-sm text-gray-300 focus:border-brand-emerald focus:outline-none transition-colors resize-y placeholder-gray-600 custom-scrollbar" placeholder="Paste the final approved copy here for quick access...">${escapeHtml(prop.approvedTemplate)}</textarea>
-                    </div>
-                </div>
-                <div class="flex justify-end">
-                    <span id="templatesSaveStatus_${prop.id}" class="text-[10px] uppercase tracking-wider text-brand-cyan font-bold opacity-0 transition-opacity">Saved automatically <i class="fa-solid fa-check ml-1"></i></span>
-                </div>
-            </div>
-        `;
-        container.appendChild(templatesDiv);
-
-        // --- 2. INTERNAL COMMENTS WORKSPACE ---
-        const commentsIsOpen = window.sectionToggleState['workspace_comments'] === 'open';
-        const commentsCount = prop.comments.length;
-        let commentsListHtml = commentsCount === 0 
-            ? '<p class="text-xs text-gray-500 italic text-center py-6">No comments yet. Be the first to start the discussion.</p>'
-            : prop.comments.map(c => `
-                <div class="bg-gray-800/40 border border-gray-700/50 rounded-lg p-3 flex flex-col gap-1.5">
-                    <div class="flex justify-between items-start">
-                        <span class="text-xs font-bold text-brand-gold"><i class="fa-solid fa-user-circle mr-1 text-gray-500"></i> ${escapeHtml(c.author)}</span>
-                        <span class="text-[10px] text-gray-500 font-mono">${formatEST(c.timestamp)}</span>
-                    </div>
-                    <p class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed mt-1">${escapeHtml(c.text)}</p>
-                </div>
-            `).join('');
-
-        const commentsDiv = document.createElement('div');
-        commentsDiv.className = "glass-card rounded-xl border border-gray-800/80 overflow-hidden mb-8";
-        commentsDiv.innerHTML = `
-            <div class="group bg-gray-900/80 hover:bg-brand-gold/10 px-4 py-3 border-b border-gray-800 flex items-center justify-between cursor-pointer transition-colors duration-300 select-none" onclick="window.toggleSection('workspace_comments')">
-                <h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2 group-hover:text-brand-gold transition-colors">
-                    <i class="fa-solid fa-caret-${commentsIsOpen ? 'down' : 'right'} text-gray-600 group-hover:text-brand-gold w-3 text-center transition-transform"></i>
-                    <i class="fa-solid fa-comments text-brand-gold ml-1"></i> Internal Notes & Discussion
-                </h3>
-                <span class="${commentsCount > 0 ? 'bg-brand-gold/20 text-brand-gold border-brand-gold/30' : 'bg-gray-800 text-gray-400 border-gray-700'} text-[10px] font-black px-2 py-0.5 rounded border transition-colors">${commentsCount}</span>
-            </div>
-            <div class="${commentsIsOpen ? 'flex' : 'hidden'} flex-col bg-gray-900/40 p-4">
-                <div class="max-h-80 overflow-y-auto pr-2 space-y-3 mb-4 custom-scrollbar flex-col flex">
-                    ${commentsListHtml}
-                </div>
-                <div class="flex items-end gap-3 mt-2 pt-4 border-t border-gray-800/60">
-                    <textarea id="newCommentInput_${prop.id}" class="flex-1 bg-gray-950/50 border border-gray-700/80 rounded-lg p-3 text-sm text-white focus:border-brand-gold focus:outline-none transition-colors resize-none placeholder-gray-600 min-h-[46px] h-[46px] custom-scrollbar" placeholder="Type a new comment... (Press Enter to post)" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.addComment('${prop.id}'); }"></textarea>
-                    <button onclick="window.addComment('${prop.id}')" class="bg-brand-gold hover:bg-yellow-500 text-gray-900 px-5 py-2.5 rounded-lg text-sm font-bold transition-colors cursor-pointer shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-                        Post <i class="fa-solid fa-paper-plane ml-1 text-xs"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        container.appendChild(commentsDiv);
-
-        // Auto-scroll comments to bottom when opened
-        if (commentsIsOpen) {
-            setTimeout(() => {
-                const scrollBox = commentsDiv.querySelector('.overflow-y-auto');
-                if (scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight;
-            }, 10);
-        }
 
         // --- 3. STANDARD TASKS WORKFLOW ---
         for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
@@ -1463,6 +1476,31 @@
                         </div>
                     `;
 
+                    // Generate Dynamic In-line Template UI specifically for Draft/Approved tasks
+                    let templateActionHtml = '';
+                    let templateBoxHtml = '';
+                    
+                    if (t.title.toLowerCase().includes('draft')) {
+                        templateActionHtml = `
+                            <div class="w-px h-3 bg-gray-700 mx-3"></div>
+                            <button onclick="window.toggleTaskTemplate(${t.originalIndex})" class="text-[10px] uppercase tracking-wider font-bold text-brand-cyan/70 hover:text-brand-cyan flex items-center gap-1.5 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-file-code"></i> Copy / Template
+                            </button>
+                        `;
+                        
+                        // Default state handling for templates
+                        const templateIsOpen = window.sectionToggleState[`template_${t.originalIndex}`] === 'open';
+                        
+                        templateBoxHtml = `
+                            <div id="taskTemplateUI_${t.originalIndex}" class="${templateIsOpen ? 'block' : 'hidden'} pl-8 sm:pl-14 mt-3 mb-1 pr-4 w-full">
+                                <textarea id="taskTemplateInput_${t.originalIndex}" onchange="window.saveTaskTemplate(${t.originalIndex})" class="w-full max-w-3xl h-24 bg-gray-950/50 border border-brand-cyan/30 rounded-lg p-3 text-xs text-gray-300 focus:border-brand-cyan focus:outline-none transition-colors resize-y custom-scrollbar placeholder-gray-600" placeholder="Paste generated text blast, FB draft, or final approved copy here...">${escapeHtml(t.templateText || "")}</textarea>
+                                <div class="max-w-3xl flex justify-end mt-1">
+                                    <span class="text-[9px] uppercase tracking-wider text-brand-cyan opacity-50">Saves automatically on blur</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     row.innerHTML = `
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div class="flex items-start gap-4 flex-1 ${paddingAdjust}">
@@ -1471,10 +1509,11 @@
                                     <p class="text-sm font-bold ${t.completed ? 'text-gray-500 line-through' : 'text-gray-100'} leading-tight inline-flex items-center">
                                         ${t.title}
                                     </p>
-                                    <div class="mt-1.5">
+                                    <div class="mt-1.5 flex items-center">
                                         <button onclick="window.toggleAddSubtaskUI(${t.originalIndex})" class="text-[10px] uppercase tracking-wider font-bold text-brand-purple/70 hover:text-brand-purple flex items-center gap-1 transition-colors cursor-pointer">
                                             <i class="fa-solid fa-plus"></i> Add Subtask
                                         </button>
+                                        ${templateActionHtml}
                                     </div>
                                 </div>
                             </div>
@@ -1485,6 +1524,7 @@
                                 <span class="${weightColor} text-xs font-black px-2 py-1 rounded w-12 text-center transition-colors">+${t.weight}%</span>
                             </div>
                         </div>
+                        ${templateBoxHtml}
                         ${subtasksHtml}
                         ${addSubtaskInputHtml}
                     `;
@@ -1498,6 +1538,31 @@
             sectionDiv.appendChild(listDiv);
             container.appendChild(sectionDiv);
         }
+    }
+
+    // Task Specific Template Logic
+    window.toggleTaskTemplate = function(taskIndex) {
+        const ui = document.getElementById(`taskTemplateUI_${taskIndex}`);
+        if (!window.sectionToggleState) window.sectionToggleState = {};
+        
+        if (ui.classList.contains('hidden')) {
+            ui.classList.remove('hidden');
+            window.sectionToggleState[`template_${taskIndex}`] = 'open';
+            document.getElementById(`taskTemplateInput_${taskIndex}`).focus();
+        } else {
+            ui.classList.add('hidden');
+            window.sectionToggleState[`template_${taskIndex}`] = 'closed';
+        }
+    }
+
+    window.saveTaskTemplate = async function(taskIndex) {
+        const prop = propertiesData.find(p => p.id === activePropertyId);
+        if (!prop) return;
+        
+        const textVal = document.getElementById(`taskTemplateInput_${taskIndex}`).value;
+        prop.tasks[taskIndex].templateText = textVal;
+        
+        await window.savePropertyData(prop);
     }
 
     window.toggleSection = function(sectionKey) {
