@@ -168,20 +168,23 @@
         <div class="flex items-center gap-4">
             <img src="icon.svg" alt="TCHB Icon" class="h-10 w-10 object-contain" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
             <div class="h-8 w-px bg-gray-700 hidden md:block"></div>
-            <div class="flex items-center gap-3">
-                <h1 class="text-lg font-bold text-white tracking-tight">Dispositions Team Dashboard</h1>
-                <!-- Logged In User Display Badge -->
-                <div id="userBadge" class="hidden items-center gap-2 bg-gray-800/60 border border-gray-700/60 rounded-lg px-2.5 py-1">
-                    <div class="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse"></div>
-                    <span id="userEmailDisplay" class="text-[10px] font-bold text-gray-300 lowercase tracking-wide"></span>
+            <div class="flex items-center gap-5">
+                <h1 class="text-lg font-bold text-white tracking-tight mr-2">Dispositions Team Dashboard</h1>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Logged In User Display Badge -->
+                    <div id="userBadge" class="hidden items-center gap-2 bg-gray-800/60 border border-gray-700/60 rounded-lg px-2.5 py-1">
+                        <div class="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse"></div>
+                        <span id="userEmailDisplay" class="text-[10px] font-bold text-gray-300 lowercase tracking-wide"></span>
+                    </div>
+                    <button onclick="window.logOut()" class="text-sm font-bold text-gray-500 hover:text-brand-crimson transition-colors cursor-pointer" title="Sign Out">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
                 </div>
-                <button onclick="window.logOut()" class="text-xs font-bold text-gray-500 hover:text-brand-crimson transition-colors cursor-pointer ml-1" title="Sign Out">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </button>
                 
                 <!-- ACTIVE USERS TOGGLE -->
-                <div class="relative ml-1 border-l border-gray-700 pl-3">
-                    <button onclick="window.toggleActiveUsers(event)" class="flex items-center gap-2 bg-gray-800/60 border border-gray-700/60 hover:bg-gray-700/60 rounded-lg px-2.5 py-1.5 cursor-pointer transition-colors shadow-sm">
+                <div class="relative border-l border-gray-700 pl-5">
+                    <button onclick="window.toggleActiveUsers(event)" class="flex items-center gap-2 bg-gray-800/60 border border-gray-700/60 hover:bg-gray-700/60 rounded-lg px-3 py-1.5 cursor-pointer transition-colors shadow-sm">
                         <i class="fa-solid fa-users text-brand-emerald text-[10px]"></i>
                         <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider hidden sm:inline">Active Users</span>
                     </button>
