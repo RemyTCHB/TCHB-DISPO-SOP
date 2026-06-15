@@ -122,10 +122,8 @@
   </div>
 
   <!-- SCROLL TO TOP BUTTON -->
-  <button id="scrollToTopBtn" onclick="window.scrollToTop()" class="fixed right-6 z-[104] w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-all cursor-pointer opacity-0 pointer-events-none translate-y-4 p-1.5" style="bottom: 1.5rem; transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;">
-      <div id="scrollToTopIcon" class="w-full h-full bg-gray-800/80 rounded-full flex items-center justify-center border border-gray-500 text-white shadow-inner">
-          <i class="fa-solid fa-arrow-up text-xl"></i>
-      </div>
+  <button id="scrollToTopBtn" onclick="window.scrollToTop()" class="fixed right-6 z-[104] w-14 h-14 rounded-full bg-gray-800 border-2 border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-all cursor-pointer opacity-0 pointer-events-none translate-y-4 text-white" style="bottom: 1.5rem; transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;">
+      <i id="scrollToTopIcon" class="fa-solid fa-arrow-up text-xl"></i>
   </button>
 
   <!-- CURSOR OVERLAYS -->
@@ -587,10 +585,8 @@
             </div>
             
             <!-- FAB Button -->
-            <button id="chatFabBtn" onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50 p-1.5">
-                <div class="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden border border-gray-300">
-                    <img src="icon.svg" class="w-full h-full object-contain p-0.5 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
-                </div>
+            <button id="chatFabBtn" onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-white border-2 border-gray-300 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50 overflow-hidden">
+                <img src="icon.svg" class="w-full h-full object-contain p-1.5 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
                 <!-- Unread Badge -->
                 <span id="chatUnreadBadge" class="absolute -top-1 -right-1 bg-brand-crimson text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0f1423] shadow-md hidden z-10">0</span>
             </button>
