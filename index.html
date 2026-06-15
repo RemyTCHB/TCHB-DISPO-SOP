@@ -2154,40 +2154,51 @@
             const appModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
             const authModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-            const messagingModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js");
+            
+            // Isolate messaging so a tracking reset doesn't crash the whole login screen!
+            let messagingModule = null;
+            try {
+                messagingModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js");
+            } catch (err) {
+                console.warn("Push messaging blocked by browser:", err);
+            }
 
             const app = appModule.initializeApp(firebaseConfig);
             firebaseAuth = authModule.getAuth(app);
             db = firestoreModule.getFirestore(app);
 
-            // Initialize FCM for foreground pushes
+            // Initialize Google Provider
+            googleProvider = new authModule.GoogleAuthProvider();
+            googleProvider.setCustomParameters({ hd: 'totalchb.com' });
+            window.firebaseSignInWithPopup = authModule.signInWithPopup;
+            window.firebaseSignOut = authModule.signOut;
+
+            // Initialize FCM for foreground pushes safely
             let messaging = null;
-            try {
-                messaging = messagingModule.getMessaging(app);
-                messagingModule.onMessage(messaging, (payload) => {
-                    const toast = document.getElementById('pushToast');
-                    document.getElementById('pushToastTitle').innerText = payload.notification.title;
-                    document.getElementById('pushToastBody').innerText = payload.notification.body;
-                    toast.classList.remove('hidden');
-                    
-                    setTimeout(() => toast.classList.remove('translate-x-[150%]'), 50);
-                    setTimeout(() => { toast.classList.add('translate-x-[150%]'); }, 6000);
-                });
-            } catch (err) {
-                console.warn("Messaging not supported on this environment", err);
+            if (messagingModule) {
+                try {
+                    messaging = messagingModule.getMessaging(app);
+                    messagingModule.onMessage(messaging, (payload) => {
+                        const toast = document.getElementById('pushToast');
+                        document.getElementById('pushToastTitle').innerText = payload.notification.title;
+                        document.getElementById('pushToastBody').innerText = payload.notification.body;
+                        toast.classList.remove('hidden');
+                        
+                        setTimeout(() => toast.classList.remove('translate-x-[150%]'), 50);
+                        setTimeout(() => { toast.classList.add('translate-x-[150%]'); }, 6000);
+                    });
+                } catch (err) {
+                    console.warn("Messaging not supported on this environment", err);
+                }
             }
 
             // Function to request VAPID token (UPDATED FOR EXPLICIT SW REGISTRATION)
             window.requestPushToken = async function() {
-                if(!messaging) return null;
+                if(!messaging || !messagingModule) return null;
                 try {
-                    // 1. Explicitly register the Service Worker first
                     const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-                    
-                    // 2. Request permission from the user
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
-                        // 3. Get the token using our specific Service Worker registration
                         const token = await messagingModule.getToken(messaging, { 
                             vapidKey: "BAOBgrEDGG_WLKRjNEXU_L2_kHZrWTVFGUxN5gm7Udkkh9p0l2Tc8sTZhErN_dZmpxD-EzjEnNfhYX7R3XHrRhw",
                             serviceWorkerRegistration: registration
@@ -2426,6 +2437,11 @@
             
         } catch (e) {
             console.error("Firebase dynamic import failed:", e);
+            const errorMsg = document.getElementById('gateErrorMessage');
+            if (errorMsg) {
+                errorMsg.innerHTML = "System Error: " + e.message + "<br/><br/>Try refreshing the page or checking your internet connection.";
+                errorMsg.classList.remove('hidden');
+            }
             initLocalApp();
         }
     }
