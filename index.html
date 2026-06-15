@@ -288,10 +288,15 @@
                             
                             <div class="p-4 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 
-                                <!-- ENABLE PUSH BUTTON (Now uses Native Frontend API) -->
-                                <button id="enablePushBtn" onclick="window.enablePush()" class="w-full bg-gradient-to-r from-brand-purple to-brand-cyan hover:from-indigo-500 hover:to-cyan-400 text-white text-xs font-bold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer flex justify-center items-center gap-2">
-                                    <i class="fa-regular fa-bell animate-shake"></i> Enable Native Push Alerts
-                                </button>
+                                <!-- ENABLE PUSH BUTTON & TEST BUTTON -->
+                                <div class="flex gap-2">
+                                    <button id="enablePushBtn" onclick="window.enablePush()" class="flex-1 bg-gradient-to-r from-brand-purple to-brand-cyan hover:from-indigo-500 hover:to-cyan-400 text-white text-xs font-bold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer flex justify-center items-center gap-2">
+                                        <i class="fa-regular fa-bell animate-shake"></i> Enable Native Push Alerts
+                                    </button>
+                                    <button onclick="window.testNotification()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer border border-gray-600 flex justify-center items-center" title="Test Notification">
+                                        Test
+                                    </button>
+                                </div>
 
                                 <!-- Toggle Item -->
                                 <div class="flex items-center justify-between border-t border-gray-800 pt-4">
@@ -360,12 +365,11 @@
                                           <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-crimson"></div>
                                         </label>
                                     </div>
-                                    <select id="pref_reminder_interval" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-[10px] font-bold text-gray-300 focus:outline-none focus:border-brand-crimson transition-colors cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <option value="2">Every 2 Hours</option>
-                                        <option value="4" selected>Every 4 Hours</option>
-                                        <option value="8">Every 8 Hours</option>
-                                        <option value="24">Once a Day (24 Hours)</option>
-                                    </select>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Remind me every</span>
+                                        <input type="number" id="pref_reminder_interval" value="4" min="1" max="168" class="w-16 bg-gray-950 border border-gray-700 rounded-lg p-1.5 text-xs font-bold text-center text-white focus:outline-none focus:border-brand-crimson transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Hours</span>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -2225,13 +2229,26 @@
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         btn.innerHTML = '<i class="fa-solid fa-check"></i> Native Notifications Enabled!';
-                        btn.className = "w-full bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
+                        btn.className = "flex-1 bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
+                        new Notification("Push Enabled \u2705", { body: "You will now receive native desktop alerts!", icon: '/icon.svg' });
                     } else {
-                        btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Permission Denied by Browser';
-                        btn.className = "w-full bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
+                        btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Permission Denied';
+                        btn.className = "flex-1 bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
                     }
                 } catch(e) {
                     console.error("Native Push Error:", e);
+                }
+            }
+
+            // TEST NOTIFICATION FUNCTION
+            window.testNotification = function() {
+                if (Notification.permission === 'granted') {
+                    new Notification("Test Successful \uD83D\uDE80", { 
+                        body: "Your OS is successfully receiving notifications from TCHB Dispo Ops.", 
+                        icon: '/icon.svg' 
+                    });
+                } else {
+                    alert("Please click 'Enable Native Push Alerts' first to grant browser permissions!");
                 }
             }
 
@@ -2257,8 +2274,10 @@
                     snapshot.docChanges().forEach(async (change) => {
                         if (change.type === 'added') {
                             const data = change.doc.data();
-                            // Only show if it was created AFTER you logged in, and you didn't send it yourself
-                            if (data.timestamp > sessionLoginTime && data.sender !== currentUser.email) {
+                            
+                            // *** SELF-MUTE REMOVED FOR TESTING! ***
+                            // We removed: && data.sender !== currentUser.email
+                            if (data.timestamp > sessionLoginTime) {
                                 
                                 // Fetch this user's current settings
                                 const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
