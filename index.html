@@ -113,7 +113,7 @@
 </head>
 <body class="font-sans antialiased relative selection:bg-brand-crimson selection:text-white capitalize">
 
-  <!-- TAILWIND SAFELIST (Forces compilation of dynamic phase & strategy classes once and for all) -->
+  <!-- TAILWIND SAFELIST -->
   <div class="hidden bg-brand-crimson bg-brand-crimson/20 border-brand-crimson border-brand-crimson/30 text-brand-crimson shadow-[0_0_15px_rgba(220,38,38,0.4)] group-hover:shadow-[0_0_25px_rgba(220,38,38,0.2)] bg-brand-purple bg-brand-purple/20 border-brand-purple border-brand-purple/30 text-brand-purple shadow-[0_0_15px_rgba(79,70,229,0.4)] group-hover:shadow-[0_0_25px_rgba(79,70,229,0.2)] bg-brand-emerald bg-brand-emerald/20 border-brand-emerald border-brand-emerald/30 border-brand-emerald/50 text-brand-emerald text-gray-900 shadow-[0_0_15px_rgba(16,185,129,0.4)] group-hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] bg-brand-cyan bg-brand-cyan/20 border-brand-cyan border-brand-cyan/30 border-brand-cyan/50 text-brand-cyan shadow-[0_0_15px_rgba(6,182,212,0.4)] group-hover:shadow-[0_0_25px_rgba(6,182,212,0.2)] bg-brand-gold bg-brand-gold/20 border-brand-gold border-brand-gold/30 border-brand-gold/50 text-brand-gold bg-pink-500/20 text-pink-400 border-pink-500/50"></div>
 
   <!-- FOREGROUND PUSH TOAST -->
@@ -128,8 +128,10 @@
   </div>
 
   <!-- SCROLL TO TOP BUTTON -->
-  <button id="scrollToTopBtn" onclick="window.scrollToTop()" class="fixed right-6 z-[104] w-14 h-14 rounded-full bg-gray-800 border-2 border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-all cursor-pointer opacity-0 pointer-events-none translate-y-4 text-white" style="bottom: 1.5rem; transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;">
-      <i id="scrollToTopIcon" class="fa-solid fa-arrow-up text-xl"></i>
+  <button id="scrollToTopBtn" onclick="window.scrollToTop()" class="fixed right-6 z-[104] w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-all cursor-pointer opacity-0 pointer-events-none translate-y-4 p-1.5" style="bottom: 1.5rem; transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;">
+      <div id="scrollToTopIcon" class="w-full h-full bg-gray-800/80 rounded-full flex items-center justify-center border border-gray-500 text-white shadow-inner">
+          <i class="fa-solid fa-arrow-up text-xl"></i>
+      </div>
   </button>
 
   <!-- CURSOR OVERLAYS -->
@@ -261,25 +263,20 @@
             
             <div class="h-8 w-px bg-gray-700 hidden md:block shrink-0"></div>
             
-            <!-- RIGHT SIDE CONTROLS -->
             <div class="flex items-center gap-3 shrink-0">
                 
-                <!-- Logged In User Display Badge -->
                 <div id="userBadge" class="hidden items-center gap-2 bg-gray-800/60 border border-gray-700/60 rounded-lg px-2.5 h-8">
                     <div class="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse shrink-0"></div>
                     <span id="userEmailDisplay" class="text-[10px] font-bold text-gray-300 lowercase tracking-wide truncate max-w-[130px]"></span>
                 </div>
 
-                <!-- STACKED: Notification Bell & Logout Button -->
                 <div class="flex flex-col justify-between items-center h-8 shrink-0 py-0.5">
                     
-                    <!-- Notification Preferences Center -->
                     <div class="relative flex items-center justify-center shrink-0">
                         <button onclick="window.toggleNotificationSettings(event)" class="text-[11px] text-gray-500 hover:text-brand-cyan transition-colors cursor-pointer leading-none block" title="Alert Preferences">
                             <i class="fa-solid fa-bell"></i>
                         </button>
                         
-                        <!-- Notification Settings Dropdown -->
                         <div id="notifSettingsDropdown" class="absolute right-0 top-full mt-5 w-72 sm:w-80 bg-[#0f1423]/95 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] hidden flex-col z-[120] overflow-hidden origin-top-right transition-all text-left">
                             <div class="bg-gray-800/80 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
                                 <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-sliders text-brand-cyan"></i> Alert Preferences</span>
@@ -288,12 +285,10 @@
                             
                             <div class="p-4 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 
-                                <!-- ENABLE PUSH BUTTON -->
                                 <button id="enablePushBtn" onclick="window.enablePush()" class="w-full bg-gradient-to-r from-brand-purple to-brand-cyan hover:from-indigo-500 hover:to-cyan-400 text-white text-xs font-bold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer flex justify-center items-center gap-2">
                                     <i class="fa-regular fa-bell animate-shake"></i> Enable Device Push Notifications
                                 </button>
 
-                                <!-- Toggle Item -->
                                 <div class="flex items-center justify-between border-t border-gray-800 pt-4">
                                     <div class="pr-3">
                                         <p class="text-xs font-bold text-gray-200">Offline Comment Alerts</p>
@@ -304,7 +299,6 @@
                                       <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-cyan"></div>
                                     </label>
                                 </div>
-                                <!-- Toggle Item -->
                                 <div class="flex items-center justify-between">
                                     <div class="pr-3">
                                         <p class="text-xs font-bold text-gray-200">New Asset Deployments</p>
@@ -315,7 +309,6 @@
                                       <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-cyan"></div>
                                     </label>
                                 </div>
-                                <!-- Toggle Item -->
                                 <div class="flex items-center justify-between">
                                     <div class="pr-3">
                                         <p class="text-xs font-bold text-gray-200">Phase Completions</p>
@@ -326,7 +319,6 @@
                                       <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-cyan"></div>
                                     </label>
                                 </div>
-                                <!-- Toggle Item -->
                                 <div class="flex items-center justify-between">
                                     <div class="pr-3">
                                         <p class="text-xs font-bold text-brand-emerald"><i class="fa-solid fa-arrow-turn-down rotate-90 mr-1"></i> Task Turn Alerts</p>
@@ -337,7 +329,6 @@
                                       <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-emerald"></div>
                                     </label>
                                 </div>
-                                <!-- Toggle Item -->
                                 <div class="flex items-center justify-between border-t border-gray-800 pt-4">
                                     <div class="pr-3">
                                         <p class="text-xs font-bold text-brand-gold"><i class="fa-regular fa-sun mr-1"></i> 10 AM Daily Briefing</p>
@@ -348,7 +339,6 @@
                                       <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-gold"></div>
                                     </label>
                                 </div>
-                                <!-- Toggle Item w/ Sub Menu -->
                                 <div class="flex flex-col border-t border-gray-800 pt-4">
                                     <div class="flex items-center justify-between mb-2">
                                         <div class="pr-3">
@@ -360,11 +350,12 @@
                                           <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-crimson"></div>
                                         </label>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Remind me every</span>
-                                        <input type="number" id="pref_reminder_interval" value="4" min="1" max="168" class="w-16 bg-gray-950 border border-gray-700 rounded-lg p-1.5 text-xs font-bold text-center text-white focus:outline-none focus:border-brand-crimson transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Hours</span>
-                                    </div>
+                                    <select id="pref_reminder_interval" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-[10px] font-bold text-gray-300 focus:outline-none focus:border-brand-crimson transition-colors cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <option value="2">Every 2 Hours</option>
+                                        <option value="4" selected>Every 4 Hours</option>
+                                        <option value="8">Every 8 Hours</option>
+                                        <option value="24">Once a Day (24 Hours)</option>
+                                    </select>
                                 </div>
                             </div>
                             
@@ -376,7 +367,6 @@
                         </div>
                     </div>
 
-                    <!-- Logout Button -->
                     <button onclick="window.logOut()" class="text-[11px] text-gray-500 hover:text-brand-crimson transition-colors cursor-pointer leading-none block" title="Sign Out">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </button>
@@ -385,21 +375,18 @@
             
             <div class="h-8 w-px bg-gray-700 hidden md:block shrink-0"></div>
             
-            <!-- ACTIVE USERS TOGGLE (Fixed Height) -->
             <div class="relative shrink-0">
                 <button onclick="window.toggleActiveUsers(event)" class="flex items-center gap-2 bg-gray-800/60 border border-gray-700/60 hover:bg-gray-700/60 rounded-lg px-3 h-8 cursor-pointer transition-colors shadow-sm">
                     <i class="fa-solid fa-users text-brand-emerald text-[10px]"></i>
                     <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider hidden sm:inline">Active Users</span>
                     <span id="activeUserCountBtn" class="bg-brand-emerald/10 text-brand-emerald border border-brand-emerald/30 px-1.5 py-0.5 rounded text-[10px] font-black leading-none flex items-center justify-center">0</span>
                 </button>
-                <!-- DROPDOWN -->
                 <div id="activeUsersDropdown" class="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-52 bg-[#0f1423] border border-gray-700 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.15)] hidden flex-col z-[100] overflow-hidden">
                     <div class="bg-gray-800/80 px-3 py-2 border-b border-gray-700 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex justify-between items-center">
                         <span>Personnel Online</span>
                         <span id="activeUserCount" class="text-brand-emerald">0</span>
                     </div>
                     <div id="activeUsersList" class="flex flex-col max-h-48 overflow-y-auto p-1.5 gap-1">
-                        <!-- Populated by JS -->
                     </div>
                 </div>
             </div>
@@ -590,8 +577,10 @@
             </div>
             
             <!-- FAB Button -->
-            <button id="chatFabBtn" onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-white border-2 border-gray-300 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50 overflow-hidden">
-                <img src="icon.svg" class="w-full h-full object-contain p-1.5 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+            <button id="chatFabBtn" onclick="window.toggleChat()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-105 transition-transform group relative cursor-pointer z-50 p-1.5">
+                <div class="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden border border-gray-300">
+                    <img src="icon.svg" class="w-full h-full object-contain p-0.5 group-hover:opacity-80 transition-opacity" onerror="this.src='https://placehold.co/40x40/111827/ffffff?text=T'">
+                </div>
                 <!-- Unread Badge -->
                 <span id="chatUnreadBadge" class="absolute -top-1 -right-1 bg-brand-crimson text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0f1423] shadow-md hidden z-10">0</span>
             </button>
@@ -650,8 +639,6 @@
     window.pendingCSVContent = null;
     window.currentDashboardStrategy = "All";
     window.currentDashboardSort = "edited_desc";
-
-    let sessionLoginTime = Date.now(); // Used to filter out old notifications
 
     // --- 1. AUTHENTICATION LOGIC ---
     window.signInWithGoogle = async function() {
@@ -929,7 +916,6 @@
         const readReceipts = prop.readBy || {};
         const lastRead = readReceipts[myPrefix] || 0;
         
-        // Count messages strictly sent BY OTHERS after my last read time
         const unreadCount = (prop.comments || []).filter(c => c.timestamp > lastRead && c.author.toLowerCase() !== myPrefix).length;
         
         if (unreadCount > 0 && !window.isChatOpen) {
@@ -1007,7 +993,7 @@
         const innerIcon = document.getElementById('scrollToTopIcon');
         if (innerIcon) {
             innerIcon.classList.remove('animate-rocket-up');
-            void innerIcon.offsetWidth; // trigger reflow
+            void innerIcon.offsetWidth; 
             innerIcon.classList.add('animate-rocket-up');
         }
         setTimeout(() => {
@@ -1056,7 +1042,7 @@
             document.getElementById('nav-sop').classList.remove('text-gray-300');
             if(window.isChatOpen) window.toggleChat();
             if(scrollBtn) scrollBtn.style.bottom = '1.5rem';
-            window.renderSOPTimeline('Wholesale'); // Default load
+            window.renderSOPTimeline('Wholesale');
         }
     }
 
@@ -1087,10 +1073,9 @@
     function parseSOWCSV(csvText) {
         if (!csvText) return [];
         const rows = csvText.split('\n').filter(r => r.trim().length > 0);
-        if (rows.length <= 1) return []; // Only headers or empty
+        if (rows.length <= 1) return []; 
         const dataRows = rows.slice(1);
         return dataRows.map((row, i) => {
-            // Simple split handling quotes optionally
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
             const task = cols[0] || `SOW Item ${i+1}`;
             const detail = cols[1] ? ` - ${cols[1]}` : '';
@@ -1123,7 +1108,6 @@
             };
         });
 
-        // Inject SOW tasks if provided for Fix & Flip
         if (strategy === "Fix & Flip" && csvContent) {
             const sowItems = parseSOWCSV(csvContent);
             if (sowItems.length > 0) {
@@ -1134,7 +1118,6 @@
                     isDefault: true
                 }));
                 
-                // Adjust weights: SOW gets 30%, take 10% from Rough-In, Finishes, and Final Polish
                 tasks.forEach(t => {
                     if (t.mainTask === "Rough-In & Trades" || t.mainTask === "Finishes" || t.mainTask === "Final Polish") {
                         t.weight = Math.max(5, t.weight - 10);
@@ -1196,11 +1179,6 @@
         
         if (!currentUser) { propertiesData.unshift(newProp); }
         await window.savePropertyData(newProp);
-        
-        // PUSH NOTIFICATION (Frontend trigger)
-        if(window.sendFrontendPush) {
-            window.sendFrontendPush('new_assets', 'New Asset Deployed 🚀', `${address} has been initialized in the ${strategy} pipeline.`);
-        }
         
         window.closeAssetModal();
         
@@ -1490,7 +1468,7 @@
         const fab = document.getElementById('chatFabBtn');
         if (fab) {
             fab.classList.remove('animate-jelly-pop');
-            void fab.offsetWidth; // trigger reflow
+            void fab.offsetWidth; 
             fab.classList.add('animate-jelly-pop');
         }
 
@@ -1501,14 +1479,12 @@
             chatWin.classList.remove('hidden');
             chatWin.classList.add('flex');
             
-            // Log read receipt
             if (activePropertyId) {
                 const prop = propertiesData.find(p => p.id === activePropertyId);
                 if (prop) {
                     const myPrefix = currentUser && currentUser.email ? currentUser.email.split('@')[0].toLowerCase() : "agent";
                     prop.readBy = prop.readBy || {};
                     prop.readBy[myPrefix] = Date.now();
-                    // Save quietly to update DB without wrecking local focus
                     await window.savePropertyData(prop, true); 
                     updateChatBadge(prop);
                     renderChatMessages(prop);
@@ -1550,11 +1526,6 @@
 
         input.value = '';
         await window.savePropertyData(prop); 
-
-        // PUSH NOTIFICATION (Frontend trigger for offline users)
-        if(window.sendFrontendPush) {
-            window.sendFrontendPush('comments', 'New Comment on ' + prop.address, `${authorName} says: "${text}"`);
-        }
     }
 
     function renderChatMessages(prop) {
@@ -1580,7 +1551,6 @@
             const authorColorClass = getAgentColorClass(authorLower, 'text');
             const isMe = myPrefix === authorLower;
             
-            // Determine who has read this specific message
             const readers = Object.entries(prop.readBy || {})
                 .filter(([u, t]) => t >= c.timestamp && u !== authorLower)
                 .map(x => x[0]);
@@ -1641,12 +1611,10 @@
         document.getElementById('tracker-percent-text').innerText = `${stats.percent}%`;
         document.getElementById('tracker-progress-bar').style.width = `${stats.percent}%`;
 
-        // Preserve focus state during re-render
         let focusedId = document.activeElement ? document.activeElement.id : null;
 
         renderChatMessages(prop);
 
-        // Group tasks by Phase -> MainTask
         const structure = {};
         prop.tasks.forEach((t, i) => {
             if (!structure[t.phase]) structure[t.phase] = {};
@@ -1657,7 +1625,6 @@
         const container = document.getElementById('tracker-task-container');
         container.innerHTML = '';
 
-        // --- 3. STANDARD TASKS WORKFLOW ---
         for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
             const ui = getPhaseUI(phaseName);
             
@@ -2091,21 +2058,8 @@
     window.toggleTask = async function(taskIndex, isCompleted) {
         const prop = propertiesData.find(p => p.id === activePropertyId);
         if (!prop) return;
-        
-        const wasCompleteBefore = prop.tasks[taskIndex].completed;
         prop.tasks[taskIndex].completed = isCompleted;
         await window.savePropertyData(prop);
-
-        // FRONTEND PUSH: Check if this action completed an entire phase
-        if (isCompleted && !wasCompleteBefore && window.sendFrontendPush) {
-            const phaseName = prop.tasks[taskIndex].phase;
-            const allTasksInPhase = prop.tasks.filter(t => t.phase === phaseName);
-            const isPhaseCompleteNow = allTasksInPhase.every(t => t.completed && (!t.subtasks || t.subtasks.every(s => s.completed)));
-            
-            if (isPhaseCompleteNow) {
-                window.sendFrontendPush('completions', 'Phase Complete! ✅', `${prop.address} just reached 100% for ${phaseName}.`);
-            }
-        }
     }
 
     window.changeAssignee = async function(taskIndex, newAssignee) {
@@ -2149,17 +2103,12 @@
     window.toggleSubtask = async function(taskIndex, subtaskIndex, isCompleted) {
         const prop = propertiesData.find(p => p.id === activePropertyId);
         if (!prop) return;
-        
-        const wasTaskCompleteBefore = prop.tasks[taskIndex].completed;
         prop.tasks[taskIndex].subtasks[subtaskIndex].completed = isCompleted;
         
-        let isTaskCompleteNow = false;
-
         if (prop.tasks[taskIndex].isSOW) {
             const allDone = prop.tasks[taskIndex].subtasks.every(s => s.completed);
             if (allDone) {
                 prop.tasks[taskIndex].completed = true;
-                isTaskCompleteNow = true;
                 const sectionKey = btoa(encodeURIComponent(prop.tasks[taskIndex].phase + "_" + prop.tasks[taskIndex].mainTask)).replace(/=/g, '');
                 if (window.sectionToggleState) window.sectionToggleState[sectionKey] = 'closed';
             } else {
@@ -2168,17 +2117,6 @@
         }
         
         await window.savePropertyData(prop);
-
-        // FRONTEND PUSH: Check if completing this subtask triggered phase completion
-        if (isTaskCompleteNow && !wasTaskCompleteBefore && window.sendFrontendPush) {
-            const phaseName = prop.tasks[taskIndex].phase;
-            const allTasksInPhase = prop.tasks.filter(t => t.phase === phaseName);
-            const isPhaseCompleteNow = allTasksInPhase.every(t => t.completed && (!t.subtasks || t.subtasks.every(s => s.completed)));
-            
-            if (isPhaseCompleteNow) {
-                window.sendFrontendPush('completions', 'Phase Complete! ✅', `${prop.address} just reached 100% for ${phaseName}.`);
-            }
-        }
     }
 
     window.deleteSubtask = async function(taskIndex, subtaskIndex) {
@@ -2218,7 +2156,7 @@
             window.firebaseSignInWithPopup = authModule.signInWithPopup;
             window.firebaseSignOut = authModule.signOut;
 
-            // Setup Foreground Messaging Listener
+            // Initialize FCM for foreground pushes
             let messaging = null;
             try {
                 messaging = messagingModule.getMessaging(app);
@@ -2227,6 +2165,7 @@
                     document.getElementById('pushToastTitle').innerText = payload.notification.title;
                     document.getElementById('pushToastBody').innerText = payload.notification.body;
                     toast.classList.remove('hidden');
+                    
                     setTimeout(() => toast.classList.remove('translate-x-[150%]'), 50);
                     setTimeout(() => { toast.classList.add('translate-x-[150%]'); }, 6000);
                 });
@@ -2234,109 +2173,55 @@
                 console.warn("Messaging not supported on this environment", err);
             }
 
-            // --- NATIVE FRONTEND NOTIFICATION ENGINE ---
-            window.enablePush = async function() {
-                const btn = document.getElementById('enablePushBtn');
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authorizing...';
-                
+            // Function to request VAPID token (UPDATED FOR EXPLICIT SW REGISTRATION)
+            window.requestPushToken = async function() {
+                if(!messaging) return null;
                 try {
+                    // 1. Explicitly register the Service Worker first
+                    const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+                    
+                    // 2. Request permission from the user
                     const permission = await Notification.requestPermission();
-                    if (permission === 'granted' && messaging) {
-                        const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-                        
+                    if (permission === 'granted') {
+                        // 3. Get the token using our specific Service Worker registration
                         const token = await messagingModule.getToken(messaging, { 
                             vapidKey: "BAOBgrEDGG_WLKRjNEXU_L2_kHZrWTVFGUxN5gm7Udkkh9p0l2Tc8sTZhErN_dZmpxD-EzjEnNfhYX7R3XHrRhw",
                             serviceWorkerRegistration: registration
                         });
-                        
-                        if (token && currentUser && db) {
-                            const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
-                            await firestoreModule.setDoc(docRef, {
-                                fcmTokens: firestoreModule.arrayUnion(token)
-                            }, { merge: true });
-                        }
-
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Device Linked Successfully!';
-                        btn.className = "w-full bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
-                        new Notification("Push Enabled \u2705", { body: "You will now receive native desktop alerts!", icon: '/icon.svg' });
+                        return token;
                     } else {
-                        btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Permission Denied';
-                        btn.className = "w-full bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
+                        console.warn("User blocked notifications.");
                     }
-                } catch(e) {
-                    console.error("Native Push Error:", e);
-                    btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Setup Failed';
+                } catch(e) { 
+                    console.error("FCM Token Generation Failed:", e); 
+                }
+                return null;
+            }
+
+            // Action for Enable Push Notifications button
+            window.enablePush = async function() {
+                const btn = document.getElementById('enablePushBtn');
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authorizing...';
+                
+                const token = await window.requestPushToken();
+                if (token && currentUser && db) {
+                    const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
+                    await firestoreModule.setDoc(docRef, {
+                        fcmTokens: firestoreModule.arrayUnion(token)
+                    }, { merge: true });
+                    
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Device Linked Successfully!';
+                    btn.className = "w-full bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Setup Failed (Check Console)';
                     btn.className = "w-full bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
                 }
             }
 
-            // Function to dispatch alerts to everyone via Database
-            window.sendFrontendPush = async function(prefKey, title, body) {
-                if (!db || !currentUser) return;
-                const notifRef = firestoreModule.collection(db, 'artifacts', appId, 'public', 'data', 'global_notifications');
-                await firestoreModule.addDoc(notifRef, {
-                    type: prefKey,
-                    title: title,
-                    body: body,
-                    timestamp: Date.now(),
-                    sender: currentUser.email
-                });
-            }
-
-            // Function to listen for incoming alerts from others
-            window.listenToNotifications = function() {
-                if (!db || !currentUser) return;
-                const notifRef = firestoreModule.collection(db, 'artifacts', appId, 'public', 'data', 'global_notifications');
-                
-                firestoreModule.onSnapshot(notifRef, (snapshot) => {
-                    snapshot.docChanges().forEach(async (change) => {
-                        if (change.type === 'added') {
-                            const data = change.doc.data();
-                            
-                            // *** SELF-MUTE REMOVED FOR TESTING! ***
-                            // We removed: && data.sender !== currentUser.email
-                            if (data.timestamp > sessionLoginTime) {
-                                
-                                // Fetch this user's current settings
-                                const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
-                                const snap = await firestoreModule.getDoc(docRef);
-                                let allowNotif = false;
-                                if(snap.exists()) {
-                                    const prefs = snap.data();
-                                    if(prefs[data.type] === true) allowNotif = true;
-                                }
-
-                                if(allowNotif) {
-                                    // 1. Show In-App Toast
-                                    const toast = document.getElementById('pushToast');
-                                    document.getElementById('pushToastTitle').innerText = data.title;
-                                    document.getElementById('pushToastBody').innerText = data.body;
-                                    toast.classList.remove('hidden');
-                                    setTimeout(() => toast.classList.remove('translate-x-[150%]'), 50);
-                                    setTimeout(() => { toast.classList.add('translate-x-[150%]'); }, 6000);
-
-                                    // 2. Trigger OS Native Notification (if allowed by browser/OS)
-                                    if (Notification.permission === 'granted') {
-                                        new Notification(data.title, {
-                                            body: data.body,
-                                            icon: '/icon.svg'
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    });
-                });
-            }
-
-            // Listen to Properties Map
             window.listenToProperties = function() {
                 if (!currentUser) return;
-                
-                // Start listening to the global alert channel
-                window.listenToNotifications();
-
                 const propsRef = firestoreModule.collection(db, 'artifacts', appId, 'public', 'data', 'properties');
+                
                 firestoreModule.onSnapshot(propsRef, (snapshot) => {
                     propertiesData = [];
                     snapshot.forEach(doc => {
@@ -2358,6 +2243,7 @@
                                 }
                             }
                         }
+                        
                         propertiesData.push(data);
                     });
                     
@@ -2387,10 +2273,14 @@
                 }
             };
 
+            // Helper for role-based notification defaults
             function getDefaultPrefs(email) {
                 const mail = (email || '').toLowerCase();
                 const agents = ['carlos@totalchb.com', 'yanna@totalchb.com', 'moe@totalchb.com', 'sara@totalchb.com'];
+                
+                // If they are an Agent, they get task alerts. Everyone else (Admins) defaults to false.
                 const isAgent = agents.includes(mail);
+                
                 return {
                     comments: true,
                     new_assets: true,
@@ -2402,6 +2292,7 @@
                 };
             }
 
+            // Cloud Data Integration for Notification Preferences
             window.loadNotificationPreferences = async function() {
                 if (!currentUser || !db) return;
                 try {
@@ -2413,8 +2304,9 @@
 
                     if(snap.exists()) {
                         const dbData = snap.data();
-                        data = { ...defaults, ...dbData }; 
+                        data = { ...defaults, ...dbData }; // Merge saved data over the defaults
                     } else {
+                        // First time login! Seed the database with role defaults so the backend has them immediately
                         await firestoreModule.setDoc(docRef, {
                             email: currentUser.email,
                             ...defaults,
@@ -2422,22 +2314,17 @@
                         });
                     }
 
+                    // Apply to UI Dropdown
                     document.getElementById('pref_comments').checked = data.comments;
                     document.getElementById('pref_new_assets').checked = data.new_assets;
                     document.getElementById('pref_completions').checked = data.completions;
                     document.getElementById('pref_task_turns').checked = data.task_turns;
                     document.getElementById('pref_daily_brief').checked = data.daily_brief;
+                    
                     document.getElementById('pref_reminders').checked = data.reminders;
                     document.getElementById('pref_reminder_interval').disabled = !data.reminders;
                     if (data.reminder_interval) document.getElementById('pref_reminder_interval').value = data.reminder_interval;
                     
-                    // Check if browser already granted native permission
-                    if (Notification.permission === 'granted') {
-                        const btn = document.getElementById('enablePushBtn');
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Native Notifications Enabled!';
-                        btn.className = "w-full bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
-                    }
-
                 } catch(e) { console.error("Pref load error", e); }
             }
 
@@ -2476,6 +2363,7 @@
                         currentUser = user;
                         grantAccess(); 
                         
+                        // Load user's unique alert settings from the Cloud
                         window.loadNotificationPreferences();
                         
                         if (!window.presenceInterval) {
@@ -2553,6 +2441,7 @@
             renderDashboard();
         }
     }
+
 
     // --- 5. CURSOR & CANVAS ANIMATION LOGIC ---
     const canvas = document.getElementById('gridCanvas');
