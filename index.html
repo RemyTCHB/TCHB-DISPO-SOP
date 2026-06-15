@@ -169,12 +169,19 @@
               
               <div>
                   <label class="block text-xs font-bold uppercase text-gray-400 mb-1.5">Exit Strategy Profile</label>
-                  <select id="newAssetStrategyInput" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-brand-emerald transition-colors cursor-pointer appearance-none" onchange="window.handleStrategyChange()">
-                      <option value="Wholesale">Wholesale</option>
-                      <option value="Fix & Flip">Fix & Flip</option>
-                      <option value="Creative">Creative</option>
-                      <option value="Novation">Novation</option>
-                  </select>
+                  <div class="relative w-full z-30" id="newAssetStrategyWrapper">
+                      <input type="hidden" id="newAssetStrategyInput" value="Wholesale">
+                      <button type="button" onclick="window.toggleNewAssetStrategyDropdown(event)" class="w-full bg-gradient-to-r from-brand-emerald/5 to-brand-cyan/5 border border-brand-emerald/30 hover:border-brand-emerald/60 rounded-lg p-3 text-sm font-bold text-gray-200 focus:outline-none flex justify-between items-center transition-all cursor-pointer shadow-sm">
+                          <span id="newAssetStrategyLabel" class="truncate">Wholesale</span>
+                          <i id="newAssetStrategyIcon" class="fa-solid fa-chevron-down text-[10px] text-brand-emerald/70 transition-transform duration-300"></i>
+                      </button>
+                      <div id="newAssetStrategyList" class="absolute left-0 top-full mt-2 w-full bg-[#0f1423] border border-brand-emerald/40 rounded-xl shadow-[0_10px_40px_rgba(16,185,129,0.2)] hidden flex-col overflow-hidden z-50">
+                          <div onclick="window.selectNewAssetStrategy('Wholesale')" class="px-4 py-3 text-sm font-bold text-white hover:bg-gray-800 hover:text-brand-emerald cursor-pointer transition-colors border-b border-gray-800/50">Wholesale</div>
+                          <div onclick="window.selectNewAssetStrategy('Fix & Flip')" class="px-4 py-3 text-sm font-bold text-white hover:bg-gray-800 hover:text-brand-emerald cursor-pointer transition-colors border-b border-gray-800/50">Fix & Flip</div>
+                          <div onclick="window.selectNewAssetStrategy('Creative')" class="px-4 py-3 text-sm font-bold text-white hover:bg-gray-800 hover:text-brand-emerald cursor-pointer transition-colors border-b border-gray-800/50">Creative</div>
+                          <div onclick="window.selectNewAssetStrategy('Novation')" class="px-4 py-3 text-sm font-bold text-white hover:bg-gray-800 hover:text-brand-emerald cursor-pointer transition-colors">Novation</div>
+                      </div>
+                  </div>
               </div>
 
               <div id="csvUploadWrapper" class="hidden">
@@ -932,6 +939,26 @@
         ]
     };
 
+    window.toggleNewAssetStrategyDropdown = function(e) {
+        if(e) e.stopPropagation();
+        const list = document.getElementById('newAssetStrategyList');
+        const icon = document.getElementById('newAssetStrategyIcon');
+        if(list.classList.contains('hidden')) {
+            list.classList.remove('hidden'); list.classList.add('flex');
+            icon.classList.add('rotate-180');
+        } else {
+            list.classList.add('hidden'); list.classList.remove('flex');
+            icon.classList.remove('rotate-180');
+        }
+    }
+
+    window.selectNewAssetStrategy = function(val) {
+        document.getElementById('newAssetStrategyInput').value = val;
+        document.getElementById('newAssetStrategyLabel').innerText = val;
+        window.toggleNewAssetStrategyDropdown();
+        window.handleStrategyChange();
+    }
+
     function getAgentColorClass(name, type = 'text') {
         const nameLower = (name || "").toLowerCase();
         return (agentColors[nameLower] || agentColors["completed"])[type];
@@ -1118,14 +1145,11 @@
     window.toggleAgentDropdown = function(taskId, e) {
         if(e) e.stopPropagation();
         const list = document.getElementById(`agentList_${taskId}`);
-        const icon = document.getElementById(`agentIcon_${taskId}`);
         const wrapper = document.getElementById(`agentSelectorWrapper_${taskId}`);
         
         document.querySelectorAll('.agent-dropdown-list').forEach(el => {
             if (el.id !== `agentList_${taskId}`) {
                 el.classList.add('hidden'); el.classList.remove('flex');
-                const otherIcon = document.getElementById(el.id.replace('agentList_', 'agentIcon_'));
-                if(otherIcon) otherIcon.classList.remove('rotate-180');
             }
         });
         document.querySelectorAll('.agent-selector-wrapper').forEach(el => {
@@ -1136,11 +1160,9 @@
 
         if(list.classList.contains('hidden')) {
             list.classList.remove('hidden'); list.classList.add('flex');
-            icon.classList.add('rotate-180');
             if(wrapper) { wrapper.classList.remove('z-10'); wrapper.classList.add('z-[60]'); }
         } else {
             list.classList.add('hidden'); list.classList.remove('flex');
-            icon.classList.remove('rotate-180');
             if(wrapper) { wrapper.classList.remove('z-[60]'); wrapper.classList.add('z-10'); }
         }
     }
@@ -1188,13 +1210,18 @@
             }
         });
 
+        // New Asset Strategy Dropdown
+        const stratDrop = document.getElementById('newAssetStrategyList');
+        if(stratDrop && !stratDrop.classList.contains('hidden') && !e.target.closest('#newAssetStrategyWrapper')) {
+            stratDrop.classList.add('hidden'); stratDrop.classList.remove('flex');
+            document.getElementById('newAssetStrategyIcon')?.classList.remove('rotate-180');
+        }
+
         // Agent Assignee Dropdowns
         if (!e.target.closest('.agent-selector-wrapper')) {
             document.querySelectorAll('.agent-dropdown-list').forEach(el => {
                 if (!el.classList.contains('hidden')) {
                     el.classList.add('hidden'); el.classList.remove('flex');
-                    const icon = document.getElementById(el.id.replace('agentList_', 'agentIcon_'));
-                    if(icon) icon.classList.remove('rotate-180');
                 }
             });
             document.querySelectorAll('.agent-selector-wrapper').forEach(el => {
@@ -2099,9 +2126,8 @@
 
                     const assigneeHtml = `
                     <div class="relative z-10 w-full sm:w-auto agent-selector-wrapper" id="agentSelectorWrapper_${t.originalIndex}">
-                        <button onclick="window.toggleAgentDropdown(${t.originalIndex}, event)" class="${agentBg} border ${agentBorder} ${agentColor} text-[10px] sm:text-xs font-bold rounded px-1.5 sm:px-2 py-1 flex justify-between items-center gap-1.5 cursor-pointer transition-all min-w-[70px]">
-                            <span id="agentLabel_${t.originalIndex}" class="flex-1 text-center">${t.assignee}</span>
-                            <i id="agentIcon_${t.originalIndex}" class="fa-solid fa-chevron-down text-[8px] transition-transform duration-300 opacity-70"></i>
+                        <button onclick="window.toggleAgentDropdown(${t.originalIndex}, event)" class="${agentBg} border ${agentBorder} ${agentColor} text-[10px] sm:text-xs font-bold rounded px-2 py-1 flex justify-center items-center cursor-pointer transition-all min-w-[70px]">
+                            <span id="agentLabel_${t.originalIndex}" class="text-center">${t.assignee}</span>
                         </button>
                         <div id="agentList_${t.originalIndex}" class="agent-dropdown-list absolute right-0 top-full mt-1 w-32 bg-[#0f1423] border border-gray-600 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] hidden flex-col max-h-48 overflow-y-auto custom-scrollbar z-50 overflow-hidden text-left py-1">
                             ${agentListHtml}
