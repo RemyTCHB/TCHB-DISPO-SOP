@@ -288,15 +288,10 @@
                             
                             <div class="p-4 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 
-                                <!-- ENABLE PUSH BUTTON & TEST BUTTON -->
-                                <div class="flex gap-2">
-                                    <button id="enablePushBtn" onclick="window.enablePush()" class="flex-1 bg-gradient-to-r from-brand-purple to-brand-cyan hover:from-indigo-500 hover:to-cyan-400 text-white text-xs font-bold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer flex justify-center items-center gap-2">
-                                        <i class="fa-regular fa-bell animate-shake"></i> Enable Native Push Alerts
-                                    </button>
-                                    <button onclick="window.testNotification()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer border border-gray-600 flex justify-center items-center" title="Test Notification">
-                                        Test
-                                    </button>
-                                </div>
+                                <!-- ENABLE PUSH BUTTON -->
+                                <button id="enablePushBtn" onclick="window.enablePush()" class="w-full bg-gradient-to-r from-brand-purple to-brand-cyan hover:from-indigo-500 hover:to-cyan-400 text-white text-xs font-bold py-3 px-4 rounded-lg shadow-md transition-all cursor-pointer flex justify-center items-center gap-2">
+                                    <i class="fa-regular fa-bell animate-shake"></i> Enable Device Push Notifications
+                                </button>
 
                                 <!-- Toggle Item -->
                                 <div class="flex items-center justify-between border-t border-gray-800 pt-4">
@@ -2211,6 +2206,7 @@
             const appModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
             const authModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
             const firestoreModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+            const messagingModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js");
 
             const app = appModule.initializeApp(firebaseConfig);
             firebaseAuth = authModule.getAuth(app);
@@ -2222,33 +2218,55 @@
             window.firebaseSignInWithPopup = authModule.signInWithPopup;
             window.firebaseSignOut = authModule.signOut;
 
+            // Setup Foreground Messaging Listener
+            let messaging = null;
+            try {
+                messaging = messagingModule.getMessaging(app);
+                messagingModule.onMessage(messaging, (payload) => {
+                    const toast = document.getElementById('pushToast');
+                    document.getElementById('pushToastTitle').innerText = payload.notification.title;
+                    document.getElementById('pushToastBody').innerText = payload.notification.body;
+                    toast.classList.remove('hidden');
+                    setTimeout(() => toast.classList.remove('translate-x-[150%]'), 50);
+                    setTimeout(() => { toast.classList.add('translate-x-[150%]'); }, 6000);
+                });
+            } catch (err) {
+                console.warn("Messaging not supported on this environment", err);
+            }
+
             // --- NATIVE FRONTEND NOTIFICATION ENGINE ---
             window.enablePush = async function() {
                 const btn = document.getElementById('enablePushBtn');
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authorizing...';
+                
                 try {
                     const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Native Notifications Enabled!';
-                        btn.className = "flex-1 bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
+                    if (permission === 'granted' && messaging) {
+                        const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+                        
+                        const token = await messagingModule.getToken(messaging, { 
+                            vapidKey: "BAOBgrEDGG_WLKRjNEXU_L2_kHZrWTVFGUxN5gm7Udkkh9p0l2Tc8sTZhErN_dZmpxD-EzjEnNfhYX7R3XHrRhw",
+                            serviceWorkerRegistration: registration
+                        });
+                        
+                        if (token && currentUser && db) {
+                            const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
+                            await firestoreModule.setDoc(docRef, {
+                                fcmTokens: firestoreModule.arrayUnion(token)
+                            }, { merge: true });
+                        }
+
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Device Linked Successfully!';
+                        btn.className = "w-full bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
                         new Notification("Push Enabled \u2705", { body: "You will now receive native desktop alerts!", icon: '/icon.svg' });
                     } else {
                         btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Permission Denied';
-                        btn.className = "flex-1 bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
+                        btn.className = "w-full bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
                     }
                 } catch(e) {
                     console.error("Native Push Error:", e);
-                }
-            }
-
-            // TEST NOTIFICATION FUNCTION
-            window.testNotification = function() {
-                if (Notification.permission === 'granted') {
-                    new Notification("Test Successful \uD83D\uDE80", { 
-                        body: "Your OS is successfully receiving notifications from TCHB Dispo Ops.", 
-                        icon: '/icon.svg' 
-                    });
-                } else {
-                    alert("Please click 'Enable Native Push Alerts' first to grant browser permissions!");
+                    btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Setup Failed';
+                    btn.className = "w-full bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
                 }
             }
 
