@@ -420,6 +420,7 @@
                                     <i class="fa-solid fa-mobile-screen-button relative"><i class="fa-solid fa-xmark absolute -bottom-1 -right-2 text-[10px] text-brand-crimson"></i></i>
                                 </button>
                             </div>
+                            
                             <div class="flex items-center justify-between border-t border-gray-800 pt-4">
                                 <div class="pr-3">
                                     <p class="text-xs font-bold text-gray-200">Offline Comment Alerts</p>
@@ -442,15 +443,45 @@
                             </div>
                             <div class="flex items-center justify-between">
                                 <div class="pr-3">
-                                    <p class="text-xs font-bold text-gray-200">Phase Completions</p>
-                                    <p class="text-[9px] text-gray-500">Notify the team when major pipeline phases reach 100%.</p>
+                                    <p class="text-xs font-bold text-gray-200">Phase & Tracker Completions</p>
+                                    <p class="text-[9px] text-gray-500">Alert when a section, major phase, or full pipeline reaches 100%.</p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                    <input type="checkbox" id="pref_completions" class="sr-only peer">
+                                    <input type="checkbox" id="pref_completions_phase" class="sr-only peer">
                                     <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-cyan"></div>
                                 </label>
                             </div>
                             <div class="flex items-center justify-between">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-gray-200">Task Completions</p>
+                                    <p class="text-[9px] text-gray-500">Notify the team when a main workflow task is checked off.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" id="pref_completions_task" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-cyan"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-gray-200">Subtask Completions</p>
+                                    <p class="text-[9px] text-gray-500">Granular alerts for every individual subtask checkmark.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" id="pref_completions_subtask" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-cyan"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-gray-800 pt-4">
+                                <div class="pr-3">
+                                    <p class="text-xs font-bold text-gray-200">Drafts & Link Updates</p>
+                                    <p class="text-[9px] text-gray-500">Alerts when a task URL or template draft is saved.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" id="pref_drafts_links" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-purple"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-gray-800 pt-4">
                                 <div class="pr-3">
                                     <p class="text-xs font-bold text-brand-emerald"><i class="fa-solid fa-arrow-turn-down rotate-90 mr-1"></i> Task Turn Alerts</p>
                                     <p class="text-[9px] text-gray-500">Instant alert when the next workflow step is assigned to you.</p>
@@ -2572,6 +2603,24 @@
                 } catch(e) {}
             }
             
+            function getDefaultPrefs(email) {
+                const mail = (email || '').toLowerCase();
+                const dispoAgents = ['carlos@totalchb.com', 'yanna@totalchb.com', 'moe@totalchb.com', 'sara@totalchb.com', 'sarah@totalchb.com'];
+                const tcAgents = ['monz@totalchb.com', 'chris@totalchb.com'];
+                const admins = ['brandy@totalchb.com', 'luke@totalchb.com', 'info@totalchb.com'];
+                const superAdmin = ['systems@totalchb.com'];
+                
+                if (superAdmin.includes(mail)) {
+                    return { comments: false, new_assets: false, completions_phase: false, completions_task: false, completions_subtask: false, drafts_links: false, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
+                } else if (admins.includes(mail)) {
+                    return { comments: true, new_assets: true, completions_phase: true, completions_task: true, completions_subtask: false, drafts_links: true, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
+                } else if (dispoAgents.includes(mail) || tcAgents.includes(mail)) {
+                    return { comments: true, new_assets: true, completions_phase: true, completions_task: true, completions_subtask: true, drafts_links: true, task_turns: true, daily_brief: true, reminders: true, reminder_interval: '4' };
+                }
+                
+                return { comments: true, new_assets: true, completions_phase: true, completions_task: true, completions_subtask: false, drafts_links: true, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
+            }
+
             window.resetNotificationPreferences = async function() {
                 if (!currentUser || !db) return;
                 try {
@@ -2723,19 +2772,6 @@
                 }
             };
 
-            function getDefaultPrefs(email) {
-                const mail = (email || '').toLowerCase();
-                const dispoAgents = ['carlos@totalchb.com', 'yanna@totalchb.com', 'moe@totalchb.com', 'sara@totalchb.com', 'sarah@totalchb.com'];
-                const tcAgents = ['monz@totalchb.com', 'chris@totalchb.com'];
-                const admins = ['brandy@totalchb.com', 'luke@totalchb.com', 'info@totalchb.com'];
-                const superAdmin = ['systems@totalchb.com'];
-                
-                if (superAdmin.includes(mail)) return { comments: false, new_assets: false, completions: false, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
-                else if (admins.includes(mail)) return { comments: true, new_assets: true, completions: true, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
-                else if (dispoAgents.includes(mail) || tcAgents.includes(mail)) return { comments: true, new_assets: true, completions: true, task_turns: true, daily_brief: true, reminders: true, reminder_interval: '4' };
-                return { comments: true, new_assets: true, completions: true, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
-            }
-
             window.loadNotificationPreferences = async function() {
                 if (!currentUser || !db) return;
                 try {
@@ -2749,7 +2785,10 @@
 
                     document.getElementById('pref_comments').checked = data.comments;
                     document.getElementById('pref_new_assets').checked = data.new_assets;
-                    document.getElementById('pref_completions').checked = data.completions;
+                    document.getElementById('pref_completions_phase').checked = data.completions_phase;
+                    document.getElementById('pref_completions_task').checked = data.completions_task;
+                    document.getElementById('pref_completions_subtask').checked = data.completions_subtask;
+                    document.getElementById('pref_drafts_links').checked = data.drafts_links;
                     document.getElementById('pref_task_turns').checked = data.task_turns;
                     document.getElementById('pref_daily_brief').checked = data.daily_brief;
                     document.getElementById('pref_reminders').checked = data.reminders;
@@ -2766,10 +2805,18 @@
                 try {
                     const docRef = firestoreModule.doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
                     await firestoreModule.setDoc(docRef, {
-                        email: currentUser.email, comments: document.getElementById('pref_comments').checked, new_assets: document.getElementById('pref_new_assets').checked,
-                        completions: document.getElementById('pref_completions').checked, task_turns: document.getElementById('pref_task_turns').checked,
-                        daily_brief: document.getElementById('pref_daily_brief').checked, reminders: document.getElementById('pref_reminders').checked,
-                        reminder_interval: document.getElementById('pref_reminder_interval').value, updatedAt: Date.now()
+                        email: currentUser.email, 
+                        comments: document.getElementById('pref_comments').checked, 
+                        new_assets: document.getElementById('pref_new_assets').checked,
+                        completions_phase: document.getElementById('pref_completions_phase').checked,
+                        completions_task: document.getElementById('pref_completions_task').checked,
+                        completions_subtask: document.getElementById('pref_completions_subtask').checked,
+                        drafts_links: document.getElementById('pref_drafts_links').checked,
+                        task_turns: document.getElementById('pref_task_turns').checked,
+                        daily_brief: document.getElementById('pref_daily_brief').checked, 
+                        reminders: document.getElementById('pref_reminders').checked,
+                        reminder_interval: document.getElementById('pref_reminder_interval').value, 
+                        updatedAt: Date.now()
                     }, { merge: true });
                     
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Preferences Saved';
