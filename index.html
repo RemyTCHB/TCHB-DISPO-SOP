@@ -2567,14 +2567,15 @@
             
             appId = typeof __app_id !== 'undefined' ? __app_id : 'tchb-dispo-ops';
             const app = initializeApp(firebaseConfig);
+            
+            // Fix: Initialize Auth synchronously BEFORE any awaits
             firebaseAuth = getAuth(app);
+            googleProvider = new GoogleAuthProvider();
+            googleProvider.setCustomParameters({ hd: 'totalchb.com' });
             db = getFirestore(app);
             
             // Enable Local Offline Persistence safely
             try { await enableIndexedDbPersistence(db); } catch (err) {}
-
-            googleProvider = new GoogleAuthProvider();
-            googleProvider.setCustomParameters({ hd: 'totalchb.com' });
 
             let messaging = null;
             if (getMessaging) {
@@ -3016,7 +3017,18 @@
         requestAnimationFrame(animateGrid);
     }
 
-    window.addEventListener('DOMContentLoaded', () => { resizeCanvas(); requestAnimationFrame(animateGrid); initFirebase(); });
+    // Fix: Check if DOM is already loaded because top-level await might delay this script
+    function bootstrapApp() {
+        resizeCanvas(); 
+        requestAnimationFrame(animateGrid); 
+        initFirebase();
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', bootstrapApp);
+    } else {
+        bootstrapApp();
+    }
   </script>
 </body>
 </html>
