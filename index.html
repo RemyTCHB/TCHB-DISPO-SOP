@@ -747,11 +747,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, onSnapshot, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, arrayUnion, enableIndexedDbPersistence, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    let getMessaging, getToken, onMessage;
-    try {
-        const msgModule = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js");
-        getMessaging = msgModule.getMessaging; getToken = msgModule.getToken; onMessage = msgModule.onMessage;
-    } catch(err) {}
 
     // --- HARDCODED APP CONFIGURATION (To be migrated to Firestore later) ---
     const AppConfig = {
@@ -893,15 +888,21 @@
     let propertiesData = [];
     let activePropertyId = null;
     let isGatewayUnlocked = false;
-    let localDeviceId = localStorage.getItem('tchb_device_id');
-    if (!localDeviceId) { localDeviceId = 'dev_' + Date.now() + Math.random().toString(36).substr(2, 9); localStorage.setItem('tchb_device_id', localDeviceId); }
+    let localDeviceId = 'dev_fallback';
+    try {
+        localDeviceId = localStorage.getItem('tchb_device_id');
+        if (!localDeviceId) { 
+            localDeviceId = 'dev_' + Date.now() + Math.random().toString(36).substr(2, 9); 
+            localStorage.setItem('tchb_device_id', localDeviceId); 
+        }
+    } catch(e) {}
 
     let db = null;
     let currentUser = null;
     let firebaseAuth = null;
     let googleProvider = null;
     let appId = 'tchb-dispo-default';
-    window.activeListeners = []; // Fix for Firebase Memory Leaks
+    window.activeListeners = []; 
     
     window.isChatOpen = false;
     window.isChatSearchOpen = false;
@@ -917,8 +918,14 @@
         const el = document.getElementById(id);
         if(!el) return;
         const willShow = forceShow !== null ? forceShow : el.classList.contains('hidden');
-        if (willShow) { el.classList.remove('hidden'); el.classList.add(flexClass); }
-        else { el.classList.add('hidden'); el.classList.remove(flexClass); }
+        if (willShow) { 
+            el.classList.remove('hidden'); 
+            el.classList.add(flexClass); 
+        } else { 
+            el.classList.add('hidden'); 
+            // Fix: remove all display classes to prevent sticky layouts from overlapping tabs
+            el.classList.remove('flex', 'block', 'inline-block', 'grid'); 
+        }
     }
 
     function escapeHtml(unsafe) {
@@ -996,7 +1003,6 @@
         const lockContainer = document.getElementById('gateLockIconContainer');
         if (lockIcon && lockContainer) {
             lockIcon.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>';
-            // Fix: Use setAttribute for SVGs instead of .className
             lockIcon.setAttribute('class', "w-6 h-6 text-brand-emerald transition-all duration-300 scale-110");
             lockContainer.className = "mx-auto w-14 h-14 rounded-full bg-brand-emerald/10 flex items-center justify-center border border-brand-emerald/20 mb-4 animate-bounce";
         }
@@ -1421,7 +1427,6 @@
                 requiresLink: false
             })) : [];
 
-            // Fix functional mapping bug for Drafts & Hyperlinks
             const requiresDraft = !!(task.draftsAndHyperlinks && task.draftsAndHyperlinks.includes("Draft"));
             const requiresLink = !!(task.draftsAndHyperlinks && task.draftsAndHyperlinks.includes("Hyperlink"));
 
@@ -1437,7 +1442,6 @@
             };
         });
 
-        // Fix SOW CSV Mapping bug
         if (strategy === "Fix & Flip" && csvContent) {
             const sowItems = parseSOWCSV(csvContent);
             if (sowItems.length > 0) {
@@ -1473,17 +1477,16 @@
             dateLastEdited: Date.now(), comments: [], readBy: {}, tasks: newTasks
         };
         
-        // Optimistically add to local array before saving so UI immediately has access to it.
         propertiesData.unshift(newProp); 
         
         await window.savePropertyData(newProp);
         
-        input.value = ''; // Clean up input for next time
+        input.value = ''; 
         input.classList.remove('border-red-500');
         if (btn) { btn.innerHTML = origText; btn.disabled = false; }
 
         window.toggleDisplay('newAssetModal', false);
-        window.openTracker(newProp.id); // Automatically navigate and open
+        window.openTracker(newProp.id); 
         updateGlobalAssetSelector();
     }
 
@@ -1569,7 +1572,7 @@
         
         if(optionIndex === "") {
             prop.tasks[taskIndex].selectedOption = null;
-            prop.tasks[taskIndex].completed = false; // Reset completion state if unselected
+            prop.tasks[taskIndex].completed = false; 
         } else {
             const opt = prop.tasks[taskIndex].dropdownOptions[optionIndex];
             prop.tasks[taskIndex].title = opt.title;
@@ -1578,7 +1581,501 @@
         }
 
         await window.savePropertyData(prop);
-        renderTrackerView(); // Complete re-render needed when title/assignee fully mutate from dropdown
+        renderTrackerView(); 
+    }
+
+    // --- 6. UI RENDERING & INTERACTIVITY ---
+    window.switchTab = function(tab) {
+        window.toggleDisplay('tab-dashboard', false);
+        window.toggleDisplay('tab-tracker', false);
+        window.toggleDisplay('tab-sop', false);
+        
+        const defaultNavClasses = "px-5 py-2 text-sm font-bold rounded-lg cursor-pointer transition-all text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap";
+        const mobNavs = ['nav-mobile-dashboard', 'nav-mobile-tracker', 'nav-mobile-sop'];
+        
+        document.getElementById('nav-dashboard').className = defaultNavClasses;
+        document.getElementById('nav-tracker').className = defaultNavClasses;
+        document.getElementById('nav-sop').className = defaultNavClasses;
+        
+        mobNavs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) { 
+                el.classList.remove('text-brand-emerald'); 
+                el.classList.add('text-gray-500', 'hover:text-gray-300'); 
+            }
+        });
+
+        const activeNavClasses = "bg-gradient-to-r from-brand-crimson to-brand-purple text-white shadow-md border-transparent";
+        
+        if (tab === 'dashboard') {
+            window.toggleDisplay('tab-dashboard', true, 'block');
+            document.getElementById('nav-dashboard').classList.add(...activeNavClasses.split(' '));
+            document.getElementById('nav-dashboard').classList.remove('text-gray-300');
+            const mob = document.getElementById('nav-mobile-dashboard');
+            if (mob) { mob.classList.remove('text-gray-500', 'hover:text-gray-300'); mob.classList.add('text-brand-emerald'); }
+            
+            activePropertyId = null;
+            window.sectionToggleState = {}; window.sectionCompletionState = {};
+            if(window.isChatOpen) window.toggleChat();
+            renderDashboard(); updateGlobalAssetSelector();
+        } else if (tab === 'tracker') {
+            window.toggleDisplay('tab-tracker', true);
+            document.getElementById('nav-tracker').classList.add(...activeNavClasses.split(' '));
+            document.getElementById('nav-tracker').classList.remove('text-gray-300');
+            const mob = document.getElementById('nav-mobile-tracker');
+            if (mob) { mob.classList.remove('text-gray-500', 'hover:text-gray-300'); mob.classList.add('text-brand-emerald'); }
+            
+            renderTrackerView(); updateGlobalAssetSelector();
+        } else if (tab === 'sop') {
+            window.toggleDisplay('tab-sop', true, 'block');
+            document.getElementById('nav-sop').classList.add(...activeNavClasses.split(' '));
+            document.getElementById('nav-sop').classList.remove('text-gray-300');
+            const mob = document.getElementById('nav-mobile-sop');
+            if (mob) { mob.classList.remove('text-gray-500', 'hover:text-gray-300'); mob.classList.add('text-brand-emerald'); }
+            
+            if(window.isChatOpen) window.toggleChat();
+            window.renderSOPTimeline('Wholesale');
+        }
+    }
+
+    window.toggleNewAssetStrategyDropdown = function(e) {
+        if(e) e.stopPropagation();
+        const list = document.getElementById('newAssetStrategyList');
+        const icon = document.getElementById('newAssetStrategyIcon');
+        if(list.classList.contains('hidden')) {
+            list.classList.remove('hidden'); list.classList.add('flex');
+            icon.classList.add('rotate-180');
+        } else {
+            list.classList.add('hidden'); list.classList.remove('flex');
+            icon.classList.remove('rotate-180');
+        }
+    }
+
+    window.selectNewAssetStrategy = function(val) {
+        document.getElementById('newAssetStrategyInput').value = val;
+        document.getElementById('newAssetStrategyLabel').innerText = val;
+        window.toggleNewAssetStrategyDropdown();
+        window.handleStrategyChange();
+    }
+
+    window.handleStrategyChange = function() {
+        const strat = document.getElementById('newAssetStrategyInput').value;
+        if (strat === 'Fix & Flip') window.toggleDisplay('csvUploadWrapper', true, 'block');
+        else {
+            window.toggleDisplay('csvUploadWrapper', false);
+            window.pendingCSVContent = null;
+            document.getElementById('csvFileNameDisplay').innerText = "Click to attach a CSV file (Task, Cost, Notes)";
+        }
+    }
+
+    window.toggleAssetDropdown = function(e) {
+        if(e) e.stopPropagation();
+        const drop = document.getElementById('globalAssetDropdownList');
+        const icon = document.getElementById('globalAssetDropdownIcon');
+        if(drop.classList.contains('hidden')) {
+            window.toggleDisplay('globalAssetDropdownList', true);
+            icon.classList.add('rotate-180');
+        } else {
+            window.toggleDisplay('globalAssetDropdownList', false);
+            icon.classList.remove('rotate-180');
+        }
+    }
+
+    function updateGlobalAssetSelector() {
+        const list = document.getElementById('globalAssetDropdownList');
+        const label = document.getElementById('globalAssetSelectorLabel');
+        if(!list || !label) return;
+
+        let htmlStr = `<div onclick="window.handleGlobalAssetSelection('')" class="px-4 py-3 text-sm font-bold text-gray-400 hover:bg-gray-800 hover:text-white cursor-pointer transition-colors border-b border-gray-800">-- Select an Active Deal --</div>`;
+        let activePropName = '-- Select an Active Deal --';
+
+        propertiesData.forEach(p => {
+            const isSelected = p.id === activePropertyId;
+            if(isSelected) activePropName = p.address;
+            htmlStr += `<div onclick="window.handleGlobalAssetSelection('${p.id}')" class="px-4 py-3 text-sm font-bold ${isSelected ? 'text-brand-purple bg-brand-purple/10' : 'text-white hover:bg-gray-800'} cursor-pointer transition-colors flex items-center justify-between group">
+                <span class="truncate">${escapeHtml(p.address)}</span>
+                ${isSelected ? '<div class="w-2 h-2 rounded-full bg-brand-purple shrink-0 ml-3"></div>' : '<div class="w-2 h-2 rounded-full bg-transparent group-hover:bg-gray-600 transition-colors shrink-0 ml-3"></div>'}
+            </div>`;
+        });
+        list.innerHTML = htmlStr; label.innerText = activePropName;
+    }
+
+    window.handleGlobalAssetSelection = function(propId) {
+        window.toggleDisplay('globalAssetDropdownList', false);
+        document.getElementById('globalAssetDropdownIcon')?.classList.remove('rotate-180');
+
+        if (!propId || propId === '') {
+            activePropertyId = null;
+            window.sectionToggleState = {}; window.sectionCompletionState = {};
+            if(window.isChatOpen) window.toggleChat(); 
+            renderTrackerView();
+        } else {
+            window.openTracker(propId);
+        }
+    }
+
+    function renderDashboard() {
+        const tbody = document.getElementById('dashboard-tbody');
+        const emptyState = document.getElementById('empty-state');
+        if (!tbody || !emptyState) return;
+        
+        tbody.innerHTML = '';
+
+        let filteredProps = propertiesData.filter(p => {
+            if (window.currentDashboardStrategy === "All") return true;
+            return (p.exitStrategy || 'Wholesale') === window.currentDashboardStrategy;
+        });
+
+        filteredProps.sort((a, b) => {
+            if (window.currentDashboardSort === 'started_desc') return b.dateStarted - a.dateStarted;
+            if (window.currentDashboardSort === 'started_asc') return a.dateStarted - b.dateStarted;
+            if (window.currentDashboardSort === 'edited_desc') return b.dateLastEdited - a.dateLastEdited;
+            if (window.currentDashboardSort === 'edited_asc') return a.dateLastEdited - b.dateLastEdited;
+            return 0;
+        });
+
+        if (filteredProps.length === 0) {
+            window.toggleDisplay('empty-state', true, 'block');
+        } else {
+            window.toggleDisplay('empty-state', false);
+            filteredProps.forEach(prop => {
+                const stats = getPropStats(prop);
+                const agentTxtColor = getAgentColorClass(stats.nextAgent, 'text');
+                const agentBgColor = getAgentColorClass(stats.nextAgent, 'bg');
+                const agentBorderColor = getAgentColorClass(stats.nextAgent, 'border');
+                const progressColor = getProgressColorRGB(stats.percent);
+                const tooltipEscapedDetail = stats.nextTaskDetail.replace(/"/g, '&quot;');
+                const strategy = prop.exitStrategy || 'Wholesale';
+                const strategyColor = getStrategyColorClass(strategy);
+                
+                const tr = document.createElement('tr');
+                tr.className = "cursor-pointer group";
+                tr.onclick = () => window.openTracker(prop.id);
+                
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-white group-hover:text-brand-emerald transition-colors text-center">${escapeHtml(prop.address)}</td>
+                    <td class="p-4 text-center"><span class="${strategyColor} px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider">${strategy}</span></td>
+                    <td class="p-4 text-center">${formatEST(prop.dateStarted)}</td>
+                    <td class="p-4 text-brand-emerald text-xs font-mono text-center align-middle">${timeSince(prop.dateLastEdited, true)}</td>
+                    <td class="p-4 text-center">
+                        <span class="${agentBgColor} ${agentTxtColor} px-2.5 py-1 rounded text-xs font-extrabold border ${agentBorderColor}">${escapeHtml(stats.nextAgent)}</span>
+                    </td>
+                    <td class="p-4 text-center text-xs font-semibold text-gray-200 transition-colors hover:text-brand-emerald cursor-help"
+                        data-tooltip-text="${escapeHtml(tooltipEscapedDetail)}" onmouseenter="window.showDashboardTooltip(event)" onmouseleave="window.hideDashboardTooltip()"
+                        onclick="event.stopPropagation(); window.openTracker('${prop.id}', '${stats.nextTaskId}', '${stats.nextSectionKey}')">
+                        <div class="truncate max-w-[150px] mx-auto border-b border-dashed border-gray-600 pb-0.5 inline-block">${escapeHtml(stats.nextStep)}</div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="font-black text-lg drop-shadow" style="color: ${progressColor}">${stats.percent}%</span>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    window.showDashboardTooltip = function(event) {
+        const td = event.currentTarget;
+        const text = td.getAttribute('data-tooltip-text');
+        if (!text || text === 'All workflow tasks finished' || text === 'null') return;
+        const tooltip = document.getElementById('dashboard-tooltip');
+        
+        if (window.hideTooltipTimer) clearTimeout(window.hideTooltipTimer);
+        document.getElementById('dashboard-tooltip-text').innerText = text;
+        window.toggleDisplay('dashboard-tooltip', true, 'block');
+        
+        const tableCard = document.querySelector('#tab-dashboard .glass-card');
+        if (!tableCard) return;
+
+        const cardRect = tableCard.getBoundingClientRect();
+        const tdRect = td.getBoundingClientRect();
+        
+        const topPos = tdRect.top + (tdRect.height / 2);
+        let leftPos = cardRect.right + 20;
+
+        tooltip.style.left = `${leftPos}px`; tooltip.style.right = 'auto'; 
+        tooltip.style.top = `${topPos}px`; tooltip.style.transform = `translateY(-50%)`;
+        
+        const tooltipWidth = tooltip.offsetWidth || 250;
+        if (leftPos + tooltipWidth > window.innerWidth) {
+            tooltip.style.left = 'auto'; tooltip.style.right = '15px';
+        }
+        setTimeout(() => tooltip.classList.remove('opacity-0'), 10);
+    }
+
+    window.hideDashboardTooltip = function() {
+        const tooltip = document.getElementById('dashboard-tooltip');
+        tooltip.classList.add('opacity-0');
+        window.hideTooltipTimer = setTimeout(() => window.toggleDisplay('dashboard-tooltip', false), 200);
+    }
+
+    window.openTracker = function(propId, scrollToTaskId = null, forceOpenSectionKey = null) {
+        let changed = activePropertyId !== propId;
+        if (changed) {
+            window.sectionToggleState = {}; window.sectionCompletionState = {};
+        }
+        
+        activePropertyId = propId;
+        if (forceOpenSectionKey && forceOpenSectionKey !== 'null') {
+            if (!window.sectionToggleState) window.sectionToggleState = {};
+            window.sectionToggleState[forceOpenSectionKey] = 'open';
+        }
+        
+        if(document.getElementById('tab-tracker').classList.contains('hidden')) {
+            window.switchTab('tracker');
+        } else {
+            renderTrackerView(); updateGlobalAssetSelector();
+        }
+        
+        if (window.isChatOpen && changed) {
+            window.isChatOpen = false; window.toggleChat(); 
+        }
+
+        if (scrollToTaskId && scrollToTaskId !== 'null') {
+            setTimeout(() => {
+                const el = document.getElementById('task_' + scrollToTaskId);
+                if (el) {
+                    el.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    el.classList.add('bg-brand-emerald/20');
+                    setTimeout(() => el.classList.remove('bg-brand-emerald/20'), 1500);
+                }
+            }, 150);
+        }
+    }
+
+    window.toggleChat = async function(focusCommentId = null) {
+        const fab = document.getElementById('chatFabBtn');
+        if (fab) { fab.classList.remove('animate-jelly-pop'); void fab.offsetWidth; fab.classList.add('animate-jelly-pop'); }
+
+        window.isChatOpen = focusCommentId ? true : !window.isChatOpen;
+        const mobChatNav = document.getElementById('nav-mobile-chat');
+        
+        if (window.isChatOpen) {
+            window.toggleDisplay('chatWindow', true);
+            if (mobChatNav) { mobChatNav.classList.remove('text-brand-crimson'); mobChatNav.classList.add('text-brand-gold'); }
+            
+            if (activePropertyId) {
+                window.toggleDisplay('chatHubView', false); window.toggleDisplay('chatPropertyView', true);
+                const prop = propertiesData.find(p => p.id === activePropertyId);
+                if (prop) {
+                    const myPrefix = currentUser && currentUser.email ? currentUser.email.split('@')[0].toLowerCase() : "agent";
+                    prop.readBy = prop.readBy || {}; const lastReadTime = prop.readBy[myPrefix] || 0;
+                    prop.readBy[myPrefix] = Date.now();
+                    await window.savePropertyData(prop, true); 
+                    updateChatBadge(prop); renderChatMessages(prop, lastReadTime, focusCommentId);
+                    document.getElementById('chatWindowAddress').innerText = prop.address;
+                }
+                setTimeout(() => { if(!focusCommentId && !window.isChatSearchOpen) document.getElementById('chatInput').focus(); }, 100);
+            } else {
+                window.toggleDisplay('chatHubView', true); window.toggleDisplay('chatPropertyView', false); window.renderChatHub();
+            }
+        } else {
+            window.toggleDisplay('chatWindow', false);
+            if(window.isChatSearchOpen) window.toggleChatSearch();
+            if (mobChatNav) { mobChatNav.classList.remove('text-brand-gold'); mobChatNav.classList.add('text-brand-crimson'); }
+        }
+    }
+    
+    window.openPropertyChatOnly = function(propId) {
+        activePropertyId = propId; updateGlobalAssetSelector();
+        window.isChatOpen = false; window.toggleChat();
+    }
+
+    window.toggleChatHub = function(forceHubOnly = false) {
+        if (forceHubOnly) activePropertyId = null;
+        if (!window.isChatOpen) { window.toggleChat(); }
+        else if (forceHubOnly) {
+            window.toggleDisplay('chatHubView', true); window.toggleDisplay('chatPropertyView', false); window.renderChatHub();
+        } else { window.toggleChat(); }
+    }
+
+    window.renderChatHub = function() {
+        const list = document.getElementById('chatHubList');
+        if (!list) return;
+
+        let hubItems = propertiesData.map(p => {
+            const comments = p.comments || [];
+            const lastCmt = comments.length > 0 ? comments[comments.length - 1] : null;
+            const myPrefix = currentUser && currentUser.email ? currentUser.email.split('@')[0].toLowerCase() : "agent";
+            const lastRead = (p.readBy || {})[myPrefix] || 0;
+            const unreadCount = comments.filter(c => c.timestamp > lastRead && c.author.toLowerCase() !== myPrefix).length;
+            return { id: p.id, address: p.address, lastComment: lastCmt, unreadCount: unreadCount, timestamp: lastCmt ? lastCmt.timestamp : p.dateStarted };
+        }).sort((a, b) => b.timestamp - a.timestamp);
+
+        if (hubItems.length === 0) { list.innerHTML = `<div class="text-center text-xs text-gray-500 mt-10 italic">No active discussions. Deploy a new asset to begin tracking!</div>`; return; }
+
+        list.innerHTML = hubItems.map(item => {
+            let badgeHtml = item.unreadCount > 0 ? `<span class="bg-brand-crimson text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md animate-pulse">${item.unreadCount} New</span>` : '';
+            let snippet = item.lastComment ? `<span class="font-bold text-gray-400 capitalize">${escapeHtml(item.lastComment.author)}:</span> ${escapeHtml(item.lastComment.text)}` : `<span class="italic text-gray-600">No messages yet</span>`;
+            
+            return `<div onclick="window.openPropertyChatOnly('${item.id}')" class="p-3 bg-gray-900/50 hover:bg-gray-800/80 rounded-xl border border-gray-800/80 cursor-pointer transition-colors group shadow-sm">
+                <div class="flex justify-between items-start mb-1"><h4 class="text-xs font-bold text-white group-hover:text-brand-purple transition-colors truncate pr-2 flex items-center gap-2"><i class="fa-solid fa-house-chimney text-[10px] text-gray-600"></i> ${escapeHtml(item.address)}</h4><div class="shrink-0 flex items-center gap-2">${badgeHtml}</div></div>
+                <p class="text-[10px] text-gray-300 line-clamp-1 mb-1 mt-1">${snippet}</p>
+                <div class="text-[9px] text-gray-500 font-mono mt-1.5 border-t border-gray-800/50 pt-1.5 inline-block w-full">${timeSince(item.lastComment ? item.lastComment.timestamp : item.timestamp)}</div>
+            </div>`;
+        }).join('');
+    }
+
+    window.toggleChatSearch = function() {
+        window.isChatSearchOpen = !window.isChatSearchOpen;
+        const searchInput = document.getElementById('chatSearchInput');
+        if(window.isChatSearchOpen) { window.toggleDisplay('chatSearchContainer', true); searchInput.focus(); }
+        else { window.toggleDisplay('chatSearchContainer', false); searchInput.value = ''; if (activePropertyId) window.renderChatMessages(propertiesData.find(p => p.id === activePropertyId)); }
+    }
+
+    window.jumpToChatMessage = function(commentId) {
+        const searchInput = document.getElementById('chatSearchInput');
+        if (searchInput) searchInput.value = '';
+        if (window.isChatSearchOpen) window.toggleChatSearch();
+        const pinsModal = document.getElementById('chatPinsModal');
+        if (pinsModal && !pinsModal.classList.contains('hidden')) window.toggleChatPins();
+        if (activePropertyId) window.renderChatMessages(propertiesData.find(p => p.id === activePropertyId), 0, commentId);
+    }
+
+    window.togglePinComment = async function(commentId) {
+        if (!activePropertyId) return;
+        const prop = propertiesData.find(p => p.id === activePropertyId);
+        if (!prop || !prop.comments) return;
+        const comment = prop.comments.find(c => c.id === commentId);
+        if (comment) { comment.pinned = !comment.pinned; await window.savePropertyData(prop, true); const pinsModal = document.getElementById('chatPinsModal'); if (pinsModal && !pinsModal.classList.contains('hidden')) window.renderChatPins(prop); }
+    }
+
+    window.toggleChatPins = function() {
+        window.toggleDisplay('chatPinsModal');
+        const modal = document.getElementById('chatPinsModal');
+        if (!modal.classList.contains('hidden') && activePropertyId) window.renderChatPins(propertiesData.find(p => p.id === activePropertyId));
+    }
+
+    window.renderChatPins = function(prop) {
+        const list = document.getElementById('chatPinsList');
+        if (!prop || !list) return;
+        const pinnedComments = (prop.comments || []).filter(c => c.pinned);
+        if (pinnedComments.length === 0) { list.innerHTML = `<div class="text-xs text-gray-500 italic text-center mt-6">No pinned messages yet.</div>`; return; }
+
+        list.innerHTML = pinnedComments.map(c => `
+            <div onclick="window.jumpToChatMessage('${c.id}')" class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-800/80 transition-colors">
+                <div class="flex justify-between items-center mb-1 border-b border-gray-800 pb-1"><span class="text-[9px] font-bold text-gray-400 capitalize">${escapeHtml(c.author)}</span><span class="text-[9px] text-gray-500">${formatEST(c.timestamp)}</span></div>
+                <p class="text-xs text-gray-300 line-clamp-3 whitespace-pre-wrap">${escapeHtml(c.text)}</p>
+            </div>`).join('');
+    }
+
+    window.toggleChatAttachments = function() {
+        window.toggleDisplay('chatAttachmentsModal');
+        const modal = document.getElementById('chatAttachmentsModal');
+        if (!modal.classList.contains('hidden') && activePropertyId) {
+            const prop = propertiesData.find(p => p.id === activePropertyId);
+            const list = document.getElementById('chatAttachmentsList');
+            if (!prop || !list) return;
+
+            let items = [];
+            prop.tasks.forEach(t => {
+                if(t.hyperlink || t.templateText) items.push({ phase: t.phase, title: t.title, link: t.hyperlink, template: t.templateText });
+                if(t.subtasks) t.subtasks.forEach(st => {
+                    if(st.hyperlink || st.templateText) items.push({ phase: t.phase, title: `${t.title} <i class="fa-solid fa-angle-right text-[8px] mx-1"></i> ${st.title}`, link: st.hyperlink, template: st.templateText });
+                });
+            });
+
+            let htmlStr = '';
+            items.forEach(item => {
+                let hasItem = false; let itemContent = '';
+                if (item.link) {
+                    hasItem = true;
+                    itemContent += `<a href="${item.link.startsWith('http') ? item.link : 'https://'+item.link}" target="_blank" class="text-brand-cyan hover:underline text-xs break-all block mb-1"><i class="fa-solid fa-link"></i> ${escapeHtml(item.link)}</a>`;
+                }
+                if (item.template) {
+                    const urls = item.template.match(/(https?:\/\/[^\s]+)/g);
+                    if (urls) {
+                        hasItem = true;
+                        urls.forEach(url => { itemContent += `<a href="${url}" target="_blank" class="text-brand-emerald hover:underline text-xs break-all block mb-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${escapeHtml(url)}</a>`; });
+                    }
+                    if (item.template.length > 0) {
+                        hasItem = true;
+                        itemContent += `<div class="text-[10px] text-gray-400 mt-1.5 p-2 bg-gray-950/50 rounded border border-gray-800 line-clamp-4 whitespace-pre-wrap leading-relaxed"><span class="text-brand-purple font-bold block mb-0.5 uppercase tracking-wider text-[8px]">Draft Content</span>${escapeHtml(item.template)}</div>`;
+                    }
+                }
+                if (hasItem) {
+                    htmlStr += `<div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-700 shadow-sm"><div class="flex flex-col mb-2 border-b border-gray-800 pb-1.5"><span class="text-[8px] font-bold text-brand-emerald/70 uppercase tracking-widest mb-0.5">${escapeHtml(item.phase)}</span><h5 class="text-[10px] font-bold text-gray-300">${escapeHtml(item.title)}</h5></div>${itemContent}</div>`;
+                }
+            });
+            list.innerHTML = htmlStr || `<div class="text-xs text-gray-500 italic text-center mt-6">No links or templates found for this asset.</div>`;
+        }
+    }
+
+    window.sendChatMessage = async function() {
+        if (!activePropertyId) return;
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        const prop = propertiesData.find(p => p.id === activePropertyId);
+        if (!prop) return;
+
+        const authorName = currentUser && currentUser.email ? currentUser.email.split('@')[0] : "Agent";
+        const myPrefix = authorName.toLowerCase();
+
+        if (!prop.comments) prop.comments = [];
+        prop.comments.push({ id: 'cmt_' + Date.now() + Math.random().toString(36).substr(2, 5), text: text, author: authorName, timestamp: Date.now(), pinned: false });
+        prop.readBy = prop.readBy || {}; prop.readBy[myPrefix] = Date.now();
+        input.value = ''; await window.savePropertyData(prop); 
+    }
+
+    window.renderChatMessages = function(prop, lastReadTime = 0, focusCommentId = null) {
+        const container = document.getElementById('chatMessages');
+        if (!container || !prop) return;
+        
+        const myPrefix = currentUser && currentUser.email ? currentUser.email.split('@')[0].toLowerCase() : "agent";
+        
+        if (window.isChatOpen && !window.isChatSearchOpen) { prop.readBy = prop.readBy || {}; prop.readBy[myPrefix] = Date.now(); }
+        updateChatBadge(prop);
+
+        const searchInput = document.getElementById('chatSearchInput');
+        const searchTerm = searchInput && window.isChatSearchOpen ? searchInput.value.toLowerCase() : '';
+        const isSearching = window.isChatSearchOpen && searchTerm !== '';
+
+        const comments = (prop.comments || []).filter(c => searchTerm === '' || c.text.toLowerCase().includes(searchTerm) || c.author.toLowerCase().includes(searchTerm));
+
+        if (comments.length === 0) { container.innerHTML = `<div class="text-center text-xs text-gray-500 mt-10 italic">${isSearching ? 'No matching messages.' : 'No messages found.'}</div>`; return; }
+
+        let firstUnreadId = null;
+        if (!focusCommentId && lastReadTime > 0 && !isSearching) {
+            const firstUnread = comments.find(c => c.timestamp > lastReadTime && c.author.toLowerCase() !== myPrefix);
+            if(firstUnread) firstUnreadId = firstUnread.id;
+        }
+
+        container.innerHTML = comments.map(c => {
+            const authorLower = c.author.toLowerCase();
+            const authorColorClass = getAgentColorClass(authorLower, 'text');
+            const isMe = myPrefix === authorLower;
+            const isHighlight = focusCommentId === c.id;
+            
+            const readers = Object.entries(prop.readBy || {}).filter(([u, t]) => t >= c.timestamp && u !== authorLower).map(x => x[0]);
+            let readReceiptHtml = readers.length > 0 ? `<div class="text-[9px] text-gray-500 ${isMe ? 'text-right justify-end' : 'text-left justify-start'} mt-1 flex items-center gap-1 pointer-events-none"><i class="fa-solid fa-check-double text-brand-cyan/70"></i> Read by: ${escapeHtml(readers.join(', '))}</div>` : '';
+            const pinActionHtml = `<button onclick="event.stopPropagation(); window.togglePinComment('${c.id}')" class="mx-2 text-gray-500 hover:text-brand-gold ${c.pinned ? 'text-brand-gold opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity cursor-pointer z-10 relative pointer-events-auto" title="${c.pinned ? 'Unpin' : 'Pin'} Message"><i class="fa-solid fa-thumbtack text-[9px]"></i></button>`;
+
+            let wrapperClass = `group flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1 ${isHighlight ? 'highlight-comment' : ''}`;
+            let jumpOnClick = isSearching ? `onclick="window.jumpToChatMessage('${c.id}')"` : '';
+            if (isSearching) wrapperClass += ' cursor-pointer hover:bg-gray-800/40 p-2 rounded-lg transition-colors';
+
+            return `
+            <div id="chat_msg_${c.id}" class="${wrapperClass}" ${jumpOnClick}>
+                <div class="flex items-center w-full ${isMe ? 'justify-end' : 'justify-start'} mb-1">
+                    ${isMe ? pinActionHtml : ''}
+                    <span class="text-[9px] font-bold ${authorColorClass} px-1">${escapeHtml(c.author)} • ${formatEST(c.timestamp)}</span>
+                    ${!isMe ? pinActionHtml : ''}
+                </div>
+                <div class="${isMe ? 'bg-brand-emerald/10 border-brand-emerald/30' : 'bg-gray-800/60 border-gray-700/50'} border rounded-xl px-3 py-2 max-w-[90%] shadow-sm ${isSearching ? 'pointer-events-none' : ''}">
+                    <p class="text-xs text-gray-200 whitespace-pre-wrap">${escapeHtml(c.text)}</p>
+                </div>
+                ${readReceiptHtml}
+            </div>`;
+        }).join('');
+        
+        setTimeout(() => {
+            if (focusCommentId) document.getElementById('chat_msg_' + focusCommentId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            else if (firstUnreadId && !isSearching) document.getElementById('chat_msg_' + firstUnreadId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            else if (!isSearching) container.scrollTop = container.scrollHeight;
+        }, 100);
     }
 
     function renderTrackerView() {
@@ -1659,7 +2156,6 @@
         for (const [phaseName, mainTasksMap] of Object.entries(structure)) {
             const ui = getPhaseUI(phaseName);
             const sectionDiv = document.createElement('div');
-            // Fix 7: Removed overflow-hidden to allow dropdowns to pop out
             sectionDiv.className = `glass-card rounded-xl border ${ui.timelineCard} mb-6 transition-all`;
 
             sectionDiv.innerHTML = `<div class="bg-gray-900/60 p-4 border-b border-gray-800 flex items-center justify-between"><h3 class="font-bold text-white uppercase text-sm tracking-wider flex items-center gap-2"><i class="fa-solid ${ui.icon} ${ui.trackerHeaderIcon}"></i> ${escapeHtml(phaseName)}</h3></div>`;
@@ -2086,354 +2582,6 @@
         window.selectedNotifs.clear();
     }
 
-    // --- 7. CLOUD FIREBASE SYNC ENGINE ---
-    async function initFirebase() {
-        try {
-            const firebaseConfig = {
-                apiKey: "AIzaSyAd9AdG1Yl65SYscJT_hbqXa4HWzC4ky3k",
-                authDomain: "dispo-ops.firebaseapp.com",
-                projectId: "dispo-ops",
-                storageBucket: "dispo-ops.firebasestorage.app",
-                messagingSenderId: "933896335434",
-                appId: "1:933896335434:web:1be42c24236eb05155b6b3",
-                measurementId: "G-K5YV8RS58E"
-            };
-            
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'tchb-dispo-ops';
-            const app = initializeApp(firebaseConfig);
-            
-            // Fix: Initialize Auth synchronously BEFORE any awaits
-            firebaseAuth = getAuth(app);
-            googleProvider = new GoogleAuthProvider();
-            googleProvider.setCustomParameters({ hd: 'totalchb.com' });
-            db = getFirestore(app);
-            
-            // Enable Local Offline Persistence safely
-            try { await enableIndexedDbPersistence(db); } catch (err) {}
-
-            let messaging = null;
-            if (getMessaging) {
-                try {
-                    messaging = getMessaging(app);
-                    onMessage(messaging, (payload) => window.showAppToast(payload.notification.title, payload.notification.body));
-                } catch (err) {}
-            }
-            
-            window.showAppToast = function(title, body) {
-                const toast = document.getElementById('appToast');
-                if(!toast) return;
-                document.getElementById('appToastTitle').innerText = title;
-                document.getElementById('appToastBody').innerText = body;
-                toast.classList.remove('hidden');
-                setTimeout(() => toast.classList.remove('translate-x-[150%]'), 50);
-                setTimeout(() => toast.classList.add('translate-x-[150%]'), 6000);
-            }
-
-            window.requestPushToken = async function() {
-                if(!messaging || !getToken) return null;
-                try {
-                    const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-                    await registration.update();
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        return await getToken(messaging, { vapidKey: "BAOBgrEDGG_WLKRjNEXU_L2_kHZrWTVFGUxN5gm7Udkkh9p0l2Tc8sTZhErN_dZmpxD-EzjEnNfhYX7R3XHrRhw", serviceWorkerRegistration: registration });
-                    }
-                } catch(e) {}
-                return null;
-            }
-
-            window.enablePush = async function() {
-                const btn = document.getElementById('enablePushBtn');
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authorizing...';
-                const token = await window.requestPushToken();
-                if (token && currentUser && db) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
-                    await setDoc(docRef, { fcmTokens: arrayUnion(token) }, { merge: true });
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Device Linked Successfully!';
-                    btn.className = "flex-1 bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
-                } else {
-                    btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Setup Failed (Check Console)';
-                    btn.className = "flex-1 bg-brand-crimson/20 text-brand-crimson border border-brand-crimson/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
-                }
-            }
-
-            window.resetPushTokens = async function() {
-                if (!currentUser || !db) return;
-                const btn = document.getElementById('enablePushBtn');
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
-                    await setDoc(docRef, { fcmTokens: [] }, { merge: true });
-                    btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Wiped! Click to Link Current.';
-                    btn.className = "flex-1 bg-brand-gold/20 text-brand-gold border border-brand-gold/50 text-xs font-bold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-all";
-                } catch(e) {}
-            }
-            
-            function getDefaultPrefs(email) {
-                const mail = (email || '').toLowerCase();
-                const dispoAgents = ['carlos@totalchb.com', 'yanna@totalchb.com', 'moe@totalchb.com', 'sara@totalchb.com', 'sarah@totalchb.com'];
-                const tcAgents = ['monz@totalchb.com', 'chris@totalchb.com'];
-                const admins = ['brandy@totalchb.com', 'luke@totalchb.com', 'info@totalchb.com'];
-                const superAdmin = ['systems@totalchb.com'];
-                
-                if (superAdmin.includes(mail)) {
-                    return { comments: false, new_assets: false, completions_phase: false, completions_task: false, completions_subtask: false, drafts_links: false, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
-                } else if (admins.includes(mail)) {
-                    return { comments: true, new_assets: true, completions_phase: true, completions_task: true, completions_subtask: false, drafts_links: true, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
-                } else if (dispoAgents.includes(mail) || tcAgents.includes(mail)) {
-                    return { comments: true, new_assets: true, completions_phase: true, completions_task: true, completions_subtask: true, drafts_links: true, task_turns: true, daily_brief: true, reminders: true, reminder_interval: '4' };
-                }
-                return { comments: true, new_assets: true, completions_phase: true, completions_task: true, completions_subtask: false, drafts_links: true, task_turns: false, daily_brief: false, reminders: false, reminder_interval: '4' };
-            }
-
-            window.resetNotificationPreferences = async function() {
-                if (!currentUser || !db) return;
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
-                    const defaults = getDefaultPrefs(currentUser.email);
-                    await setDoc(docRef, { email: currentUser.email, ...defaults, updatedAt: Date.now() }, { merge: true });
-                    window.loadNotificationPreferences();
-                    const toast = document.getElementById('appToast');
-                    if (toast) window.showAppToast("Settings Reset", "Notification preferences have been restored to their defaults.");
-                } catch(e) {}
-            }
-
-            window.listenToProperties = function() {
-                if (!currentUser) return;
-                const propsRef = collection(db, 'artifacts', appId, 'public', 'data', 'properties');
-                
-                const unsub = onSnapshot(propsRef, (snapshot) => {
-                    propertiesData = [];
-                    snapshot.forEach(docSnap => {
-                        let data = docSnap.data();
-                        if (data.tasks) {
-                            data.tasks = data.tasks.filter(t => t.id !== 'p3_7'); 
-                            let p3_6 = data.tasks.find(t => t.id === 'p3_6');
-                            if (p3_6) {
-                                p3_6.subtasks = p3_6.subtasks || [];
-                                if (!p3_6.subtasks.some(s => s.title.includes("Boost the Post"))) {
-                                    p3_6.subtasks.unshift({ id: 'sub_default_boost', title: "Boost the Post (If Needed)", completed: false, isDefault: true });
-                                }
-                            }
-                        }
-                        propertiesData.push(data);
-                    });
-                    
-                    if (isGatewayUnlocked) {
-                        renderDashboard(); updateGlobalAssetSelector(); updateChatBadge(); 
-                        if (activePropertyId) renderTrackerView();
-                        if (window.isChatOpen && !activePropertyId) window.renderChatHub();
-                    }
-                }, (error) => { if (isGatewayUnlocked) renderDashboard(); });
-                window.activeListeners.push(unsub);
-            };
-
-            window.listenToNotifications = function() {
-                if (!currentUser || !db) return;
-                const notifRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications');
-                let isInitialLoad = true;
-
-                const unsub = onSnapshot(notifRef, (snapshot) => {
-                    let newNotifs = [];
-                    snapshot.docChanges().forEach(change => { if (change.type === 'added') newNotifs.push(change.doc.data()); });
-                    window.notificationHistory = [];
-                    snapshot.forEach(docSnap => window.notificationHistory.push({ ...docSnap.data(), id: docSnap.id }));
-                    window.notificationHistory.sort((a,b) => b.createdAt - a.createdAt); 
-                    updateNotificationsBadge(); renderNotificationList();
-
-                    if (!isInitialLoad && newNotifs.length > 0) {
-                        const latest = newNotifs.sort((a,b) => b.createdAt - a.createdAt)[0];
-                        if (!latest.read) window.showAppToast(latest.title, latest.body);
-                    }
-                    isInitialLoad = false;
-                });
-                window.activeListeners.push(unsub);
-            }
-
-            window.renderNotificationList = function() {
-                const list = document.getElementById('notificationsListItems');
-                const header = document.getElementById('notifHeaderActions');
-                if (!list || !header) return;
-
-                const selectedCount = window.selectedNotifs.size;
-                const totalCount = window.notificationHistory.length;
-
-                if (selectedCount > 0) {
-                    const isAllSelected = selectedCount === totalCount && totalCount > 0;
-                    header.innerHTML = `
-                        <div class="flex items-center gap-3 w-full">
-                            <input type="checkbox" ${isAllSelected ? 'checked' : ''} onchange="window.toggleSelectAllNotifications(event)" class="w-4 h-4 rounded accent-brand-emerald bg-gray-900 border-gray-600 cursor-pointer">
-                            <span class="text-xs font-bold text-white">${selectedCount} Selected</span>
-                            <div class="flex gap-4 ml-auto items-center">
-                                <button onclick="window.markSelectedNotificationsRead()" class="text-gray-400 hover:text-brand-cyan transition-colors" title="Mark Read"><i class="fa-solid fa-envelope-open-text text-[14px]"></i></button>
-                                <button onclick="window.deleteSelectedNotifications()" class="text-gray-400 hover:text-brand-crimson transition-colors" title="Delete"><i class="fa-solid fa-trash-can text-[14px]"></i></button>
-                            </div>
-                        </div>`;
-                } else {
-                    header.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            ${totalCount > 0 ? `<input type="checkbox" onchange="window.toggleSelectAllNotifications(event)" class="w-4 h-4 rounded accent-brand-emerald bg-gray-900 border-gray-600 cursor-pointer" title="Select All">` : ''}
-                            <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-bell text-brand-emerald"></i> Notifications</span>
-                        </div>
-                        <div class="flex gap-4 items-center">
-                            ${totalCount > 0 ? `<button onclick="window.markAllNotificationsRead()" class="text-[10px] text-gray-400 hover:text-brand-cyan uppercase font-bold tracking-widest cursor-pointer transition-colors" title="Mark All Read"><i class="fa-solid fa-check-double text-[14px]"></i></button>` : ''}
-                            <button onclick="window.toggleNotificationSettings(event)" class="text-gray-400 hover:text-brand-cyan cursor-pointer transition-colors" title="Settings"><i class="fa-solid fa-gear text-[14px]"></i></button>
-                        </div>`;
-                }
-
-                if (totalCount === 0) { list.innerHTML = `<div class="p-6 text-center text-xs text-gray-500 italic">You're all caught up!</div>`; return; }
-
-                list.innerHTML = window.notificationHistory.map(n => {
-                    const extraDataStr = encodeURIComponent(JSON.stringify(n.extraData || {}));
-                    const isSelected = window.selectedNotifs.has(n.id);
-                    return `
-                    <div class="p-4 flex gap-3 hover:bg-gray-800/40 transition-colors group ${!n.read ? 'bg-gray-800/20' : 'opacity-70'} ${isSelected ? 'bg-brand-emerald/5' : ''}">
-                        <div class="flex items-start mt-0.5"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="window.toggleNotificationSelection('${n.id}', event)" class="w-4 h-4 rounded accent-brand-emerald bg-gray-900 border-gray-600 focus:ring-brand-emerald focus:ring-offset-0 focus:ring-1 cursor-pointer"></div>
-                        <div onclick="window.handleNotificationClick('${n.id}', '${extraDataStr}', event)" class="flex-1 cursor-pointer">
-                            <h5 class="text-xs font-bold ${!n.read ? 'text-white' : 'text-gray-300'} flex items-center gap-2">${!n.read ? '<div class="w-1.5 h-1.5 rounded-full bg-brand-emerald shrink-0"></div>' : ''}${escapeHtml(n.title)}</h5>
-                            <p class="text-[10px] text-gray-400 mt-1 leading-relaxed">${escapeHtml(n.body)}</p>
-                            <span class="text-[9px] text-gray-500 mt-2 block">${timeSince(n.createdAt)}</span>
-                        </div>
-                        <button onclick="window.deleteNotification('${n.id}', event)" class="text-gray-600 hover:text-brand-crimson opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer shrink-0 mt-0.5" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>`;
-                }).join('');
-            }
-
-            window.markAllNotificationsRead = async function() {
-                const unread = window.notificationHistory.filter(n => !n.read);
-                unread.forEach(n => {
-                    const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications', n.id);
-                    updateDoc(ref, { read: true }).catch(e=>console.error(e));
-                });
-            }
-
-            window.handleNotificationClick = async function(id, extraDataStr, e) {
-                if (e) e.stopPropagation();
-                const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications', id);
-                updateDoc(ref, { read: true }).catch(e=>{});
-                window.toggleNotificationList();
-                try {
-                    const data = JSON.parse(decodeURIComponent(extraDataStr));
-                    if (data.propId) {
-                        window.openTracker(data.propId);
-                        if (data.action === 'open_chat') setTimeout(() => window.toggleChat(data.commentId), 300);
-                    }
-                } catch(e) {}
-            }
-
-            window.savePropertyData = async function(prop, quiet = false) {
-                if (currentUser && db) {
-                    if(!quiet) { prop.dateLastEdited = Date.now(); prop.lastEditedBy = currentUser.uid; prop.lastEditedByName = currentUser.email.split('@')[0]; }
-                    const propRef = doc(db, 'artifacts', appId, 'public', 'data', 'properties', prop.id);
-                    await setDoc(propRef, prop);
-                } else {
-                    console.error("Database unavailable. Action blocked to prevent data desync.");
-                }
-            };
-
-            window.removePropertyData = async function(id) {
-                if (currentUser && db) {
-                    const propRef = doc(db, 'artifacts', appId, 'public', 'data', 'properties', id);
-                    await deleteDoc(propRef);
-                }
-            };
-
-            window.loadNotificationPreferences = async function() {
-                if (!currentUser || !db) return;
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
-                    const snap = await getDoc(docRef);
-                    const defaults = getDefaultPrefs(currentUser.email);
-                    let data = defaults;
-
-                    if(snap.exists()) data = { ...defaults, ...snap.data() }; 
-                    else await setDoc(docRef, { email: currentUser.email, ...defaults, updatedAt: Date.now() });
-
-                    document.getElementById('pref_comments').checked = data.comments;
-                    document.getElementById('pref_new_assets').checked = data.new_assets;
-                    document.getElementById('pref_completions_phase').checked = data.completions_phase;
-                    document.getElementById('pref_completions_task').checked = data.completions_task;
-                    document.getElementById('pref_completions_subtask').checked = data.completions_subtask;
-                    document.getElementById('pref_drafts_links').checked = data.drafts_links;
-                    document.getElementById('pref_task_turns').checked = data.task_turns;
-                    document.getElementById('pref_daily_brief').checked = data.daily_brief;
-                    document.getElementById('pref_reminders').checked = data.reminders;
-                    document.getElementById('pref_reminder_interval').disabled = !data.reminders;
-                    if (data.reminder_interval) document.getElementById('pref_reminder_interval').value = data.reminder_interval;
-                } catch(e) { }
-            }
-
-            window.saveNotificationPreferences = async function() {
-                if (!currentUser || !db) return;
-                const btn = document.getElementById('savePrefsBtn'); const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-                
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_preferences', currentUser.uid);
-                    await setDoc(docRef, {
-                        email: currentUser.email, 
-                        comments: document.getElementById('pref_comments').checked, 
-                        new_assets: document.getElementById('pref_new_assets').checked,
-                        completions_phase: document.getElementById('pref_completions_phase').checked,
-                        completions_task: document.getElementById('pref_completions_task').checked,
-                        completions_subtask: document.getElementById('pref_completions_subtask').checked,
-                        drafts_links: document.getElementById('pref_drafts_links').checked,
-                        task_turns: document.getElementById('pref_task_turns').checked,
-                        daily_brief: document.getElementById('pref_daily_brief').checked, 
-                        reminders: document.getElementById('pref_reminders').checked,
-                        reminder_interval: document.getElementById('pref_reminder_interval').value, 
-                        updatedAt: Date.now()
-                    }, { merge: true });
-                    
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Preferences Saved';
-                    setTimeout(() => { btn.innerHTML = originalText; window.toggleNotificationSettings(); }, 1500);
-                } catch(e) { 
-                    btn.innerHTML = 'Error Saving!'; setTimeout(() => { btn.innerHTML = originalText; }, 2000);
-                }
-            }
-
-            onAuthStateChanged(firebaseAuth, async (user) => {
-                if (user) {
-                    if (user.email && user.email.endsWith('@totalchb.com')) {
-                        currentUser = user; grantAccess(); 
-                        window.loadNotificationPreferences(); window.listenToNotifications();
-                        
-                        if (!window.presenceInterval) {
-                            const updatePresence = () => {
-                                if (currentUser && db) {
-                                    const deviceType = ( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) ? 'Mobile' : 'Desktop';
-                                    setDoc(
-                                        doc(db, 'artifacts', appId, 'public', 'data', 'active_users', currentUser.uid),
-                                        { email: currentUser.email, sessions: { [localDeviceId]: { lastActive: Date.now(), type: deviceType } } }, { merge: true }
-                                    ).catch(e => {});
-                                }
-                            };
-                            updatePresence(); window.presenceInterval = setInterval(updatePresence, 60000); 
-
-                            const activeUsersRef = collection(db, 'artifacts', appId, 'public', 'data', 'active_users');
-                            const unsub = onSnapshot(activeUsersRef, (snapshot) => {
-                                window.activeUsersData = []; const now = Date.now();
-                                snapshot.forEach(docSnap => {
-                                    const data = docSnap.data(); let isOnline = false;
-                                    if(data.sessions) Object.values(data.sessions).forEach(sess => { if (now - sess.lastActive < 300000) isOnline = true; });
-                                    if (isOnline) window.activeUsersData.push(data);
-                                });
-                                if(window.renderActiveUsersList) window.renderActiveUsersList();
-                            });
-                            window.activeListeners.push(unsub);
-                        }
-                    } else { await signOut(firebaseAuth); currentUser = null; }
-                } else {
-                    if (window.presenceInterval) { clearInterval(window.presenceInterval); window.presenceInterval = null; }
-                    currentUser = null;
-                }
-            });
-            
-        } catch (e) {
-            const errorMsg = document.getElementById('gateErrorMessage');
-            if (errorMsg) { errorMsg.innerHTML = "System Error: " + e.message + "<br/><br/>Try refreshing the page or checking your internet connection."; window.toggleDisplay('gateErrorMessage', true, 'block'); }
-        }
-    }
-
     // --- 8. CURSOR & CANVAS ANIMATION LOGIC ---
     const canvas = document.getElementById('gridCanvas');
     const ctx = canvas.getContext('2d');
@@ -2444,7 +2592,6 @@
     let ringX = customMouseX; let ringY = customMouseY;
 
     function resizeCanvas() { 
-        // Implement High-DPI Canvas scaling Fix
         const dpr = window.devicePixelRatio || 1;
         canvas.width = window.innerWidth * dpr; 
         canvas.height = window.innerHeight * dpr; 
