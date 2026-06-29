@@ -2722,21 +2722,21 @@
         ` : '';
 
         const categoryUIs = state.categoryMode === 'existing' 
-            ? `<div><label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Select Group</label>${renderCustomSelect('cat', 'Category', catsOptions, state.category, 'window.updateTaskState(\\'category\\', ')}</div>`
+            ? `<div><label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Select Group</label>${renderCustomSelect('cat', 'Category', catsOptions, state.category, "window.updateTaskState('category', ")}</div>`
             : `<div class="col-span-2 grid grid-cols-2 gap-4 p-3.5 bg-brand-emerald/5 border border-brand-emerald/20 rounded-xl mt-1">
                    <div><label class="block text-[10px] font-bold uppercase text-brand-emerald mb-1">New Group Name</label><input type="text" value="${escapeHtml(state.newCategoryName)}" oninput="window.updateTaskStateInput('newCategoryName', this.value)" class="w-full bg-gray-950 border border-brand-emerald/40 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-emerald transition-colors" placeholder="e.g. Closing"></div>
-                   <div><label class="block text-[10px] font-bold uppercase text-brand-emerald mb-1">Position (Order)</label>${renderCustomSelect('insertAfter', 'Position', insertOptions, state.insertGroupAfter, 'window.updateTaskState(\\'insertGroupAfter\\', ')}</div>
+                   <div><label class="block text-[10px] font-bold uppercase text-brand-emerald mb-1">Position (Order)</label>${renderCustomSelect('insertAfter', 'Position', insertOptions, state.insertGroupAfter, "window.updateTaskState('insertGroupAfter', ")}</div>
                </div>`;
 
         document.getElementById('addTaskModalContent').innerHTML = `
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Target Phase</label>
-                    ${renderCustomSelect('phase', 'Phase', phases, state.phase, 'window.updateTaskState(\\'phase\\', ')}
+                    ${renderCustomSelect('phase', 'Phase', phases, state.phase, "window.updateTaskState('phase', ")}
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Group Mode</label>
-                    ${renderCustomSelect('catMode', 'Mode', catModeOptions, state.categoryMode, 'window.updateTaskState(\\'categoryMode\\', ')}
+                    ${renderCustomSelect('catMode', 'Mode', catModeOptions, state.categoryMode, "window.updateTaskState('categoryMode', ")}
                 </div>
                 ${categoryUIs}
             </div>
@@ -2749,7 +2749,7 @@
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Assignee</label>
-                    ${renderCustomSelect('assignee', 'Assignee', assignees, state.assignee, 'window.updateTaskState(\\'assignee\\', ')}
+                    ${renderCustomSelect('assignee', 'Assignee', assignees, state.assignee, "window.updateTaskState('assignee', ")}
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold uppercase text-brand-cyan mb-1">Task Weight % (Optional)</label>
