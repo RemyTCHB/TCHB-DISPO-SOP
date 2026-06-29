@@ -719,17 +719,17 @@
                     </div>
                 </div>
 
-                <div class="relative z-10 flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto mt-4 lg:mt-0 shrink-0">
-                    <button onclick="window.promptGlobalAddTask()" class="w-full sm:w-auto px-4 py-2 h-[60px] text-xs font-bold bg-brand-emerald/10 border border-brand-emerald/30 text-brand-emerald hover:bg-brand-emerald hover:text-gray-900 rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-sm">
+                <div class="relative z-10 flex flex-col sm:flex-row items-stretch gap-4 w-full lg:w-auto mt-4 lg:mt-0 shrink-0">
+                    <button onclick="window.promptGlobalAddTask()" class="w-full sm:w-auto px-5 py-3 min-h-[68px] text-xs font-bold bg-brand-emerald/10 border border-brand-emerald/30 text-brand-emerald hover:bg-brand-emerald hover:text-gray-900 rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-sm">
                         <i class="fa-solid fa-plus"></i> Add Custom Task
                     </button>
-                    <div class="w-full sm:w-64 bg-gray-900/80 p-4 rounded-xl border border-gray-800 shrink-0 h-[60px] flex flex-col justify-center">
-                        <div class="flex justify-between items-center mb-1.5">
+                    <div class="w-full sm:w-64 bg-gray-900/80 p-4 rounded-xl border border-gray-800 shrink-0 min-h-[68px] flex flex-col justify-center">
+                        <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Progress</span>
                             <span id="tracker-percent-text" class="text-sm font-black text-brand-emerald">0%</span>
                         </div>
-                        <div class="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                            <div id="tracker-progress-bar" class="bg-gradient-to-r from-brand-crimson via-brand-purple to-brand-emerald h-full transition-all duration-500" style="width: 0%"></div>
+                        <div class="w-full bg-gray-800 rounded-full h-3 overflow-hidden border border-gray-700/50 shadow-inner">
+                            <div id="tracker-progress-bar" class="bg-gradient-to-r from-brand-crimson via-brand-purple to-brand-emerald h-full transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -1389,6 +1389,7 @@
             document.querySelectorAll('.task-custom-dropdown .absolute').forEach(el => {
                 el.classList.add('hidden'); el.classList.remove('flex');
             });
+            document.querySelectorAll('.task-custom-dropdown').forEach(el => el.style.zIndex = '1');
         }
 
         if (window.isChatOpen && !e.target.closest('#chatWindow') && !e.target.closest('#chatFabBtn') && !e.target.closest('#nav-mobile-chat') && !e.target.closest('[onclick*="toggleChat"]') && !e.target.closest('[onclick*="openPropertyChatOnly"]') && !e.target.closest('[onclick*="toggleChatHub"]')) {
@@ -2631,12 +2632,12 @@
             
         return `
             <div class="relative w-full task-custom-dropdown" id="dropdown_wrap_${id}">
-                <button type="button" ${disabled ? 'disabled' : ''} onclick="window.toggleTaskDropdown('${id}')" 
+                <button type="button" ${disabled ? 'disabled' : ''} onclick="event.stopPropagation(); window.toggleTaskDropdown('${id}')" 
                         class="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 focus:outline-none hover:border-brand-emerald transition-colors cursor-pointer flex justify-between items-center ${disabled ? 'opacity-50 cursor-not-allowed border-dashed' : ''}">
-                    <span class="truncate pr-2">${escapeHtml(displayLabel)}</span>
-                    <i id="dropdown_icon_${id}" class="fa-solid fa-chevron-down text-[10px] text-gray-500 transition-transform"></i>
+                    <span class="truncate pr-2 pointer-events-none">${escapeHtml(displayLabel)}</span>
+                    <i id="dropdown_icon_${id}" class="fa-solid fa-chevron-down text-[10px] text-gray-500 transition-transform pointer-events-none"></i>
                 </button>
-                <div id="dropdown_list_${id}" class="absolute left-0 top-full mt-1 w-full bg-[#0b0f19] border border-gray-600 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.8)] hidden flex-col z-50 max-h-56 overflow-y-auto custom-scrollbar">
+                <div id="dropdown_list_${id}" class="absolute left-0 top-full mt-1 w-full bg-[#0b0f19] border border-gray-500 rounded-lg shadow-[0_10px_50px_rgba(0,0,0,0.9)] hidden flex-col z-[9999] max-h-72 overflow-y-auto custom-scrollbar">
                     ${listHtml}
                 </div>
             </div>`;
@@ -2646,10 +2647,19 @@
         document.querySelectorAll('.task-custom-dropdown .absolute').forEach(el => {
             if(el.id !== `dropdown_list_${id}`) { el.classList.add('hidden'); el.classList.remove('flex'); }
         });
+        document.querySelectorAll('.task-custom-dropdown').forEach(el => el.style.zIndex = '1');
+
         const list = document.getElementById(`dropdown_list_${id}`);
+        const wrap = document.getElementById(`dropdown_wrap_${id}`);
         if(list) {
-            if(list.classList.contains('hidden')) { list.classList.remove('hidden'); list.classList.add('flex'); }
-            else { list.classList.add('hidden'); list.classList.remove('flex'); }
+            if(list.classList.contains('hidden')) { 
+                list.classList.remove('hidden'); list.classList.add('flex'); 
+                wrap.style.zIndex = '9999';
+            }
+            else { 
+                list.classList.add('hidden'); list.classList.remove('flex'); 
+                wrap.style.zIndex = '1';
+            }
         }
     };
 
@@ -2695,10 +2705,14 @@
             deductionsHtml += `
             <div class="flex items-start gap-3 mb-2 p-3 bg-gray-950/60 border border-gray-800 rounded-lg">
                 <div class="flex-1 w-full min-w-0">${dropHtml}</div>
-                <div class="w-24 shrink-0">
-                    <input type="number" min="0.1" step="0.1" value="${deduct.weight}" onchange="window.updateDeductionWeight(${idx}, this.value)" class="w-full bg-gray-950 border border-brand-crimson/50 rounded-lg p-3 text-xs font-bold text-brand-crimson focus:outline-none focus:border-brand-crimson transition-colors" placeholder="Weight %">
+                <div class="w-28 shrink-0">
+                    <div class="flex items-center bg-gray-950 border border-brand-crimson/50 rounded-lg overflow-hidden h-[42px]">
+                        <button onclick="window.updateDeductionWeight(${idx}, Math.max(0, (parseInt(window.customTaskState.deductions[${idx}].weight)||0) - 1))" class="px-2.5 py-3 text-brand-crimson hover:bg-brand-crimson/20 transition-colors border-r border-brand-crimson/30 cursor-pointer"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                        <input type="number" min="0" max="100" step="1" value="${deduct.weight}" onchange="window.updateDeductionWeight(${idx}, this.value)" class="flex-1 bg-transparent w-full px-1 py-2 text-xs font-bold text-center text-brand-crimson focus:outline-none appearance-none" style="-moz-appearance: textfield;" placeholder="0">
+                        <button onclick="window.updateDeductionWeight(${idx}, (parseInt(window.customTaskState.deductions[${idx}].weight)||0) + 1)" class="px-2.5 py-3 text-brand-crimson hover:bg-brand-crimson/20 transition-colors border-l border-brand-crimson/30 cursor-pointer"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                    </div>
                 </div>
-                <button onclick="window.removeDeductionRow(${idx})" class="w-10 h-10 shrink-0 bg-gray-800 hover:bg-red-500/20 text-gray-500 hover:text-brand-crimson rounded-lg flex items-center justify-center transition-colors border border-gray-700 mt-0.5"><i class="fa-solid fa-trash text-xs"></i></button>
+                <button onclick="window.removeDeductionRow(${idx})" class="w-10 h-[42px] shrink-0 bg-gray-800 hover:bg-red-500/20 text-gray-500 hover:text-brand-crimson rounded-lg flex items-center justify-center transition-colors border border-gray-700 cursor-pointer"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>`;
         });
 
@@ -2753,20 +2767,26 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold uppercase text-brand-cyan mb-1">Task Weight % (Optional)</label>
-                    <input type="number" min="0" max="100" step="0.1" value="${state.weight}" onchange="window.updateTaskState('weight', this.value)" class="w-full bg-gray-950 border border-brand-cyan/50 rounded-lg p-3 text-sm font-bold text-brand-cyan focus:outline-none focus:border-brand-cyan transition-colors" placeholder="0">
+                    <div class="flex items-center bg-gray-950 border border-brand-cyan/50 rounded-lg overflow-hidden h-[46px]">
+                        <button onclick="window.updateTaskState('weight', Math.max(0, (parseInt(window.customTaskState.weight)||0) - 1))" class="px-3.5 py-3 text-brand-cyan hover:bg-brand-cyan/20 transition-colors border-r border-brand-cyan/30 cursor-pointer"><i class="fa-solid fa-minus"></i></button>
+                        <input type="number" min="0" max="100" step="1" value="${state.weight}" onchange="window.updateTaskState('weight', this.value)" class="flex-1 bg-transparent w-full px-2 py-2 text-sm font-bold text-center text-brand-cyan focus:outline-none appearance-none" style="-moz-appearance: textfield;" placeholder="0">
+                        <button onclick="window.updateTaskState('weight', Math.min(100, (parseInt(window.customTaskState.weight)||0) + 1))" class="px-3.5 py-3 text-brand-cyan hover:bg-brand-cyan/20 transition-colors border-l border-brand-cyan/30 cursor-pointer"><i class="fa-solid fa-plus"></i></button>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-6 mt-2 mb-2 p-3 bg-gray-900/50 rounded-lg border border-gray-800">
+            <div class="flex justify-center items-center gap-6 mt-4 mb-2 p-3 bg-gray-900/50 rounded-lg border border-gray-800">
                 <label class="flex items-center gap-2 text-[11px] font-bold text-gray-300 cursor-pointer hover:text-white transition-colors">
-                    <input type="checkbox" class="w-4 h-4 rounded accent-brand-emerald bg-gray-900 border-gray-600 focus:ring-brand-emerald cursor-pointer" ${state.requireLink ? 'checked' : ''} onchange="window.updateTaskState('requireLink', this.checked)"> Require Link URL capability
+                    <input type="checkbox" class="w-4 h-4 rounded accent-brand-emerald bg-gray-900 border-gray-600 focus:ring-brand-emerald cursor-pointer" ${state.requireLink ? 'checked' : ''} onchange="window.updateTaskState('requireLink', this.checked)"> Require Link URL
                 </label>
                 <label class="flex items-center gap-2 text-[11px] font-bold text-gray-300 cursor-pointer hover:text-white transition-colors">
-                    <input type="checkbox" class="w-4 h-4 rounded accent-brand-cyan bg-gray-900 border-gray-600 focus:ring-brand-cyan cursor-pointer" ${state.requireDraft ? 'checked' : ''} onchange="window.updateTaskState('requireDraft', this.checked)"> Require Text Draft capability
+                    <input type="checkbox" class="w-4 h-4 rounded accent-brand-cyan bg-gray-900 border-gray-600 focus:ring-brand-cyan cursor-pointer" ${state.requireDraft ? 'checked' : ''} onchange="window.updateTaskState('requireDraft', this.checked)"> Require Text Draft
                 </label>
             </div>
 
             ${deductionsSection}
+            
+            <div class="pb-32"></div>
         `;
     };
 
