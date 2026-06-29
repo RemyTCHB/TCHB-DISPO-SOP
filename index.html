@@ -1417,6 +1417,18 @@
             document.querySelectorAll('.task-custom-dropdown').forEach(el => el.style.zIndex = '1');
         }
 
+        // Auto-close Task Drafts when clicking outside
+        if (!e.target.closest('[id^="templateUI_"]') && !e.target.closest('[onclick*="templateUI_"]')) {
+            document.querySelectorAll('[id^="templateUI_"]').forEach(el => {
+                if (!el.classList.contains('hidden')) {
+                    el.classList.add('hidden');
+                    el.classList.remove('block');
+                    const itemKey = el.id.replace('templateUI_', '');
+                    if (window.sectionToggleState) window.sectionToggleState['template_' + itemKey] = 'closed';
+                }
+            });
+        }
+
         if (window.isChatOpen && !e.target.closest('#chatWindow') && !e.target.closest('#chatFabBtn') && !e.target.closest('#nav-mobile-chat') && !e.target.closest('[onclick*="toggleChat"]') && !e.target.closest('[onclick*="openPropertyChatOnly"]') && !e.target.closest('[onclick*="toggleChatHub"]')) {
             window.toggleChat();
         }
