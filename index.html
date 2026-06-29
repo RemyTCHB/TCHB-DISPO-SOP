@@ -110,6 +110,11 @@
 
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
     .pt-safe-top { padding-top: env(safe-area-inset-top); }
+    
+    /* Hide native number spinners to strictly use custom +/- */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
   </style>
 </head>
 <body class="font-sans antialiased relative selection:bg-brand-crimson selection:text-white capitalize">
@@ -277,7 +282,7 @@
           </div>
           
           <div class="relative z-10 shrink-0 flex justify-between items-center mt-4 pt-4 border-t border-gray-800">
-              <button onclick="window.toggleDisplay('addTaskModal', false)" class="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors cursor-pointer">Cancel</button>
+              <button onclick="window.toggleDisplay('addTaskModal', false)" class="px-4 py-2 text-xs font-bold border border-brand-crimson/50 text-brand-crimson hover:bg-brand-crimson/10 rounded-lg transition-all cursor-pointer shadow-sm">Cancel</button>
               <div class="flex gap-2 sm:gap-3">
                   <button id="confirmAddTaskMultiBtn" onclick="window.confirmGlobalAddTask(true)" class="hidden sm:block px-4 py-2 text-xs font-bold border border-brand-emerald/50 text-brand-emerald hover:bg-brand-emerald/10 rounded-lg transition-all cursor-pointer shadow-sm">Save & Add Another</button>
                   <button id="confirmAddTaskBtn" onclick="window.confirmGlobalAddTask(false)" class="px-5 py-2 text-sm font-bold bg-brand-emerald hover:bg-emerald-400 text-gray-900 rounded-lg shadow-lg transition-all cursor-pointer">Save Task</button>
@@ -2615,8 +2620,8 @@
     }
 
     window.customTaskState = {
-        phase: '', categoryMode: 'existing', category: '', newCategoryName: '', insertGroupAfter: '',
-        title: '', assignee: AppConfig.agentsList[0], weight: 0, requireLink: false, requireDraft: false,
+        phase: '', categoryMode: '', category: '', newCategoryName: '', insertGroupAfter: '',
+        title: '', assignee: '', weight: '', requireLink: false, requireDraft: false,
         deductions: [] 
     };
 
@@ -2625,7 +2630,7 @@
         const displayLabel = displayObj ? displayObj.label : '-- Select --';
         
         let listHtml = options.map(o => `
-            <div onclick="event.stopPropagation(); ${onSelectStr}('${o.value.replace(/'/g, "\\'")}'); window.toggleTaskDropdown('${id}')" 
+            <div onmousedown="event.preventDefault(); event.stopPropagation(); ${onSelectStr}'${o.value.replace(/'/g, "\\'")}'); window.toggleTaskDropdown('${id}')" 
                  class="px-3 py-2.5 text-xs hover:bg-gray-800 cursor-pointer transition-colors border-b border-gray-800/50 ${o.value === selectedValue ? 'text-brand-emerald bg-gray-800/50 font-bold' : 'text-gray-300'} truncate" title="${escapeHtml(o.label)}">
                 ${escapeHtml(o.label)}
             </div>`).join('');
@@ -2637,7 +2642,7 @@
                     <span class="truncate pr-2 pointer-events-none">${escapeHtml(displayLabel)}</span>
                     <i id="dropdown_icon_${id}" class="fa-solid fa-chevron-down text-[10px] text-gray-500 transition-transform pointer-events-none"></i>
                 </button>
-                <div id="dropdown_list_${id}" class="absolute left-0 top-full mt-1 w-full bg-[#0b0f19] border border-gray-500 rounded-lg shadow-[0_10px_50px_rgba(0,0,0,0.9)] hidden flex-col z-[9999] max-h-72 overflow-y-auto custom-scrollbar">
+                <div id="dropdown_list_${id}" class="absolute left-0 top-full mt-1 w-full bg-[#0b0f19] border border-gray-500 rounded-lg shadow-[0_10px_50px_rgba(0,0,0,0.9)] hidden flex-col z-[9999] max-h-[220px] overflow-y-auto custom-scrollbar pointer-events-auto">
                     ${listHtml}
                 </div>
             </div>`;
@@ -2675,18 +2680,16 @@
         if (!prop) return;
         const state = window.customTaskState;
         
-        const phases = [...new Set(prop.tasks.map(t => t.phase))].map(p => ({label: p, value: p}));
-        const catsInPhase = [...new Set(prop.tasks.filter(t => t.phase === state.phase).map(t => t.mainTask))];
+        const phases = [{label: '-- Select Phase --', value: ''}, ...[...new Set(prop.tasks.map(t => t.phase))].map(p => ({label: p, value: p}))];
+        const catsInPhase = state.phase ? [...new Set(prop.tasks.filter(t => t.phase === state.phase).map(t => t.mainTask))] : [];
         
-        if (state.categoryMode === 'existing' && !catsInPhase.includes(state.category)) state.category = catsInPhase[0] || '';
+        if (state.categoryMode === 'existing' && state.category && !catsInPhase.includes(state.category)) state.category = '';
 
-        const catModeOptions = [{label: 'Assign to Existing Group', value: 'existing'}, {label: 'Create New Group', value: 'new'}];
-        const catsOptions = catsInPhase.map(c => ({label: c, value: c}));
-        const insertOptions = catsInPhase.map(c => ({label: `Insert After: ${c}`, value: c}));
-        insertOptions.unshift({label: 'At the Top (Beginning)', value: 'top'});
-        if(state.categoryMode === 'new' && !state.insertGroupAfter) state.insertGroupAfter = catsInPhase[catsInPhase.length-1] || 'top';
-
-        const assignees = AppConfig.agentsList.map(a => ({label: a, value: a}));
+        const catModeOptions = [{label: '-- Select Mode --', value: ''}, {label: 'Assign to Existing Group', value: 'existing'}, {label: 'Create New Group', value: 'new'}];
+        const catsOptions = [{label: '-- Select Group --', value: ''}, ...catsInPhase.map(c => ({label: c, value: c}))];
+        const insertOptions = [{label: '-- Select Position --', value: ''}, {label: 'At the Top (Beginning)', value: 'top'}, ...catsInPhase.map(c => ({label: `Insert After: ${c}`, value: c}))];
+        
+        const assignees = [{label: '-- Select Assignee --', value: ''}, ...AppConfig.agentsList.map(a => ({label: a, value: a}))];
 
         const availableTasks = prop.tasks.map(t => ({
             label: `[${t.weight}%] ${t.title} (${t.mainTask})`, value: t.id
@@ -2697,20 +2700,14 @@
         
         state.deductions.forEach((deduct, idx) => {
             totalDeducted += parseFloat(deduct.weight) || 0;
-            const rowOptions = availableTasks.filter(at => !state.deductions.some((d, dIdx) => dIdx !== idx && d.taskId === at.value));
-            
-            if (rowOptions.length > 0 && !deduct.taskId) deduct.taskId = rowOptions[0].value;
+            const rowOptions = [{label: '-- Select Task to Borrow From --', value: ''}, ...availableTasks.filter(at => !state.deductions.some((d, dIdx) => dIdx !== idx && d.taskId === at.value))];
             
             const dropHtml = renderCustomSelect(`deduct_task_${idx}`, 'Task', rowOptions, deduct.taskId, `window.updateDeductionTask(${idx}, `);
             deductionsHtml += `
             <div class="flex items-start gap-3 mb-2 p-3 bg-gray-950/60 border border-gray-800 rounded-lg">
                 <div class="flex-1 w-full min-w-0">${dropHtml}</div>
-                <div class="w-28 shrink-0">
-                    <div class="flex items-center bg-gray-950 border border-brand-crimson/50 rounded-lg overflow-hidden h-[42px]">
-                        <button onclick="window.updateDeductionWeight(${idx}, Math.max(0, (parseInt(window.customTaskState.deductions[${idx}].weight)||0) - 1))" class="px-2.5 py-3 text-brand-crimson hover:bg-brand-crimson/20 transition-colors border-r border-brand-crimson/30 cursor-pointer"><i class="fa-solid fa-minus text-[10px]"></i></button>
-                        <input type="number" min="0" max="100" step="1" value="${deduct.weight}" onchange="window.updateDeductionWeight(${idx}, this.value)" class="flex-1 bg-transparent w-full px-1 py-2 text-xs font-bold text-center text-brand-crimson focus:outline-none appearance-none" style="-moz-appearance: textfield;" placeholder="0">
-                        <button onclick="window.updateDeductionWeight(${idx}, (parseInt(window.customTaskState.deductions[${idx}].weight)||0) + 1)" class="px-2.5 py-3 text-brand-crimson hover:bg-brand-crimson/20 transition-colors border-l border-brand-crimson/30 cursor-pointer"><i class="fa-solid fa-plus text-[10px]"></i></button>
-                    </div>
+                <div class="w-24 shrink-0">
+                    <input type="number" min="0" step="1" value="${deduct.weight}" onchange="window.updateDeductionWeight(${idx}, this.value)" class="w-full bg-gray-950 border border-brand-crimson/50 rounded-lg p-3 text-xs font-bold text-center text-brand-crimson focus:outline-none focus:border-brand-crimson transition-colors" placeholder="Weight %">
                 </div>
                 <button onclick="window.removeDeductionRow(${idx})" class="w-10 h-[42px] shrink-0 bg-gray-800 hover:bg-red-500/20 text-gray-500 hover:text-brand-crimson rounded-lg flex items-center justify-center transition-colors border border-gray-700 cursor-pointer"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>`;
@@ -2731,24 +2728,27 @@
                     <span class="text-[10px] font-bold ${diffColor} px-2.5 py-1.5 rounded border shadow-sm shrink-0 whitespace-nowrap">${diffText}</span>
                 </div>
                 ${deductionsHtml}
-                <button onclick="window.addDeductionRow()" class="mt-2 text-xs font-bold text-brand-crimson/80 hover:text-brand-crimson bg-brand-crimson/10 hover:bg-brand-crimson/20 border border-brand-crimson/30 px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all cursor-pointer"><i class="fa-solid fa-plus"></i> Add Another Task to Deduct From</button>
+                <button onclick="window.addDeductionRow()" class="mt-2 text-xs font-bold text-brand-crimson/80 hover:text-brand-crimson bg-brand-crimson/10 hover:bg-brand-crimson/20 border border-brand-crimson/30 px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all cursor-pointer"><i class="fa-solid fa-plus"></i> Add Task to Deduct From</button>
             </div>
         ` : '';
 
-        const categoryUIs = state.categoryMode === 'existing' 
-            ? `<div><label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Select Group</label>${renderCustomSelect('cat', 'Category', catsOptions, state.category, "window.updateTaskState('category', ")}</div>`
-            : `<div class="col-span-2 grid grid-cols-2 gap-4 p-3.5 bg-brand-emerald/5 border border-brand-emerald/20 rounded-xl mt-1">
+        let categoryUIs = '';
+        if (state.categoryMode === 'existing') {
+            categoryUIs = `<div class="col-span-2 sm:col-span-1"><label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Select Group</label>${renderCustomSelect('cat', 'Category', catsOptions, state.category, "window.updateTaskState('category', ")}</div>`;
+        } else if (state.categoryMode === 'new') {
+            categoryUIs = `<div class="col-span-2 grid grid-cols-2 gap-4 p-3.5 bg-brand-emerald/5 border border-brand-emerald/20 rounded-xl mt-1">
                    <div><label class="block text-[10px] font-bold uppercase text-brand-emerald mb-1">New Group Name</label><input type="text" value="${escapeHtml(state.newCategoryName)}" oninput="window.updateTaskStateInput('newCategoryName', this.value)" class="w-full bg-gray-950 border border-brand-emerald/40 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-emerald transition-colors" placeholder="e.g. Closing"></div>
                    <div><label class="block text-[10px] font-bold uppercase text-brand-emerald mb-1">Position (Order)</label>${renderCustomSelect('insertAfter', 'Position', insertOptions, state.insertGroupAfter, "window.updateTaskState('insertGroupAfter', ")}</div>
                </div>`;
+        }
 
         document.getElementById('addTaskModalContent').innerHTML = `
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
+            <div class="grid grid-cols-2 gap-4 mb-4 items-end">
+                <div class="col-span-2 sm:col-span-1">
                     <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Target Phase</label>
                     ${renderCustomSelect('phase', 'Phase', phases, state.phase, "window.updateTaskState('phase', ")}
                 </div>
-                <div>
+                <div class="col-span-2 sm:col-span-1">
                     <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Group Mode</label>
                     ${renderCustomSelect('catMode', 'Mode', catModeOptions, state.categoryMode, "window.updateTaskState('categoryMode', ")}
                 </div>
@@ -2767,19 +2767,19 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold uppercase text-brand-cyan mb-1">Task Weight % (Optional)</label>
-                    <div class="flex items-center bg-gray-950 border border-brand-cyan/50 rounded-lg overflow-hidden h-[46px]">
-                        <button onclick="window.updateTaskState('weight', Math.max(0, (parseInt(window.customTaskState.weight)||0) - 1))" class="px-3.5 py-3 text-brand-cyan hover:bg-brand-cyan/20 transition-colors border-r border-brand-cyan/30 cursor-pointer"><i class="fa-solid fa-minus"></i></button>
-                        <input type="number" min="0" max="100" step="1" value="${state.weight}" onchange="window.updateTaskState('weight', this.value)" class="flex-1 bg-transparent w-full px-2 py-2 text-sm font-bold text-center text-brand-cyan focus:outline-none appearance-none" style="-moz-appearance: textfield;" placeholder="0">
-                        <button onclick="window.updateTaskState('weight', Math.min(100, (parseInt(window.customTaskState.weight)||0) + 1))" class="px-3.5 py-3 text-brand-cyan hover:bg-brand-cyan/20 transition-colors border-l border-brand-cyan/30 cursor-pointer"><i class="fa-solid fa-plus"></i></button>
+                    <div class="flex items-center bg-gray-950 border border-brand-cyan/50 rounded-lg overflow-hidden h-[42px]">
+                        <button onclick="window.updateTaskState('weight', Math.max(0, (parseInt(window.customTaskState.weight)||0) - 1))" class="px-3.5 py-3 text-brand-cyan hover:bg-brand-cyan/20 transition-colors border-r border-brand-cyan/30 cursor-pointer"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                        <input type="number" min="0" max="100" step="1" value="${state.weight}" onchange="window.updateTaskState('weight', this.value)" class="flex-1 bg-transparent w-full px-2 py-2 text-sm font-bold text-center text-brand-cyan focus:outline-none placeholder-gray-600" placeholder="0">
+                        <button onclick="window.updateTaskState('weight', Math.min(100, (parseInt(window.customTaskState.weight)||0) + 1))" class="px-3.5 py-3 text-brand-cyan hover:bg-brand-cyan/20 transition-colors border-l border-brand-cyan/30 cursor-pointer"><i class="fa-solid fa-plus text-[10px]"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="flex justify-center items-center gap-6 mt-4 mb-2 p-3 bg-gray-900/50 rounded-lg border border-gray-800">
-                <label class="flex items-center gap-2 text-[11px] font-bold text-gray-300 cursor-pointer hover:text-white transition-colors">
+                <label class="flex items-center justify-center gap-2 text-[11px] font-bold text-gray-300 cursor-pointer hover:text-white transition-colors">
                     <input type="checkbox" class="w-4 h-4 rounded accent-brand-emerald bg-gray-900 border-gray-600 focus:ring-brand-emerald cursor-pointer" ${state.requireLink ? 'checked' : ''} onchange="window.updateTaskState('requireLink', this.checked)"> Require Link URL
                 </label>
-                <label class="flex items-center gap-2 text-[11px] font-bold text-gray-300 cursor-pointer hover:text-white transition-colors">
+                <label class="flex items-center justify-center gap-2 text-[11px] font-bold text-gray-300 cursor-pointer hover:text-white transition-colors">
                     <input type="checkbox" class="w-4 h-4 rounded accent-brand-cyan bg-gray-900 border-gray-600 focus:ring-brand-cyan cursor-pointer" ${state.requireDraft ? 'checked' : ''} onchange="window.updateTaskState('requireDraft', this.checked)"> Require Text Draft
                 </label>
             </div>
@@ -2795,10 +2795,9 @@
         const prop = propertiesData.find(p => p.id === activePropertyId);
         if (!prop) return;
         
-        let phases = [...new Set(prop.tasks.map(t => t.phase))];
         window.customTaskState = {
-            phase: phases[0], categoryMode: 'existing', category: '', newCategoryName: '', insertGroupAfter: '',
-            title: '', assignee: AppConfig.agentsList[0], weight: 0, requireLink: false, requireDraft: false,
+            phase: '', categoryMode: '', category: '', newCategoryName: '', insertGroupAfter: '',
+            title: '', assignee: '', weight: '', requireLink: false, requireDraft: false,
             deductions: []
         };
         
@@ -2815,8 +2814,11 @@
         const weight = parseFloat(state.weight) || 0;
         const mainTask = state.categoryMode === 'existing' ? state.category : state.newCategoryName.trim();
         
+        if (!state.phase) return window.showAppToast("Validation Error", "Target Phase is required.");
+        if (!state.categoryMode) return window.showAppToast("Validation Error", "Group Mode is required.");
+        if (!mainTask) return window.showAppToast("Validation Error", state.categoryMode === 'new' ? "New Group Name is required." : "Select an existing group.");
         if (!title) return window.showAppToast("Validation Error", "Task Title is required.");
-        if (state.categoryMode === 'new' && !mainTask) return window.showAppToast("Validation Error", "New Group Name is required.");
+        if (!state.assignee) return window.showAppToast("Validation Error", "Assignee is required.");
 
         let totalDeducted = 0;
         let deductionUpdates = [];
